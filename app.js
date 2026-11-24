@@ -1862,6 +1862,10 @@
     $('#h27-count').textContent = `${st.up} universidades suben${st.nuevas ? ` (+${st.nuevas} nuevas)` : ''} · ${st.down} bajan`;
     const pimTxt = num(st.pim26) !== null ? (st.p27 > st.pim26 ? ` Supera incluso el PIM 2026 (${soles(st.pim26)}).` : ` Queda por debajo del PIM 2026 (${soles(st.pim26)}).`) : '';
     $('#h27-fine').textContent = `${st.vSame !== null ? `Con las mismas universidades: ${fmtChg(st.vSame)}.` : ''}${pimTxt} Fuente: ${fuente2027(st.x)}.`;
+    // Carteles 2027 del arte del hero (assets/hero/)
+    const hc = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    hc('hc-arrow', st.d > 0 ? '▲' : st.d < 0 ? '▼' : '＝'); hc('hc-total', soles(st.p27)); hc('hc-var', fmtChg(st.v)); hc('hc-up', st.up); hc('hc-down', st.down);
+    document.querySelectorAll('.hc-total, .hc-var').forEach(e => e.classList.toggle('down', st.d < 0));
   }
   // Barras del total: PIA 2025 · PIA 2026 · PIA 2027 (y PIM 2025/2026 como referencia punteada)
   function exp2027TotalChart(id) {

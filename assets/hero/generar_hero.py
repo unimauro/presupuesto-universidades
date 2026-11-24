@@ -123,9 +123,8 @@ def poli(puntos, fill, extra=""):
 def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
     """Frontón + columnas-barras + escalinata. Devuelve (svg, y_arquitrabe)."""
     n = len(serie); vmax = max(v for _, v in serie)
-    # Las columnas arrancan de un zócalo que equivale a S/ 1,500 M: así la caída 2025 -> 2026 (-3.7 %) se nota
-    # sin exagerar la escala (ver LEEME). Arte decorativo: las cifras exactas están en el texto.
-    BASE = 1.5e9
+    # Alturas proporcionales DESDE CERO (se leen como gráfico: nada de ejes truncados).
+    # La caída 2025 -> 2026 se marca con capitel cochinilla y un ▼ chico, no exagerando la escala.
     gap = ancho * 0.30 / (n - 1); w = (ancho - gap * (n - 1)) / n
     x0 = cx - ancho / 2
     y_top_max = base_y - alto_max
@@ -136,7 +135,7 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
     # columnas (barras de PIM)
     cols = []
     for i, (a, v) in enumerate(serie):
-        h = alto_max * (v - BASE) / (vmax - BASE)
+        h = alto_max * v / vmax
         x = x0 + i * (w + gap)
         ult = i == n - 1
         baja = i > 0 and v < serie[i - 1][1] and a >= 2026       # 2026 baja frente a 2025
@@ -157,6 +156,10 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
             for k, dy in enumerate((22, 48, 78)):
                 yy = base_y - h + dy * s
                 brillo += (f'<rect x="{f(x + w + 7 * s)}" y="{f(yy)}" width="{f((10 - k * 2) * s)}" height="{f(3 * s)}" fill="{AJI}"/>')
+        if baja:   # ▼ cochinilla sobre el capitel de la columna que baja
+            ty = base_y - h - 4 * s; tw = w * .9
+            brillo += (f'<polygon fill="{COCHINILLA}" points="{f(x + w / 2 - tw / 2)},{f(ty - tw * .8)} '
+                       f'{f(x + w / 2 + tw / 2)},{f(ty - tw * .8)} {f(x + w / 2)},{f(ty)}"/>')
         cols.append(f'<g class="col{" col-27" if ult else ""}">{brillo}{fuste}{estria if not ult else ""}{pend}{cap}</g>')
     out.append(f'<g class="cols">{"".join(cols)}</g>')
     # arquitrabe = friso de pallay

@@ -6,9 +6,9 @@ el hallazgo 2025 y los metadatos. A la derecha (escritorio) o al pie (móvil) va
 
 **Arte** (SVG propio, paleta v2 de `assets/brand/BRAND.md`): sol Inti escalonado con rayos de afiche chicha,
 cordillera titicaca con nevados, cerros maíz con andenes y, al centro, el **frontón de una universidad** (tímpano
-chicha con chakana, friso de pallay). Sus **16 columnas son el PIA de las universidades de 2012 a 2027**. La de 2027
-va en ají con borde punteado de tinta, porque aún no es ley, y crece al final de la animación. Al pie van los años
-2012 y 2027. Una guarda de rombos de pallay cierra el hero.
+chicha con chakana, friso de pallay). Sus **16 columnas son el PIA de las universidades de 2012 a 2027**
+(`nacional[año].pia` + `expectativa_2027.total_universidades.pia_2027`). La de 2027 va en ají, con halo, destellos y
+borde punteado de tinta, porque aún no es ley. La de 2026 lleva el capitel en cochinilla y un ▼ chico porque baja frente a 2025 (6,700 vs 6,955 M). **Las alturas son proporcionales desde cero** (sin eje truncado), porque la gente lee las columnas como un gráfico. Al pie: "2012" y "▲ 2027". Una guarda de rombos de pallay cierra el hero.
 
 **Sello "Dictamen · pendiente de publicación"** (`#h27-sello`): una etiqueta ají girada sobre la esquina inferior
 derecha del bloque 2027, junto al botón. Es el espacio reservado para el estado del trámite y se ve en todos los tamaños.
@@ -23,8 +23,7 @@ derecha del bloque 2027, junto al botón. Es el espacio reservado para el estado
 | `generar_hero.py` | Regenera los SVG desde `data/resumen.json` (PIA 2012-2026 + `expectativa_2027.total_universidades.pia_2027`) | |
 
 **Accesibilidad:** el arte es `aria-hidden` con `alt=""`. Texto papel sobre añil 7.6:1, papel sobre tinta >15:1,
-tinta sobre ají 9.7:1. La única animación (columnas que crecen dentro del SVG) solo corre con
-`prefers-reduced-motion: no-preference`. El hero conserva el añil en ambos temas, así que el arte es el mismo en claro y oscuro.
+tinta sobre ají 9.7:1. La única animación (el balanceo de los carteles) solo corre con `prefers-reduced-motion: no-preference` y nunca oculta nada. El hero conserva el añil en ambos temas, así que el arte es el mismo en claro y oscuro.
 
 ## Integración (3 pasos)
 
@@ -34,7 +33,7 @@ tinta sobre ají 9.7:1. La única animación (columnas que crecen dentro del SVG
 <link rel="stylesheet" href="assets/hero/hero.css">
 ```
 
-### 2. `index.html`: reemplazar TODA la `<section class="hero" aria-labelledby="h-title"> … </section>` por:
+### 2. `index.html`: reemplazar TODA la `<section class="hero hero-v3" …> … </section>` por:
 
 ```html
   <section class="hero hero-v3" aria-labelledby="h-title">
@@ -45,7 +44,7 @@ tinta sobre ají 9.7:1. La única animación (columnas que crecen dentro del SVG
         <div class="h27-row">
           <span class="h27-arrow" aria-hidden="true">▲</span>
           <div>
-            <p class="h27-total" id="h27-total">S/ 7,552 M</p>
+            <p class="h27-total" id="h27-total">S/ 7.6 mil M</p>
             <p class="h27-delta" id="h27-delta">+S/ 852 M (+12.7 %) frente al PIA 2026</p>
           </div>
         </div>
@@ -71,26 +70,41 @@ tinta sobre ají 9.7:1. La única animación (columnas que crecen dentro del SVG
         <source media="(min-width: 1024px)" srcset="assets/hero/hero.svg" width="600" height="664">
         <img src="assets/hero/hero-movil.svg" alt="" width="375" height="150" decoding="async" fetchpriority="high">
       </picture>
+      <p class="hc hc-total"><b><span id="hc-arrow">▲</span> <span id="hc-total">S/ 7.6 mil M</span></b><span>presupuesto 2027</span></p>
+      <p class="hc hc-var"><b id="hc-var">+12.7 %</b><span>frente a 2026</span></p>
+      <p class="hc hc-n"><b><span id="hc-up">47</span> suben</b><b><span id="hc-down">16</span> bajan</b><span>universidades</span></p>
     </div>
   </section>
 ```
 
-Cambios respecto del hero actual: la sección lleva la clase `hero-v3`; el texto va envuelto en `.hero-txt`;
-se agrega `<p class="h27-sello" id="h27-sello">` dentro de `#hero-2027`; el buscador sube justo debajo del título
-(para que en 375 px entre en la primera pantalla); al final se agrega `.hero-arte` (decorativo).
-Se conservan todos los ids que usa app.js (`hero-2027`, `h27-*`, `h-title`, `hero-finding`, `hero-search`,
-`hs-picker`, `hs-msg`, `hero-meta`).
+Respecto de lo que ya está integrado, el único cambio son los 3 carteles 2027 dentro de `.hero-arte`.
+Los carteles de 2025 (`#hc-pim`, `#hc-ej`, `#hc-per`) desaparecen.
 
-### 3. `app.js`, en `renderHero2027()`, después de `box.className = 'h27 ' + upDown;`
+### 3. `app.js`
+
+**a) En `updateHero()`, borrar, si quedan,** las líneas que llenan `#hc-anio`, `#hc-pim`, `#hc-ej` y `#hc-per` (ya no existen).
+
+**b) En `renderHero2027()`, al final** (después de escribir `#h27-fine`):
 
 ```js
-    // Sello del estado del trámite (hero v3)
-    const sello = $('#h27-sello', box), ver = st.x.version;
-    if (sello) sello.textContent = ver === 'ley' ? '' : `${(EXP_VERSION[ver] || [ver || 'Proyecto'])[0]} · pendiente de publicación`;
+    // Hero v3: carteles 2027 colgados del arte (solo escritorio; aria-hidden)
+    const hc = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    hc('hc-arrow', st.d > 0 ? '▲' : st.d < 0 ? '▼' : '＝');
+    hc('hc-total', soles(st.p27));
+    hc('hc-var', fmtChg(st.v));
+    hc('hc-up', st.up); hc('hc-down', st.down);
+    document.querySelectorAll('.hc-total, .hc-var').forEach(e => e.classList.toggle('down', st.d < 0));
 ```
 
-Con la ley publicada el sello queda vacío y se oculta solo (`:empty`). Nota: `renderHero2027()` reescribe
-`className`, así que `hero.css` estiliza `.hero-v3 .h27` y no depende de clases extra en ese nodo.
+El sello `#h27-sello` ya lo llena `renderHero2027()`, así que eso no cambia.
+
+**Escritorio:** las cifras 2027 grandes las dicen los carteles. El bloque `#hero-2027` queda como ficha compacta
+(título, fuente, botón y sello) y su fila de cifras (`.h27-row`, `.h27-count`) queda solo para lectores de
+pantalla. Así no se repiten los números en la misma pantalla. **Móvil:** los carteles se ocultan y el bloque 2027 se ve completo.
+
+**Regla de estado final:** el arte no tiene animación interna (las columnas siempre están a su altura). Los carteles
+son visibles por defecto. El balanceo es solo una mejora: no usa fill-mode ni opacidad, así que si no corre,
+todo se ve igual.
 
 `styles.css` no necesita cambios. Si se prefiere un solo CSS, pegar `hero.css` al final de `styles.css` y cambiar
 `url("guarda.svg")` por `url("assets/hero/guarda.svg")`.
