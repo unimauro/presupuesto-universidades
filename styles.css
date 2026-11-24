@@ -749,3 +749,6 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 .cat-tag { display: inline-block; font: 700 11px var(--font-cifras); padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 999px; margin-right: 4px; }
 .cat-tag.cat-sube { background: var(--good-bg); } .cat-tag.cat-sube_en_papel { background: var(--warn-bg); } .cat-tag.cat-baja { background: var(--bad-bg); }
 .cat-tag.cat-nueva { background: var(--accent-soft); } .cat-tag.cat-sin_2027 { background: var(--surface-2); }
+
+.h27-matiz .mz-short { display: none; }
+@media (max-width: 639px) { .h27-matiz .mz-long { display: none; } .h27-matiz .mz-short { display: inline; } }

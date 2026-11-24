@@ -1917,7 +1917,7 @@
         const hcs = (id, v) => { const e2 = document.getElementById(id); if (e2) e2.textContent = v; };
         hcs('hc-up', cc.sube.n); hcs('hc-papel', cc.sube_en_papel.n); hcs('hc-down', cc.baja.n);
       }
-      el.textContent = `Pero 2026 fue un año de recorte: ${mz.recorte} universidades arrancaron 2026 con menos que en 2025, y ${mz.bajoPim} reciben en 2027 menos de lo que terminaron teniendo en 2026 (PIM).`;
+      el.innerHTML = `<span class="mz-long">Pero 2026 fue un año de recorte: ${esc(mz.recorte)} universidades arrancaron 2026 con menos que en 2025, y ${esc(mz.bajoPim)} reciben en 2027 menos de lo que terminaron teniendo en 2026 (PIM).</span><span class="mz-short">2026 fue año de recorte: ${esc(mz.bajoPim)} reciben menos de lo que tuvieron en 2026.</span>`;
     });
     const pimTxt = num(st.pim26) !== null ? (st.p27 > st.pim26 ? ` Supera incluso el PIM 2026 (${soles(st.pim26)}).` : ` Queda por debajo del PIM 2026 (${soles(st.pim26)}).`) : '';
     $('#h27-fine').textContent = `${st.vSame !== null ? `Con las mismas universidades: ${fmtChg(st.vSame)}.` : ''}${pimTxt} Fuente: ${fuente2027(st.x)}.`;
