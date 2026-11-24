@@ -235,6 +235,8 @@ def main():
         obs["expectativa_2027"] = {k: l27.get(k) for k in
                                    ("version", "norma", "fecha", "url", "estado_tramite", "documentos", "notas",
                                     "total_universidades", "disposiciones")}
+    if l27.get("universidades"):
+        p2027(l27, unis)
     bl = load("baseline", "baseline.json")
     if bl.get("anios"):
         # línea base: universidades vs presupuesto público total, Educación, PBI (participación precalculada)
@@ -260,6 +262,43 @@ def main():
     partir(obs)
     print(f"OK data/observatorio.json: {len(unis)} universidades, años {anios[0]}–{anios[-1]}, "
           f"rankeadas {len(ranked)}, {os.path.getsize(D('observatorio.json'))/1e6:.1f} MB")
+
+
+def p2027(l27, unis):
+    """data/p2027.json: propuesta 2027 en plano (proyectos y actividades de todas las universidades),
+    con cada proyecto cruzado por CUI contra su historia SIAF (PIM/devengado 2023-2026)."""
+    hist = {}
+    for u in unis:
+        for y, a in u["anios"].items():
+            for p in a.get("proyectos") or []:
+                c = str(p.get("codigo") or "")
+                if c:
+                    hist.setdefault(c, {})[y] = {"pim": p.get("pim"), "dev": p.get("dev")}
+    nombre = {u["pliego"]: (u.get("corto") or u.get("nombre")) for u in unis}
+    proys, acts, gen = [], [], {}
+    for pl, e in l27["universidades"].items():
+        for cod, p in (e.get("proyectos") or {}).items():
+            h = hist.get(str(cod), {})
+            acum_dev = sum((v.get("dev") or 0) for v in h.values())
+            proys.append({"pliego": pl, "uni": nombre.get(pl, e.get("nombre")), "codigo": cod,
+                          "nombre": p.get("nombre"), "monto_2027": p.get("monto"), "categoria": p.get("categoria"),
+                          "historia": h, "nuevo": not h, "dev_acumulado": acum_dev or None})
+        for cod, a in (e.get("actividades") or {}).items():
+            acts.append({"pliego": pl, "uni": nombre.get(pl, e.get("nombre")), "codigo": cod,
+                         "nombre": a.get("nombre"), "monto_2027": a.get("monto")})
+        for g, m in (e.get("generica") or {}).items():
+            gen[g] = gen.get(g, 0) + (m or 0)
+    proys.sort(key=lambda p: -(p["monto_2027"] or 0))
+    acts.sort(key=lambda a: -(a["monto_2027"] or 0))
+    out = {"version": l27.get("version"), "norma": l27.get("norma"),
+           "nota": "Montos por universidad de los anexos del proyecto/dictamen 2027. 'historia' = PIM y devengado SIAF "
+                   "del mismo CUI en años anteriores (vacío = proyecto sin ejecución registrada 2021-2026).",
+           "generica_total": gen, "proyectos": proys, "actividades": acts,
+           "resumen": {"n_proyectos": len(proys), "n_nuevos": sum(p["nuevo"] for p in proys),
+                       "monto_proyectos": sum(p["monto_2027"] or 0 for p in proys),
+                       "monto_nuevos": sum(p["monto_2027"] or 0 for p in proys if p["nuevo"])}}
+    json.dump(out, open(D("p2027.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print(f"  p2027: {len(proys)} proyectos ({out['resumen']['n_nuevos']} sin historia SIAF), {len(acts)} actividades")
 
 
 LIGERO = ("total", "kpi", "estudiantes", "docentes", "pubs", "estudiantes_anio", "docentes_anio", "pia_ley", "canon")

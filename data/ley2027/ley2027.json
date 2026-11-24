@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-24T04:43:29+00:00",
+ "generado": "2026-11-24T05:21:14+00:00",
  "version": "dictamen",
  "norma": "Dictamen de la Comisión Bicameral de Presupuesto recaído en la Proposición Legislativa N° 00002-2026-2031-CR (Ley de Presupuesto del Sector Público para el Año Fiscal 2027)",
  "fecha": "2026-11-05",
@@ -76,7 +76,7 @@
   "fuente: Anexo 4 por fuente de financiamiento (RO, RDR, ROOC, D y T, RD). En el Anexo 4 'RECURSOS DETERMINADOS' agrupa canon, sobrecanon, regalías, renta de aduanas y participaciones; no se desagrega por rubro.",
   "generica, categoria_presupuestal, productos, actividades y proyectos: Anexo 5. programas_presupuestales: Anexo 8 (solo PP en que aparece la universidad).",
   "Las universidades creadas recientemente sin pliego propio en el proyecto no tienen PIA 2027; el art. 87 prevé financiarlas desde la Reserva de Contingencia durante el año (monto no especificado en la ley).",
-  "Disposiciones: numeración del texto sustitutorio del dictamen (coincide con el proyecto en los artículos revisados). La numeración de la autógrafa final podría variar.",
+  "Disposiciones: lista de las que afectan el gasto de las universidades (alcance='especifica' si las nombra; 'general' si rige para entidades del Gobierno nacional y alcanza a universidades por el art. 3). Numeración y citas del texto sustitutorio del dictamen (coincide con el proyecto en los artículos revisados); la autógrafa/ley final podría renumerar. El Anexo I (tope de CAS por pliego) no se pudo descargar.",
   "Universidades sin PIA 2027 en el Anexo 4: 578, 579, 582, 583",
   "Chequeos OK: Anexo 4 (suma de fuentes = total por fila), Anexo 5 = Anexo 4 por pliego, genéricas y proyectos cuadran."
  ],
@@ -11571,76 +11571,631 @@
  },
  "disposiciones": [
   {
-   "articulo": "Art. 8, literales d) y f)",
-   "resumen": "Exceptúa de la prohibición de ingreso de personal el nombramiento y la contratación en plaza presupuestada de docentes universitarios en universidades públicas.",
+   "articulo": "Art. 3",
+   "tema": "alcance",
+   "alcance": "general",
+   "resumen": "Las reglas de austeridad, personal y modificaciones del Capítulo II son de cumplimiento obligatorio para las universidades públicas.",
+   "cita": "Tribunal Constitucional; universidades públicas; y demás entidades y organismos que cuenten con un crédito presupuestario aprobado en la presente ley.",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 13 (transferencias financieras, literal iv del MINCETUR)",
-   "resumen": "Permite al MINCETUR transferir hasta S/ 2 000 000 a la UN Toribio Rodríguez de Mendoza, UN de San Martín, UN del Altiplano, UN de San Agustín y CENFOTUR Cusco para capacitar intérpretes de turismo comunitario.",
+   "articulo": "Art. 4.2",
+   "tema": "control del gasto",
+   "alcance": "general",
+   "resumen": "Los actos que autoricen gastos sin crédito presupuestario no son eficaces; responden el titular y los jefes de presupuesto y administración.",
+   "cita": "Todo acto administrativo, acto de administración o las resoluciones administrativas que autoricen gastos no son eficaces si no cuentan con el crédito presupuestario correspondiente",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 60",
-   "resumen": "Autoriza a universidades públicas (y gobiernos subnacionales) a transferir recursos (RO, canon/sobrecanon, regalías, RDR) al IGP, SENAMHI, INAIGEM, INGEMMET, CENEPRED y otros para estudios de riesgo de desastres en el PP 0068; aprobación por resolución del titular.",
+   "articulo": "Art. 5.1",
+   "tema": "control del gasto",
+   "alcance": "general",
+   "resumen": "El titular (rector), el jefe de presupuesto y el jefe de administración responden por la aplicación de la ley.",
+   "cita": "son responsables de la debida aplicación de lo dispuesto en la presente ley",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 64",
-   "resumen": "Universidades públicas, como entidades del SINACTI, pueden pagar pasajes, alimentación y hospedaje a científicos externos para apoyo técnico, evaluaciones y jurados de CTI, sin recursos adicionales.",
+   "articulo": "Art. 6",
+   "tema": "remuneraciones",
+   "alcance": "especifica",
+   "resumen": "Prohíbe en las universidades públicas reajustar o crear remuneraciones, bonificaciones, incentivos u otros conceptos, por cualquier fuente.",
+   "cita": "el reajuste o incremento de remuneraciones, bonificaciones, beneficios, dietas, asignaciones, retribuciones, estímulos, incentivos, compensaciones económicas y conceptos de cualquier naturaleza",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 66.3",
-   "resumen": "Universidades beneficiarias de fondos concursables pueden otorgar incentivos económicos a docentes que ejecutan proyectos de investigación, con cargo a Donaciones y Transferencias y conformidad del Vicerrectorado de Investigación, sin afectar horas lectivas.",
+   "articulo": "Art. 7.1",
+   "tema": "aguinaldos y escolaridad",
+   "alcance": "especifica",
+   "resumen": "Docentes universitarios (Ley 30220) y servidores 276 perciben aguinaldos de Fiestas Patrias y Navidad de hasta S/ 300 c/u y escolaridad de hasta S/ 400.",
+   "cita": "cuyos montos ascienden, cada uno, hasta la suma de S/ 300,00 (TRESCIENTOS Y 00/100 SOLES).",
+   "cita_verificada": true,
+   "monto": 300,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 78",
-   "resumen": "Autoriza a universidades públicas, con cargo a su presupuesto por toda fuente, a otorgar subvenciones a graduados y estudiantes de pregrado (movilidad, congresos, concursos de investigación, titulación); MINEDU aprueba lineamientos en 30 días.",
+   "articulo": "Art. 8.1 (encabezado)",
+   "tema": "ingreso de personal",
+   "alcance": "general",
+   "resumen": "Prohíbe incorporar personal y nombrar en el sector público, salvo las excepciones listadas.",
+   "cita": "Se prohíbe la incorporación del personal en el sector público por servicios personales y el nombramiento, salvo en los supuestos siguientes:",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 8.1 c)",
+   "tema": "ingreso de personal",
+   "alcance": "general",
+   "resumen": "Permite contratar por reemplazo de ceses (desde julio de 2025), suplencias y ascensos, por concurso y con plaza registrada en el AIRHSP; no habilita plazas nuevas.",
+   "cita": "La contratación para el reemplazo por cese, o para la suplencia temporal de los servidores del Sector Público, o por el ascenso o promoción del personal",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 8.1 d)",
+   "tema": "docentes: nombramiento",
+   "alcance": "especifica",
+   "resumen": "Exceptúa de la prohibición el nombramiento de docentes universitarios en plaza presupuestada.",
+   "cita": "El nombramiento en plaza presupuestada cuando se trate de docentes universitarios de las universidades públicas.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 8.1 f)",
+   "tema": "docentes: contratación",
+   "alcance": "especifica",
+   "resumen": "Exceptúa de la prohibición la contratación de docentes universitarios en plaza presupuestada.",
+   "cita": "La contratación en plaza presupuestada de docentes universitarios en las universidades públicas.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 8.2",
+   "tema": "ingreso de personal",
+   "alcance": "general",
+   "resumen": "Las excepciones exigen plaza en CAP/PAP o CPE, registro en AIRHSP, certificación presupuestal e informe favorable de presupuesto sobre sostenibilidad futura.",
+   "cita": "que dicha entidad cuenta con los créditos presupuestarios suficientes para financiar el referido gasto y su sostenibilidad en los años fiscales siguientes",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 8.3",
+   "tema": "horas extras",
+   "alcance": "general",
+   "resumen": "Prohíbe pagar horas extras en todas las entidades, cualquiera sea el régimen laboral.",
+   "cita": "no se encuentran autorizadas para efectuar gastos por concepto de horas extras.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 9.1",
+   "tema": "modificaciones: personal",
+   "alcance": "general",
+   "resumen": "La partida 2.1.1 (retribuciones) no puede habilitar ni ser habilitada, salvo dentro de la partida en el mismo pliego y excepciones tasadas (sentencias, CTS, ESSALUD, etc.).",
+   "cita": "la Partida de Gasto 2.1.1 “Retribuciones y Complementos en Efectivo” no puede habilitar a otras partidas de gasto ni ser habilitada",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 9.2",
+   "tema": "modificaciones: pensiones",
+   "alcance": "general",
+   "resumen": "La partida 2.2.1 (pensiones) no puede habilitar a otras, salvo entre unidades ejecutoras del mismo pliego.",
+   "cita": "la Partida de Gasto 2.2.1 “Pensiones” no puede ser habilitadora",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 9.3",
+   "tema": "CAS",
+   "alcance": "general",
+   "resumen": "La partida de CAS (2.1.1 13) no puede ser habilitada, salvo entre unidades ejecutoras del mismo pliego.",
+   "cita": "la Partida de Gasto 2.1.1 13 “Contrato Administrativo de Servicios” no puede ser habilitada",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 9.4",
+   "tema": "modificaciones: cargas sociales",
+   "alcance": "general",
+   "resumen": "Los recursos de contribuciones a la seguridad social (2.1.3) no pueden destinarse a otras partidas.",
+   "cita": "no pueden habilitar a otras partidas de gasto, bajo responsabilidad.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 9.7",
+   "tema": "modificaciones: emergencias",
+   "alcance": "general",
+   "resumen": "Prohíbe anular créditos de las actividades de atención de emergencias y Fenómeno El Niño, salvo dentro del mismo pliego y actividad.",
+   "cita": "con el fin de efectuar anulaciones con cargo a los créditos presupuestarios de la Actividad 5006144: “Atención de Actividades de Emergencia”",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 9.9",
+   "tema": "consultorías y publicidad",
+   "alcance": "general",
+   "resumen": "Las partidas de consultorías, publicidad e imagen institucional y servicios diversos no pueden recibir recursos de otras partidas.",
+   "cita": "no pueden ser habilitadas, salvo las habilitaciones que se realicen entre o dentro de las indicadas partidas de gasto en la misma unidad ejecutora o entre unidades ejecutoras del mismo pliego.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 37 a)–b)",
+   "tema": "programas presupuestales (PP 0066/0137)",
+   "alcance": "general",
+   "resumen": "En los programas presupuestales solo se habilitan recursos si se cumplieron las metas físicas; las transferencias entre pliegos exigen productos del mismo programa y decreto supremo.",
+   "cita": "solo se permiten las habilitaciones con cargo a los recursos previstos en programas presupuestales, siempre que hayan alcanzado las metas programadas",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 10.1",
+   "tema": "viajes al exterior",
+   "alcance": "general",
+   "resumen": "Los viajes al exterior con recursos públicos son en clase económica, con excepciones para altos funcionarios en vuelos largos o estancias cortas.",
+   "cita": "deben realizarse en categoría económica",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 10.2",
+   "tema": "locación y CAS: tope",
+   "alcance": "general",
+   "resumen": "El honorario mensual de locadores y CAS no puede superar el tope del D.U. 038-2006.",
+   "cita": "el monto máximo por concepto de honorarios mensuales es el tope de ingresos señalado en el artículo 2 del Decreto de Urgencia 038-2006",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 10.3",
+   "tema": "telefonía",
+   "alcance": "general",
+   "resumen": "Tope de gasto en telefonía móvil de S/ 120 mensuales por equipo; un equipo por persona; el exceso lo paga el usuario.",
+   "cita": "el número de equipos por S/ 120,00",
+   "cita_verificada": true,
+   "monto": 120,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 10.4",
+   "tema": "vehículos: compra",
+   "alcance": "general",
+   "resumen": "Solo se compran vehículos para intervenciones propias o para renovar unidades de 10 años o más, con resolución indelegable del titular y en el marco de Invierte.pe.",
+   "cita": "para la renovación de los vehículos automotores que tengan una antigüedad igual o superior a diez (10) años",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 10.5",
+   "tema": "vehículos: uso",
+   "alcance": "especifica",
+   "resumen": "En las universidades públicas la asignación exclusiva de vehículo es solo para uso oficial del rector.",
+   "cita": "en el caso de las universidades públicas, es únicamente para uso oficial del rector",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Cuadragésima novena DCF",
+   "tema": "celebraciones y agasajos",
+   "alcance": "general",
+   "resumen": "Prohíbe gastar en celebraciones, agasajos o similares, salvo lo propio de las funciones de la entidad.",
+   "cita": "realizar todo tipo de gasto orientado a celebraciones, agasajos o similares con cargo a los recursos de su presupuesto institucional.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 14",
+   "tema": "contrataciones: umbrales",
+   "alcance": "general",
+   "resumen": "Licitación pública para obras desde S/ 5 000 000 y para bienes desde S/ 468 000; concurso público para servicios desde S/ 468 000; supervisión obligatoria en obras desde S/ 4 300 000.",
+   "cita": "Licitación pública para obras si la cuantía es igual o superior a S/ 5 000 000,00",
+   "cita_verificada": true,
+   "monto": 5000000,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 11.1–11.3",
+   "tema": "inversiones: anulaciones",
+   "alcance": "general",
+   "resumen": "Anular recursos de inversiones requiere opinión de la OPMI y de presupuesto; no se anulan inversiones con avance >90 %; lo anulado solo va a inversiones con expediente técnico.",
+   "cita": "No se pueden anular recursos de los proyectos de inversión, de las IOARR y de los programas de inversión",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 12.1",
+   "tema": "inversiones: previsión presupuestaria",
+   "alcance": "general",
+   "resumen": "Permite convocar en los últimos 4 meses de 2027 con previsión presupuestaria basada en el proyecto de presupuesto 2028.",
+   "cita": "para los procedimientos de selección cuya convocatoria se realice dentro de los últimos cuatro (04) meses del año fiscal 2027",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Quincuagésima quinta DCF",
+   "tema": "compromisos plurianuales",
+   "alcance": "general",
+   "resumen": "Contratos o adendas que generen gasto en años siguientes requieren certificación o previsión presupuestaria previa.",
+   "cita": "deben contar previamente con la certificación del crédito presupuestario y/o la constancia de previsión presupuestaria respectiva",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 82.1",
+   "tema": "canon",
+   "alcance": "especifica",
+   "resumen": "Canon, sobrecanon, regalías, FOCAM y renta de aduanas (y saldos): hasta 50 % inversiones, 5 % preinversión, 20 % gasto corriente de investigación y mantenimiento, 10 % software, licencias, patentes y CBC; nunca remuneraciones.",
+   "cita": "Dichos recursos no pueden utilizarse, en ningún caso, para el pago de remuneraciones o retribuciones de cualquier índole.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 82.2",
+   "tema": "canon",
+   "alcance": "especifica",
+   "resumen": "Mismos porcentajes para saldos de canon transferidos por gobiernos regionales e incorporados como Donaciones y Transferencias.",
+   "cita": "que cuentan con saldos de balance provenientes de las transferencias de canon efectuadas por los gobiernos regionales",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 82.3",
+   "tema": "canon",
+   "alcance": "especifica",
+   "resumen": "Para usar el canon según el art. 82, exceptúa a las universidades de las reglas de anulación de inversiones (11.3) y de programas presupuestales (37 a).",
+   "cita": "Se exceptúa, solo para los fines del presente artículo, a las universidades públicas de lo establecido en el numeral 11.3 del artículo 11",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 17",
+   "tema": "CAS",
+   "alcance": "general",
+   "resumen": "Prohíbe financiar CAS con mayores ingresos o saldos de balance de Recursos Directamente Recaudados.",
+   "cita": "se prohíbe a las entidades del Gobierno nacional y los gobiernos regionales incorporar recursos destinados a la Partida de Gasto 2.1.1 13.1 “Contrato Administrativo de Servicios”",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 18",
+   "tema": "CAS",
+   "alcance": "general",
+   "resumen": "Prohíbe contratar CAS con recursos de inversiones y financiar CAS desde partidas de mantenimiento.",
+   "cita": "se prohíben las contrataciones de personal bajo el régimen laboral especial del Decreto Legislativo 1057 con cargo a los recursos asignados a la partida de gasto vinculada a inversiones.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 19.1",
+   "tema": "CAS",
+   "alcance": "general",
+   "resumen": "Fija un número máximo de puestos CAS por pliego según el Anexo I (no se obtuvo el Anexo I por pliego).",
+   "cita": "un límite máximo al número de puestos bajo el régimen laboral especial del Decreto Legislativo 1057 con financiamiento anualizado",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 19.2",
+   "tema": "CAS",
+   "alcance": "general",
+   "resumen": "Los CAS transitorios fuera del límite no requieren financiamiento anualizado y vencen a más tardar el 31-dic-2027.",
+   "cita": "culminan indefectiblemente como máximo hasta el 31 de diciembre de 2027.",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 22",
+   "tema": "incrementos: 276",
+   "alcance": "general",
+   "resumen": "Autoriza al MEF a aprobar por decreto supremo un nuevo MUC para servidores 276 del GN (incluye administrativos de universidades), según el convenio colectivo centralizado 2026-2027.",
+   "cita": "apruebe el nuevo Monto Único Consolidado (MUC) de los servidores del régimen del Decreto Legislativo 276",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 24",
+   "tema": "incrementos: 276 CAFAE",
+   "alcance": "general",
+   "resumen": "Autoriza al MEF a aprobar nuevos montos de la Escala Base del Incentivo Único CAFAE para servidores 276.",
+   "cita": "apruebe los nuevos montos de la Escala Base del Incentivo Único – CAFAE",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 25",
+   "tema": "incrementos: 728",
+   "alcance": "general",
+   "resumen": "Autoriza al MEF a aprobar un incremento mensual para servidores 728 del GN y gobiernos regionales.",
+   "cita": "apruebe el incremento mensual de la remuneración de los servidores sujetos al régimen del Decreto Legislativo 728",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 27",
+   "tema": "incrementos: CAS",
+   "alcance": "general",
+   "resumen": "Autoriza al MEF a aprobar un incremento mensual para servidores CAS del GN y gobiernos regionales.",
+   "cita": "apruebe el incremento mensual de la remuneración de los servidores sujetos al régimen del Decreto Legislativo 1057",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 29",
+   "tema": "incrementos: servicio civil",
+   "alcance": "general",
+   "resumen": "Autoriza al MEF a aprobar un incremento mensual de la compensación de servidores de la Ley 30057.",
+   "cita": "apruebe el incremento mensual de la compensación económica de los servidores sujetos al régimen de la Ley 30057",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 32",
+   "tema": "negociación colectiva",
+   "alcance": "general",
+   "resumen": "Exceptúa de la prohibición del art. 6 los conceptos aprobados por convenios colectivos, actas o laudos conforme a la Ley 31188.",
+   "cita": "para efectos de la aprobación de conceptos de ingresos mediante la aprobación de convenios colectivos, actas de conciliación o laudos arbitrales",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 33",
+   "tema": "negociación colectiva",
+   "alcance": "general",
+   "resumen": "Los recursos para negociación colectiva descentralizada (2.5.6 1.1 1/2) no pueden moverse a otras partidas ni recibir recursos.",
+   "cita": "no pueden habilitar a otras partidas, genéricas o específicas del gasto de sus presupuestos institucionales ni ser habilitadas",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 34",
+   "tema": "arbitrajes laborales",
+   "alcance": "general",
+   "resumen": "Los laudos laborales deben respetar las normas fiscales y las medidas de austeridad de la ley.",
+   "cita": "los árbitros deben sujetarse al cumplimiento de las normas de la Administración Financiera del Sector Público",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Trigésima sétima DCF",
+   "tema": "remuneraciones",
+   "alcance": "general",
+   "resumen": "Todo ingreso del personal se aprueba en montos fijos; no se permiten porcentajes, sistemas vinculantes ni indexación.",
+   "cita": "se aprueban en montos fijos y específicos",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
    "articulo": "Art. 79",
-   "resumen": "Autoriza al MINEDU a transferir hasta S/ 26 521 910 a universidades públicas para la implementación progresiva de la bonificación especial del docente investigador (art. 86 Ley 30220), mediante decreto supremo.",
+   "tema": "docentes: bonificación investigador",
+   "alcance": "especifica",
+   "resumen": "MINEDU puede transferir hasta S/ 26 521 910 a universidades para la bonificación especial del docente investigador (art. 86 Ley 30220), vía decreto supremo; exceptúa del art. 6.",
+   "cita": "hasta por la suma de S/ 26 521 910,00",
+   "cita_verificada": true,
+   "monto": 26521910,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 82",
-   "resumen": "Autoriza excepcionalmente a universidades públicas a usar canon, sobrecanon, regalías, FOCAM y renta de aduanas (y sus saldos): hasta 50 % en inversiones, 5 % en preinversión, 20 % en gasto corriente de investigación y mantenimiento, 10 % en software, licencias, patentes y CBC; prohíbe usarlos en remuneraciones. Regla análoga (82.2) para saldos de canon transferidos por gobiernos regionales en Donaciones y Transferencias. Fue uno de los 5 puntos sin consenso MEF–Congreso en el predictamen (RPP).",
+   "articulo": "Art. 66.3",
+   "tema": "docentes: incentivo investigación",
+   "alcance": "especifica",
+   "resumen": "Universidades con fondos concursables pueden pagar incentivos a docentes investigadores con cargo a Donaciones y Transferencias, con conformidad del Vicerrectorado de Investigación.",
+   "cita": "quedan autorizadas a otorgar un incentivo económico a los docentes universitarios que participan en la ejecución de proyectos de investigación.",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
-   "articulo": "Art. 87.1–87.3",
-   "resumen": "Autoriza al MEF a financiar con la Reserva de Contingencia (RO) la implementación inicial de 26 universidades públicas creadas por ley; las que inician en el 2.º semestre de 2026 registran puestos CAS sin tope del Anexo I. El dictamen cambia la lista de leyes respecto del proyecto (retira 32549 y 32554; agrega 32674 y 32546).",
+   "articulo": "Art. 64",
+   "tema": "investigación: viáticos externos",
+   "alcance": "especifica",
+   "resumen": "Universidades (SINACTI) pueden pagar pasajes, alimentación y hospedaje a científicos externos para apoyo técnico, evaluaciones y jurados de CTI.",
+   "cita": "puedan pagar gastos relacionados a pasajes, alimentación y hospedaje a profesionales científicos y técnicos calificados externos a la institución",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 78",
+   "tema": "estudiantes: subvenciones",
+   "alcance": "especifica",
+   "resumen": "Universidades pueden otorgar subvenciones a estudiantes y graduados (movilidad, congresos, concursos, titulación) por cualquier fuente; MINEDU dicta lineamientos en 30 días.",
+   "cita": "para otorgar subvenciones económicas a favor de graduados y estudiantes de pregrado",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 13.1 ñ)",
+   "tema": "transferencias recibidas",
+   "alcance": "especifica",
+   "resumen": "MINEDU puede transferir hasta S/ 169 419 978 al INEI y/o universidades públicas, por convenio, para formación, capacitación y evaluación en materia educativa.",
+   "cita": "Las que realice el Ministerio de Educación a favor del Instituto Nacional de Estadística e Informática (INEI) y/o universidades públicas, previa suscripción de convenios",
+   "cita_verificada": true,
+   "monto": 169419978,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 13 (MINCETUR, literal iv)",
+   "tema": "transferencias recibidas",
+   "alcance": "especifica",
+   "resumen": "MINCETUR puede transferir hasta S/ 2 000 000 a la UNTRM, la UN de San Martín, la UNA Puno, la UNSA y CENFOTUR Cusco para formar intérpretes de turismo comunitario.",
+   "cita": "hasta por la suma de S/ 2 000 000,00 (DOS MILLONES Y 00/100 SOLES)",
+   "cita_verificada": true,
+   "monto": 2000000,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 60",
+   "tema": "transferencias otorgadas",
+   "alcance": "especifica",
+   "resumen": "Universidades pueden transferir recursos (RO, canon, RDR) al IGP, SENAMHI, INAIGEM, INGEMMET, CENEPRED y otros para estudios de riesgo de desastres (PP 0068), por resolución del titular.",
+   "cita": "universidades públicas para realizar transferencias financieras a favor del Instituto Geofísico del Perú (IGP)",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 16.1",
+   "tema": "modificaciones sectoriales",
+   "alcance": "general",
+   "resumen": "Ministerios y entidades de su sector pueden transferirse recursos RO por decreto supremo para implementar políticas públicas (aplicable a MINEDU y universidades si se consideran de su sector).",
+   "cita": "entre el respectivo ministerio y las entidades de su sector o entre estas últimas",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 15.1",
+   "tema": "reserva de contingencia",
+   "alcance": "general",
+   "resumen": "El MEF puede asignar recursos de la Reserva de Contingencia a entidades del GN para reactivación, seguridad, elecciones y Panamericanos 2027.",
+   "cita": "a realizar modificaciones presupuestarias en el nivel institucional a favor de las entidades del Gobierno nacional, los gobiernos regionales y los gobiernos locales",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Décima sétima DCF",
+   "tema": "reserva de contingencia",
+   "alcance": "general",
+   "resumen": "El MEF puede retirar recursos RO de los pliegos (incluidas universidades) hacia la Reserva de Contingencia, por decreto supremo.",
+   "cita": "a favor de la Reserva de Contingencia a la que se refiere el artículo 53 del Decreto Legislativo 1440",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 87.1–87.2",
+   "tema": "universidades nuevas",
+   "alcance": "especifica",
+   "resumen": "El MEF puede financiar con la Reserva de Contingencia (RO) la implementación inicial de 26 universidades creadas por ley, con refrendo de MINEDU; no fija monto.",
+   "cita": "para financiar la implementación inicial de las universidades públicas creadas mediante las leyes",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
+  },
+  {
+   "articulo": "Art. 87.3",
+   "tema": "universidades nuevas: CAS",
+   "alcance": "especifica",
+   "resumen": "Universidades que inician desde el 2.º semestre de 2026 registran puestos CAS en el AIRHSP sin sujetarse al tope del Anexo I.",
+   "cita": "Dichos registros no están sujetos al límite máximo de plazas CAS establecido en el anexo I",
+   "cita_verificada": true,
+   "monto": null,
+   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   },
   {
    "articulo": "Art. 87.4",
-   "resumen": "Moratoria en 2027 para crear y autorizar el funcionamiento de nuevas universidades públicas, salvo universidades con licencia denegada y las comprendidas en la Ley 30597 (Música, Daniel Alomía Robles, Diego Quispe Tito) solo con su oferta actual.",
+   "tema": "moratoria",
+   "alcance": "especifica",
+   "resumen": "Moratoria en 2027 para crear y autorizar nuevas universidades públicas, salvo las de licencia denegada y las de la Ley 30597 con su oferta actual.",
+   "cita": "la moratoria para la creación y autorización de funcionamiento de nuevas universidades públicas.",
+   "cita_verificada": true,
+   "monto": null,
    "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
-  },
-  {
-   "articulo": "Art. 7 / Capítulo II (reglas generales)",
-   "resumen": "Los docentes universitarios de la Ley 30220 están comprendidos en las reglas generales de aguinaldos y escolaridad, y en la prohibición general de reajustes remunerativos salvo excepciones de la propia ley.",
-   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
-  },
-  {
-   "articulo": "Uso de vehículos (medidas de austeridad)",
-   "resumen": "En universidades públicas el vehículo asignado es de uso oficial exclusivo del rector.",
-   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"
+   "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026)"
   }
  ]
 }

@@ -88,8 +88,9 @@ Los textos pequeños nunca van en estos colores: van en `--color-tinta` o `--col
 ```css
 --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
 --font-cifras:  "Archivo", system-ui, sans-serif;
---font-texto:   "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+--font-texto:   "Cifras Texto", "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
 ```
+**Cero sin barra:** Atkinson Hyperlegible Next dibuja el 0 con barra ("2Ø25") y no trae variante sin ella (probado: `zero`, `ss01–05`, `salt`, `cv01–02`). Por eso los dígitos del texto vienen de Archivo con un `@font-face` "Cifras Texto" limitado a `unicode-range: U+0030-0039` (ver cabecera de `historias.css`).
 
 **Por qué.** Archivo extra condensada a peso 900 da letras de afiche: altas, apretadas, de pintor de carteles, y permite que
 una cifra como `S/ 6,967` ocupe casi todo el ancho de un celular sin romperse. Al ser variable, la misma familia baja a ancho
@@ -127,6 +128,7 @@ Las portadas de capítulo mantienen su color en ambos temas.
 - Espacios no separables entre `S/`, número y unidad (no se parte en dos líneas).
 - Porcentajes: ≥ 100 % sin decimales; variaciones ≥ 1000 % como `×11.5 veces`; signo menos tipográfico `−`.
 - Cifra héroe: número + unidad aparte (`S/ 7.0` + `mil millones`).
+- Cuando hay que comparar montos cercanos (PIA vs devengado) se usa el formato fino `S/ 6,954.6 M` (`solesF()` en historias.js).
 
 ## 5c. Equivalencias para `styles.css` (index)
 | Token actual de index | Token v2 | Claro | Oscuro |
