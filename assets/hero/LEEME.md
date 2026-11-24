@@ -8,7 +8,7 @@ el hallazgo 2025 y los metadatos. A la derecha (escritorio) o al pie (móvil) va
 cordillera titicaca con nevados, cerros maíz con andenes y, al centro, el **frontón de una universidad** (tímpano
 chicha con chakana, friso de pallay). Sus **16 columnas son el PIA de las universidades de 2012 a 2027**
 (`nacional[año].pia` + `expectativa_2027.total_universidades.pia_2027`). La de 2027 va en ají, con halo, destellos y
-borde punteado de tinta, porque aún no es ley. La de 2026 lleva el capitel en cochinilla y un ▼ chico porque baja frente a 2025 (6,700 vs 6,955 M). **Las alturas son proporcionales desde cero** (sin eje truncado), porque la gente lee las columnas como un gráfico. Al pie: "2012" y "▲ 2027". Una guarda de rombos de pallay cierra el hero.
+borde punteado de tinta, porque aún no es ley. La de 2026 lleva el capitel en cochinilla y, encima, un chip cochinilla "▼ 3.7 %" (calculado de los datos; en la banda móvil, solo un ▼ porque el texto no se leería) porque baja frente a 2025 (6,700 vs 6,955 M). **Las alturas son proporcionales desde cero** (sin eje truncado), porque la gente lee las columnas como un gráfico. Al pie: "2012" y "▲ 2027". Una guarda de rombos de pallay cierra el hero.
 
 **Sello "Dictamen · pendiente de publicación"** (`#h27-sello`): una etiqueta ají girada sobre la esquina inferior
 derecha del bloque 2027, junto al botón. Es el espacio reservado para el estado del trámite y se ve en todos los tamaños.
