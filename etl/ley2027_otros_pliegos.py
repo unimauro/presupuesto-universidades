@@ -18,14 +18,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 SIGLAS = {
-    "UNMSM": "510", "UNSAAC": "511", "UNSA": "513", "UNI": "514", "UNICA": "515", "UNSLG": "515",
-    "UNSCH": "516", "UNCP": "517", "UNALM": "518", "UNAP": None,  # ambigua: Amazonía Peruana / Altiplano
-    "UNA PUNO": "520", "UNPRG": "523", "UNFV": "524", "UNHEVAL": "525", "UNAS": "526", "UNDAC": "527",
-    "UNE": "528", "UNAC": "529", "UNJFSC": "530", "UNJBG": "531", "UNASAM": "532", "UNSM": "533",
+    "UNMSM": "510", "UNSAAC": "511", "UNSA": "513", "UNI": "514", "UNICA": "515",     "UNSCH": "516", "UNCP": "517", "UNALM": "518", "UNAP": None,  # ambigua: Amazonía Peruana / Altiplano
+    "UNA PUNO": "520", "UNPRG": "523", "UNFV": "524", "UNHEVAL": "525", "UNDAC": "527",
+    "UNAC": "529", "UNJFSC": "530", "UNJBG": "531", "UNASAM": "532", "UNSM": "533",
     "UNTRM": "541", "UNIA": "542", "UNTELS": "543", "UNAJMA": "544", "UNAMAD": "538", "UNAMBA": "539",
     "UNFS": None, "UNDC": "547", "UNISCJSA": "551", "UNAAT": "553", "UNAH": "554", "UNIFSLB": "555",
-    "UNIQ": "556", "UNAAA": "557", "UNAT": "558", "UNCA": "559",
+    "UNIQ": "556", "UNAAA": "557", "UNAT": "558",
 }
+# Omitidas por ser palabras comunes en castellano: UNE (528), UNAS (526).
 # alias de nombre (forma en que aparece en los proyectos) -> pliego
 ALIAS = {
     "UNIVERSIDAD NACIONAL DE SAN AGUSTIN": "513",

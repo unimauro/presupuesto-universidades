@@ -419,7 +419,23 @@ def main():
         ("total_sector_publico_pia_2026_millones", 257_562),
         ("referencias_em", "Exposición de motivos: PP 0066 S/ 4 222 M en total (incluye MINEDU y 1 GR); S/ 3 511 M remuneraciones de 67 universidades; S/ 260 M pensiones de 54; S/ 1 201 M gastos operativos de 67; S/ 1 967 M inversiones y otros activos."),
     ])
+    # proyectos/actividades para universidades ubicados en otros pliegos del GN (Anexo 5)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from ley2027_otros_pliegos import buscar
+    nombres_u = {c: r["nombre"] for c, r in universidades.items()}
+    otros = buscar(a5_todos, nombres_u)
+    for r in universidades.values():
+        r["monto_en_otros_pliegos"] = 0
+    for o in otros:
+        if o["beneficiario"]:
+            universidades[o["beneficiario"]]["monto_en_otros_pliegos"] += o["monto"]
+    asig = sum(o["monto"] for o in otros if o["beneficiario"])
+    out["total_universidades"]["en_otros_pliegos_asignado"] = asig
+    out["total_universidades"]["en_otros_pliegos_dudoso"] = sum(o["monto"] for o in otros if not o["beneficiario"])
+    out["total_universidades"]["pia_2027_mas_otros_pliegos"] = tot27 + asig
+    out["notas"].append("en_otros_pliegos: proyectos/actividades del Anexo 5 en pliegos no universitarios (MINEDU, CONCYTEC, etc.) cuyo nombre o CUI apunta a una universidad (match: nombre, sigla, cui; 'dudoso' sin beneficiario único). NO forman parte del PIA de la universidad (los ejecuta otro pliego); se reportan aparte en monto_en_otros_pliegos. Solo Gobierno Nacional: no incluye proyectos de gobiernos regionales/locales (Anexos 6–7).")
     out["universidades"] = universidades
+    out["en_otros_pliegos"] = otros
     out["disposiciones"] = disposiciones()
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1))
