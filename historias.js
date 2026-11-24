@@ -1,7 +1,7 @@
-/* Historias — Radiografía Presupuestal de las Universidades Públicas del Perú.
- * Todas las cifras se calculan en vivo desde data/observatorio.json
- * (fallback: data/sample/observatorio.json, con aviso de datos de ejemplo).
- * Ningún número está horneado en este archivo. */
+/* Historias v2 — Radiografía Presupuestal de las Universidades Públicas del Perú.
+ * Todas las cifras se calculan en vivo desde data/resumen.json + data/anio/{año}.json
+ * (respaldo: data/observatorio.json; último recurso: data/sample/observatorio.json con aviso).
+ * Ningún número está escrito a mano en este archivo. Gráficos en SVG propio (sin librerías). */
 (() => {
   'use strict';
   document.documentElement.classList.add('js');
@@ -9,28 +9,46 @@
   // ---------- utilidades ----------
   const $ = (s, r = document) => r.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => { try { const x = new URL(String(u), location.href); return /^https?:$/.test(x.protocol) ? x.href : null; } catch (e) { return null; } };
   const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
   const nf0 = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 0 });
   const nf1 = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const SD = 's/d';
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Mismo formato que index.html (fmtM): "S/ 6,954.6 M"; montos menores a 1 M en soles enteros.
-  function soles(v) {
-    if (!isNum(v)) return SD;
-    if (Math.abs(v) >= 1e6) return 'S/ ' + nf1.format(v / 1e6) + ' M';
-    return 'S/ ' + nf0.format(v);
+  // Formato adaptativo: ≥1,000 M → "S/ 7.7 mil M"; ≥1 M → "S/ 53.4 M"; <1 M → "S/ 850 mil" / "S/ 19.7 mil"; <1,000 → "S/ 40".
+  const trim0 = (t) => t.replace(/\.0$/, '');
+  function solesN(v) { // sin el prefijo "S/ "
+    const a = Math.abs(v), sg = v < 0 ? '−' : '';
+    if (a >= 1e9) return sg + nf1.format(a / 1e9) + '\u00a0mil\u00a0M';
+    if (a >= 1e6) return sg + nf1.format(a / 1e6) + '\u00a0M';
+    if (a >= 1e5) return sg + nf0.format(a / 1e3) + '\u00a0mil';
+    if (a >= 1e3) return sg + trim0(nf1.format(a / 1e3)) + '\u00a0mil';
+    return sg + nf0.format(a);
+  }
+  const soles = (v) => (isNum(v) ? 'S/\u00a0' + solesN(v) : SD);
+  // Cifra héroe: [número, unidad]
+  function heroParts(v) {
+    if (!isNum(v)) return [SD, ''];
+    if (Math.abs(v) >= 1e9) return ['S/ ' + nf1.format(v / 1e9), 'mil millones'];
+    if (Math.abs(v) >= 1e6) return ['S/ ' + nf1.format(v / 1e6), 'millones'];
+    return ['S/ ' + nf0.format(v / 1e3), 'mil'];
   }
   function solesAxis(v) {
     if (!isNum(v)) return '';
     const a = Math.abs(v);
-    if (a >= 1e9) return nf1.format(v / 1e9) + ' mil M';
+    if (a >= 1e9) return nf1.format(v / 1e9).replace(/[.,]0$/, '') + ' mil M';
     if (a >= 1e6) return nf0.format(v / 1e6) + ' M';
     if (a >= 1e3) return nf0.format(v / 1e3) + ' mil';
     return nf0.format(v);
   }
-  const pct = (v, d = 0) => (isNum(v) ? new Intl.NumberFormat('es-PE', { maximumFractionDigits: d, minimumFractionDigits: d }).format(v * 100) + '%' : SD);
-  const pctSigned = (v) => (isNum(v) ? (v > 0 ? '+' : '') + pct(v) : SD);
+  // Porcentajes: ≥1000 % → "×11.5 veces" (en variaciones); ≥100 % sin decimales.
+  const pct = (v, d = 0) => (isNum(v) ? new Intl.NumberFormat('es-PE', { maximumFractionDigits: Math.abs(v) >= 1 ? 0 : d, minimumFractionDigits: Math.abs(v) >= 1 ? 0 : d }).format(v * 100) + '%' : SD);
+  const pctSigned = (v, d = 0) => {
+    if (!isNum(v)) return SD;
+    if (v >= 10) return '×' + trim0(nf1.format(1 + v)) + ' veces';
+    return (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v), d);
+  };
   const div = (a, b) => (isNum(a) && isNum(b) && b !== 0 ? a / b : null);
   const sum = (arr) => arr.reduce((s, x) => s + (isNum(x) ? x : 0), 0);
   function median(arr) {
@@ -48,48 +66,47 @@
   const findKey = (obj, test) => (obj ? Object.keys(obj).find(test) : undefined);
   const pick = (obj, test) => { const k = findKey(obj, test); return k ? obj[k] : null; };
   const val = (o, f) => (o && isNum(o[f]) ? o[f] : null);
+  const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
   // Accesores al esquema
   const generica = (a, code) => pick(a && a.generica, (k) => k.trim().startsWith(code + ' ') || k.trim().startsWith(code + ':') || k.trim() === code);
   const programa = (a, code) => pick(a && a.programa, (k) => k.trim().startsWith(code));
   const fuenteRDR = (a) => pick(a && a.fuente, (k) => /DIRECTAMENTE\s+RECAUDADOS/i.test(k));
-  const ingresoRDR = (a) => pick(a && a.ingresos && a.ingresos.fuente, (k) => /DIRECTAMENTE\s+RECAUDADOS/i.test(k));
   const label = (u) => String(u.corto || u.nombre || u.pliego);
-  // Etiqueta corta para ejes (P1-13): la sigla; si "corto" es un nombre largo ("U.N. DE SECHURA"),
-  // se abrevia desde el inicio: "UN Sechura", "UN Tecnológica d…". El nombre completo va en el tooltip.
   const SMALL = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'e']);
   function titleCase(t) {
     return t.toLowerCase().split(/\s+/).map((w, i) => (i > 0 && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
   }
-  function axisLabel(u) {
+  // Etiqueta corta para ejes: la sigla; si "corto" es un nombre largo, se abrevia. El nombre completo va en el tooltip.
+  function axisLabel(u, max = 16) {
     const c = String(u.corto || '').trim();
     if (c && c.length <= 12) return c;
     let t = (c || String(u.nombre || u.pliego)).trim();
     const pref = /^(U\.\s?N\.|UNIVERSIDAD\b|UN\s)/i.test(t);
     t = t.replace(/^(U\.\s?N\.|UNIVERSIDAD\s+NACIONAL|UN)\s+/i, '').replace(/^UNIVERSIDAD\s+/i, '')
       .replace(/^AUT[OÓ]NOMA\s+/i, '').replace(/^(DE\s+|DEL\s+)/i, '');
-    // Si viene todo en MAYÚSCULAS se pasa a tipo título; si ya viene con mayúsculas y minúsculas (siglas del ETL) se respeta.
     if (t === t.toUpperCase()) t = titleCase(t);
     if (pref) t = 'UN ' + t;
-    return t.length > 16 ? t.slice(0, 15).trimEnd() + '…' : t;
+    return t.length > max ? t.slice(0, max - 1).trimEnd() + '…' : t;
   }
+  const sentence = (t) => { const s = String(t || '').trim().toLowerCase(); return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; };
+  const fullName = (u) => titleCase(String(u.nombre || u.pliego));
 
   // ---------- estado ----------
-  const S = { d: null, isSample: false, Y: null, hl: '', closed: [], partial: [], charts: [] };
+  const S = { d: null, isSample: false, Y: null, hl: '', closed: [], partial: [], mounts: [], slugs: null };
 
   function colors() {
     const cs = getComputedStyle(document.documentElement);
     const v = (n) => cs.getPropertyValue(n).trim();
     return {
-      ink: v('--ink'), ink2: v('--ink-2'), line: v('--line'), card: v('--card'),
-      pia: v('--c-pia'), pim: v('--c-pim'), dev: v('--c-dev'), hl: v('--c-hl'),
-      accent: v('--accent'), amber: v('--amber'), g1: v('--g1'), g2: v('--g2'), g3: v('--g3'), g4: v('--g4'), g5: v('--g5'), f2: v('--f2'),
+      ink: v('--color-tinta'), ink2: v('--color-tinta-2'), line: v('--color-linea'), paper: v('--color-papel'), paper2: v('--color-papel-2'),
+      pia: v('--color-pia'), pim: v('--color-pim'), dev: v('--color-dev'), tu: v('--color-tu'), tuB: v('--color-tu-borde'),
+      personal: v('--color-personal'), pensiones: v('--color-pensiones'), bys: v('--color-bys'), inversion: v('--color-inversion'), otros: v('--color-otros'),
+      ro: v('--color-ro'), rdr: v('--color-rdr'), canon: v('--color-canon'), dyt: v('--color-dyt'),
     };
   }
 
-  // ---------- carga ----------
-  // Carga por capas (rápida): data/resumen.json (totales/kpi por año) + data/anio/{año}.json bajo demanda.
-  // Respaldo: data/observatorio.json completo y, al final, el sample.
+  // ---------- carga por capas ----------
   const L = { full: false, years: new Set(), inflight: {}, fullP: null };
   async function getJSON(url) {
     const r = await fetch(url, { cache: 'no-cache' });
@@ -120,7 +137,6 @@
       u.anios[y] = Object.assign(u.anios[y] || {}, o);
     });
   }
-  // Si falla una capa anual, se cae al archivo completo (una sola vez).
   function loadFull() {
     if (L.full) return Promise.resolve();
     if (!L.fullP) {
@@ -143,10 +159,8 @@
     }
     return L.inflight[y];
   }
-  // Ventana de años para contar en cuántos años tuvo PIM un proyecto (limita las descargas a 6 capas).
   const WIN = 6;
   const winYears = (Y) => S.closed.filter((y) => y <= Y).slice(-WIN);
-  // Qué capas necesita cada historia antes de calcularse.
   async function prepStory(st, Y) {
     if (st.need === 'base') return;
     await ensureYear(Y);
@@ -155,7 +169,6 @@
       if (hay) await Promise.all(winYears(Y).map(ensureYear));
     }
   }
-
   function setupYears(d) {
     const partialKeys = Object.keys(d.parcial || {}).map(String);
     let years = Array.isArray(d.anios) ? d.anios.map(String) : [];
@@ -168,240 +181,505 @@
     S.closed = years.filter((y) => !partialKeys.includes(y));
     S.partial = years.filter((y) => partialKeys.includes(y));
   }
+  // Soles reales (base del IPC: 2025) — real = nominal × 100 / índice[año]
+  const ipcIdx = (y) => { const i = S.d && S.d.ipc && S.d.ipc.indice; return i && isNum(i[y]) && i[y] > 0 ? i[y] : null; };
+  const real = (v, y) => (isNum(v) && ipcIdx(y) ? (v * 100) / ipcIdx(y) : null);
+  const ipcBase = () => (S.d && S.d.ipc && S.d.ipc.base) || 2025;
 
-  // ---------- gráficos ----------
-  function destroyCharts() { S.charts.forEach((c) => c.destroy()); S.charts = []; }
-  const hasChart = () => typeof window.Chart === 'function';
-
-  function legendHTML(series) {
-    return '<ul class="legend">' + series.map((s) => `<li><i style="background:${esc(s.color)}"></i>${esc(s.name)}</li>`).join('') + '</ul>';
+  // ---------- universidad elegida ----------
+  function hlUni() { return S.hl ? S.d.universidades.find((u) => String(u.pliego) === S.hl) : null; }
+  const EnLa = (u) => `En la <mark>${esc(label(u))}</mark>`;
+  function fichaHref(u) {
+    const slug = S.slugs && S.slugs[String(u.pliego)];
+    return slug && /^[a-z0-9-]+$/.test(slug) ? `u/${slug}/` : `index.html#u=${encodeURIComponent(u.pliego)}`;
   }
+  const tuInvita = () => '<p class="tu-vacio">¿Y la tuya? <a href="#picker">Elige tu universidad arriba</a> y esta historia se personaliza.</p>';
 
-  /** Barras horizontales con "mostrar todas". items ya ordenados: [{key,label,vals:[]}] */
-  function hbar(el, { items, series, fmt, axis, stacked = false, limit = 12, max, aria }) {
-    const C = colors();
-    if (!items.length) { el.innerHTML = '<p class="empty">Sin datos suficientes para este año.</p>'; return; }
-    if (!hasChart()) { el.innerHTML = fallbackTable(items, series, fmt); return; }
-    el.innerHTML = `<div class="chart"><canvas role="img" aria-label="${esc(aria || '')}"></canvas></div>` +
-      (series.length > 1 ? legendHTML(series) : '') +
-      (items.length > limit ? `<button type="button" class="more" aria-expanded="false">Mostrar las ${items.length}</button>` : '');
-    const wrap = $('.chart', el), canvas = $('canvas', el), btn = $('.more', el);
-    let expanded = false, chart = null;
-    const draw = () => {
-      const shown = expanded ? items : items.filter((it, i) => i < limit || it.key === S.hl);
-      const per = stacked || series.length === 1 ? 24 : 36;
-      wrap.style.height = shown.length * per + 56 + 'px';
-      if (chart) { chart.destroy(); S.charts = S.charts.filter((c) => c !== chart); }
-      const isHl = (i) => shown[i] && shown[i].key === S.hl;
-      chart = new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels: shown.map((i) => i.ax || i.label),
-          datasets: series.map((s, si) => ({
-            label: s.name,
-            data: shown.map((i) => (isNum(i.vals[si]) ? i.vals[si] : null)),
-            backgroundColor: series.length === 1 ? shown.map((i) => (i.key === S.hl ? C.hl : s.color)) : s.color,
-            borderRadius: stacked ? 0 : 3, barPercentage: 0.86, categoryPercentage: 0.82,
-          })),
-        },
-        options: {
-          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          animation: reduced ? false : { duration: 450 },
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { title: (c) => (c[0] && shown[c[0].dataIndex] ? (shown[c[0].dataIndex].full || shown[c[0].dataIndex].label) : ''), label: (c) => `${c.dataset.label}: ${fmt(c.raw)}` } },
-          },
-          scales: {
-            x: { stacked, max, beginAtZero: true, grid: { color: C.line }, ticks: { color: C.ink2, maxTicksLimit: 5, callback: (v) => axis(v) } },
-            y: { stacked, grid: { display: false }, ticks: { autoSkip: false, color: (c) => (isHl(c.index) ? C.hl : C.ink2), font: (c) => ({ size: 12, weight: isHl(c.index) ? '700' : '400' }) } },
-          },
-        },
-      });
-      S.charts.push(chart);
-    };
-    draw();
-    if (btn) btn.addEventListener('click', () => {
-      expanded = !expanded;
-      btn.setAttribute('aria-expanded', String(expanded));
-      btn.textContent = expanded ? `Mostrar solo ${limit}` : `Mostrar las ${items.length}`;
-      draw();
+  // ---------- SVG ----------
+  const svgOpen = (W, H, aria) => `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(aria)}">`;
+  const cw = (t, px = 7.2) => String(t).length * px; // ancho aproximado del texto (13 px Archivo)
+  function placeLabel(x, w, W) { // devuelve [x, anchor]
+    if (x - w / 2 < 2) return [2, 'start'];
+    if (x + w / 2 > W - 2) return [W - 2, 'end'];
+    return [x, 'middle'];
+  }
+  function tuTag(x, y, text, W) {
+    const w = cw(text, 7.9) + 12;
+    const [tx, anchor] = placeLabel(x, w, W);
+    const rx = anchor === 'start' ? tx : anchor === 'end' ? tx - w : tx - w / 2;
+    return `<rect class="tu-bg" x="${rx.toFixed(1)}" y="${y - 15}" width="${w.toFixed(1)}" height="21" rx="2"/><text class="t-tu" x="${(rx + w / 2).toFixed(1)}" y="${y}" text-anchor="middle">${esc(text)}</text>`;
+  }
+  const tableHTML = (head, rows, tuKey) => `<details class="datos"><summary>Ver los datos en tabla</summary><div class="tabla"><table><thead><tr>${head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr${r.key && r.key === tuKey ? ' class="es-tu"' : ''}>${r.cells.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
+
+  /** Enjambre (beeswarm): una bolita por universidad; la tuya en ají. */
+  function swarm(box, o) {
+    const W = Math.max(280, Math.round(box.clientWidth || 340));
+    const small = W < 520;
+    const tf = o.log ? Math.log10 : (x) => x;
+    const items = o.items.filter((i) => isNum(i.v) && (!o.log || i.v > 0));
+    if (!items.length) { box.innerHTML = '<p class="empty">Sin datos suficientes.</p>'; return; }
+    const vs = items.map((i) => i.v);
+    const d0 = o.domain ? o.domain[0] : Math.min(...vs), d1 = o.domain ? o.domain[1] : Math.max(...vs);
+    const mL = 10, mR = 10;
+    const x = (v) => mL + ((tf(Math.min(Math.max(v, d0), d1)) - tf(d0)) / ((tf(d1) - tf(d0)) || 1)) * (W - mL - mR);
+    const ws = items.map((i) => i.w).filter(isNum);
+    const wmax = ws.length ? Math.max(...ws) : 0;
+    const rFix = small ? 5.4 : 7;
+    const rOf = (i) => (o.size && wmax > 0 && isNum(i.w) ? (small ? 3 : 4) + (small ? 8 : 12) * Math.sqrt(i.w / wmax) : rFix);
+    const pts = items.map((i) => ({ i, x: x(i.v), r: rOf(i), y: 0 })).sort((a, b) => a.x - b.x);
+    const placed = [];
+    pts.forEach((p) => {
+      for (let k = 0; k < 400; k++) {
+        const off = Math.ceil(k / 2) * 1.5 * (k % 2 ? 1 : -1);
+        const ok = placed.every((q) => { const dx = q.x - p.x, dy = q.y - off, rr = q.r + p.r + 0.8; return Math.abs(dx) >= rr || dx * dx + dy * dy >= rr * rr; });
+        if (ok) { p.y = off; break; }
+      }
+      placed.push(p);
     });
+    const ext = Math.max(...pts.map((p) => Math.abs(p.y) + p.r));
+    const labH = 52, cy = labH + ext + 8, axY = cy + ext + 10, H = axY + (o.refs && o.refs.length ? 46 : 26);
+    const C = colors();
+    let g = '';
+    (o.ticks || []).forEach((t) => {
+      const tx = x(t);
+      g += `<line class="grid" x1="${tx}" x2="${tx}" y1="${labH - 4}" y2="${axY}"/>`;
+      const [lx, an] = placeLabel(tx, cw(o.tickFmt(t)), W);
+      g += `<text x="${lx}" y="${axY + 17}" text-anchor="${an}">${esc(o.tickFmt(t))}</text>`;
+    });
+    g += `<line class="axis" x1="${mL}" x2="${W - mR}" y1="${axY}" y2="${axY}"/>`;
+    (o.refs || []).forEach((r) => {
+      if (!isNum(r.v)) return;
+      const rx = x(r.v);
+      g += `<line x1="${rx}" x2="${rx}" y1="${labH - 4}" y2="${axY + 22}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+      const [lx, an] = placeLabel(rx, cw(r.label, 7.6), W);
+      g += `<text class="t-ink" x="${lx}" y="${axY + 38}" text-anchor="${an}">${esc(r.label)}</text>`;
+    });
+    const tuP = pts.find((p) => p.i.key === S.hl);
+    const ends = [pts[0], pts[pts.length - 1]];
+    ends.forEach((p, k) => {
+      if (!p || p === tuP || (k === 1 && p === ends[0])) return;
+      const t = `${p.i.ax} ${o.fmt(p.i.v)}`;
+      const anchor = k === 0 ? 'start' : 'end';
+      const lx = anchor === 'start' ? Math.max(2, p.x - 4) : Math.min(W - 2, p.x + 4);
+      g += `<line x1="${p.x}" x2="${p.x}" y1="20" y2="${cy + p.y - p.r - 1}" stroke="${C.ink2}" stroke-width="1"/>`;
+      g += `<text x="${lx}" y="15" text-anchor="${anchor}">${esc(t)}</text>`;
+    });
+    const n = pts.length;
+    pts.forEach((p, k) => {
+      if (p === tuP) return;
+      g += `<circle class="drop" style="--d:${(k / n * 0.7).toFixed(2)}s" cx="${p.x.toFixed(1)}" cy="${(cy + p.y).toFixed(1)}" r="${p.r.toFixed(1)}" fill="${o.color}" fill-opacity="${o.size ? 0.82 : 0.9}" stroke="${C.paper}" stroke-width="1" data-tip="${esc(p.i.full + ': ' + o.fmt(p.i.v) + (p.i.extra ? ' (' + p.i.extra + ')' : ''))}"/>`;
+    });
+    if (tuP) {
+      g += `<line x1="${tuP.x}" x2="${tuP.x}" y1="44" y2="${cy + tuP.y - tuP.r}" stroke="${C.ink}" stroke-width="1.5"/>`;
+      g += `<circle cx="${tuP.x.toFixed(1)}" cy="${(cy + tuP.y).toFixed(1)}" r="${(tuP.r + 2).toFixed(1)}" fill="${C.tu}" stroke="${C.tuB}" stroke-width="2.5" data-tip="${esc(tuP.i.full + ': ' + o.fmt(tuP.i.v))}"/>`;
+      g += tuTag(tuP.x, 42, `${tuP.i.ax} ${o.fmt(tuP.i.v)}`, W);
+    }
+    box.innerHTML = svgOpen(W, H, o.aria) + g + '</svg>';
   }
 
-  function fallbackTable(items, series, fmt) {
-    return '<p class="note">No se pudo cargar la librería de gráficos; se muestra la tabla.</p><div style="overflow-x:auto"><table class="figs" style="width:100%;font-size:13px;border-collapse:collapse"><thead><tr><th style="text-align:left">Universidad</th>' +
-      series.map((s) => `<th style="text-align:right">${esc(s.name)}</th>`).join('') + '</tr></thead><tbody>' +
-      items.map((i) => `<tr><td>${esc(i.label)}</td>${i.vals.map((v) => `<td style="text-align:right">${esc(fmt(v))}</td>`).join('')}</tr>`).join('') +
-      '</tbody></table></div>';
+  /** Skyline: columnas ordenadas de mayor a menor, la tuya en ají. */
+  function skyline(box, o) {
+    const W = Math.max(280, Math.round(box.clientWidth || 340));
+    const items = o.items;
+    const n = items.length; if (!n) { box.innerHTML = '<p class="empty">Sin datos suficientes.</p>'; return; }
+    const C = colors();
+    const labH = 50, plotH = W < 520 ? 190 : 260, base = labH + plotH, H = base + 30;
+    const max = Math.max(...items.map((i) => i.v));
+    const bw = W / n, gap = bw > 6 ? 2 : 1;
+    let g = '';
+    [0.25, 0.5, 0.75, 1].forEach((f) => { const yv = base - f * plotH; g += `<line class="grid" x1="0" x2="${W}" y1="${yv}" y2="${yv}"/>`; });
+    let tuI = -1;
+    items.forEach((it, k) => {
+      const h = Math.max(1.5, (it.v / max) * plotH), bx = k * bw;
+      const isTu = it.key === S.hl; if (isTu) tuI = k;
+      g += `<rect class="growy" style="--d:${(k / n * 0.6).toFixed(2)}s" x="${(bx + gap / 2).toFixed(2)}" y="${(base - h).toFixed(1)}" width="${Math.max(1, bw - gap).toFixed(2)}" height="${h.toFixed(1)}" fill="${isTu ? C.tu : o.color}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''}/>`;
+      g += `<rect x="${bx.toFixed(2)}" y="${labH}" width="${bw.toFixed(2)}" height="${plotH}" fill="transparent" data-tip="${esc(it.full + ': ' + o.fmt(it.v))}"/>`;
+    });
+    if (isNum(o.median)) {
+      const my = base - (o.median / max) * plotH;
+      const t = `Mediana ${o.fmt(o.median)}`;
+      g += `<line x1="0" x2="${W}" y1="${my}" y2="${my}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      g += `<rect x="${W - cw(t, 7.6) - 10}" y="${my - 21}" width="${cw(t, 7.6) + 10}" height="18" fill="${C.paper}"/><text class="t-ink" x="${W - 2}" y="${my - 7}" text-anchor="end">${esc(t)}</text>`;
+    }
+    g += `<line class="axis" x1="0" x2="${W}" y1="${base}" y2="${base}"/>`;
+    const first = items[0], last = items[n - 1];
+    if (tuI !== 0) g += `<text x="0" y="16">${esc(`${first.ax} ${o.fmt(first.v)}`)}</text>`;
+    if (tuI !== n - 1) g += `<text x="${W}" y="${base + 20}" text-anchor="end">${esc(`${last.ax} ${o.fmt(last.v)}`)}</text>`;
+    if (tuI >= 0) {
+      const it = items[tuI], tx = tuI * bw + bw / 2, h = (it.v / max) * plotH;
+      g += `<line x1="${tx}" x2="${tx}" y1="40" y2="${base - h - 2}" stroke="${C.ink}" stroke-width="1.5"/>`;
+      g += tuTag(tx, 38, `${it.ax} ${o.fmt(it.v)}`, W);
+    }
+    box.innerHTML = svgOpen(W, H, o.aria) + g + '</svg>';
+  }
+
+  /** Barras horizontales con etiqueta directa (admite negativos). rows: [{key,ax,full,v}|{sep:true}] */
+  function hbars(box, o) {
+    const W = Math.max(280, Math.round(box.clientWidth || 340));
+    const rows = o.rows; const C = colors();
+    const data = rows.filter((r) => !r.sep);
+    if (!data.length) { box.innerHTML = '<p class="empty">Sin datos suficientes.</p>'; return; }
+    const rowH = 32, labW = W < 520 ? 108 : 180, vW = 56;
+    const vmin = Math.min(0, ...data.map((r) => r.v)), vmax = Math.max(0, ...data.map((r) => r.v));
+    const pL = labW + (vmin < 0 ? vW : 6), pR = W - (vmax > 0 ? vW : 6);
+    const x = (v) => pL + ((v - vmin) / ((vmax - vmin) || 1)) * (pR - pL);
+    const x0 = x(0), H = rows.length * rowH + 8;
+    let g = '';
+    rows.forEach((r, k) => {
+      const y = k * rowH + 4;
+      if (r.sep) { g += `<line class="grid" x1="${labW}" x2="${W}" y1="${y + rowH / 2}" y2="${y + rowH / 2}" stroke-dasharray="2 4"/><text x="0" y="${y + 21}">⋯</text>`; return; }
+      const isTu = r.key === S.hl, xv = x(r.v), bx = Math.min(x0, xv), bwid = Math.max(1, Math.abs(xv - x0));
+      if (isTu) g += `<rect class="tu-bg" x="0" y="${y + 4}" width="${Math.min(labW - 6, cw(r.ax, 7.9) + 10)}" height="${rowH - 8}" rx="2"/>`;
+      g += `<text ${isTu ? 'class="t-tu" ' : ''}x="${isTu ? 5 : 0}" y="${y + 21}">${esc(r.ax)}</text>`;
+      g += `<rect class="growx" style="--d:${(k * 0.04).toFixed(2)}s;${r.v < 0 ? 'transform-origin:right center' : ''}" x="${bx.toFixed(1)}" y="${y + 6}" width="${bwid.toFixed(1)}" height="${rowH - 12}" fill="${isTu ? C.tu : (r.v < 0 ? o.colorNeg || o.color : o.color)}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''} data-tip="${esc(r.full + ': ' + o.fmt(r.v))}"/>`;
+      g += r.v < 0 ? `<text class="t-ink" x="${xv - 5}" y="${y + 21}" text-anchor="end">${esc(o.fmt(r.v))}</text>` : `<text class="t-ink" x="${xv + 5}" y="${y + 21}">${esc(o.fmt(r.v))}</text>`;
+    });
+    g += `<line class="axis" x1="${x0}" x2="${x0}" y1="0" y2="${H}"/>`;
+    box.innerHTML = svgOpen(W, H, o.aria) + g + '</svg>';
+  }
+
+  /** Línea por años (serie principal + serie fantasma) con anotaciones de inicio y fin. */
+  function lines(box, o) {
+    const W = Math.max(280, Math.round(box.clientWidth || 340));
+    const C = colors();
+    const small = W < 520;
+    const H = small ? 280 : 340, mT = 48, mB = 48, mL = 6, mR = 8;
+    const yrs = o.years; const all = o.series.flatMap((s) => s.vals).filter(isNum);
+    const ymax = Math.max(...all) * 1.08;
+    const x = (i) => mL + (i / ((yrs.length - 1) || 1)) * (W - mL - mR);
+    const y = (v) => mT + (1 - v / ymax) * (H - mT - mB);
+    let g = '';
+    const step = ymax > 6e9 ? 2e9 : ymax > 3e9 ? 1e9 : 5e8;
+    for (let v = step; v < ymax; v += step) g += `<line class="grid" x1="${mL}" x2="${W - mR}" y1="${y(v)}" y2="${y(v)}"/><text x="${mL}" y="${y(v) - 5}">${esc('S/ ' + solesAxis(v))}</text>`;
+    g += `<line class="axis" x1="${mL}" x2="${W - mR}" y1="${y(0)}" y2="${y(0)}"/>`;
+    const every = small ? 3 : 2;
+    yrs.forEach((yr, i) => {
+      const last = i === yrs.length - 1;
+      if (last || i === o.markA || ((yrs.length - 1 - i) % every === 0 && Math.abs(i - o.markA) > 1)) {
+        const an = last ? 'end' : i === 0 ? 'start' : 'middle';
+        g += `<text x="${x(i)}" y="${y(0) + 18}" text-anchor="${an}"${i === o.markA || last ? ' class="t-ink"' : ''}>${esc(yr)}</text>`;
+      }
+    });
+    o.series.slice().reverse().forEach((s) => {
+      const d = s.vals.map((v, i) => (isNum(v) ? `${i && isNum(s.vals[i - 1]) ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}` : '')).join('');
+      g += `<path ${s.dash ? 'class="pop"' : 'class="draw" style="--len:1800"'} d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width || 3}" stroke-linejoin="round" stroke-linecap="round"${s.dash ? ' stroke-dasharray="6 5"' : ''}/>`;
+    });
+    const main = o.series[0];
+    [o.markA, yrs.length - 1].forEach((i, k) => {
+      const v = main.vals[i]; if (!isNum(v)) return;
+      const px = x(i), py = y(v);
+      g += `<circle cx="${px}" cy="${py}" r="6" fill="${main.color}" stroke="${C.paper}" stroke-width="2"/>`;
+      const an = k === 0 ? (px < W * 0.35 ? 'start' : 'middle') : 'end';
+      g += `<text class="t-big" x="${k === 0 ? Math.max(px - 6, 4) : px + 4}" y="${py - 16}" text-anchor="${an}">${esc(soles(v))}</text>`;
+      if (o.notes && o.notes[k]) g += `<text x="${k === 0 ? Math.max(px - 6, 4) : px + 4}" y="${y(0) + 36}" text-anchor="${k === 0 ? 'start' : 'end'}">${esc(o.notes[k])}</text>`;
+    });
+    const bw = (W - mL - mR) / yrs.length;
+    yrs.forEach((yr, i) => {
+      const tip = o.series.map((s) => `${s.name}: ${soles(s.vals[i])}`).join(' / ');
+      g += `<rect x="${(x(i) - bw / 2).toFixed(1)}" y="${mT}" width="${bw.toFixed(1)}" height="${H - mT - mB}" fill="transparent" data-tip="${esc(yr + ': ' + tip)}"/>`;
+    });
+    box.innerHTML = svgOpen(W, H, o.aria) + g + '</svg>';
+  }
+
+  /** Histograma de pocas cajas; marca la caja de tu universidad. */
+  function histo(box, o) {
+    const W = Math.max(280, Math.round(box.clientWidth || 340));
+    const C = colors();
+    const n = o.bins.length, gapX = 8, labH = 34, plotH = W < 520 ? 150 : 190, base = labH + plotH, H = base + (o.bins.some((b) => b.tu) ? 52 : 28);
+    const bw = (W - gapX * (n - 1)) / n;
+    const max = Math.max(...o.bins.map((b) => b.count), 1);
+    let g = '';
+    o.bins.forEach((b, k) => {
+      const bx = k * (bw + gapX), h = (b.count / max) * plotH, top = base - h;
+      g += `<rect class="growy" style="--d:${(k * 0.08).toFixed(2)}s" x="${bx.toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" fill="${b.neg ? o.colorNeg : o.color}"${b.tu ? ` stroke="${C.tuB}" stroke-width="3"` : ''} data-tip="${esc(b.label + ': ' + b.count + ' universidades')}"/>`;
+      g += `<text class="t-big" x="${bx + bw / 2}" y="${top - 8}" text-anchor="middle">${b.count}</text>`;
+      g += `<text x="${bx + bw / 2}" y="${base + 18}" text-anchor="middle" class="t-ink">${esc(b.label)}</text>`;
+      if (b.tu) g += tuTag(bx + bw / 2, base + 44, b.tu, W);
+    });
+    g += `<line class="axis" x1="0" x2="${W}" y1="${base}" y2="${base}"/>`;
+    box.innerHTML = svgOpen(W, H, o.aria) + g + '</svg>';
+  }
+
+  // ---------- piezas HTML ----------
+  function stepsHTML(t, title) {
+    const { pia, pim, dev } = t;
+    const mx = Math.max(pia || 0, pim || 0, dev || 0) || 1;
+    const w = (v) => (isNum(v) ? Math.max(0, (v / mx) * 100).toFixed(2) : 0);
+    const extra = isNum(pim) && isNum(pia) ? pim - pia : null;
+    const sin = isNum(pim) && isNum(dev) ? pim - dev : null;
+    return `${title ? `<p class="fig-t">${title}</p>` : ''}<div class="steps">
+      <div class="step"><div class="step-l"><span>Arrancaron con (PIA)</span><b>${esc(soles(pia))}</b></div>
+        <div class="step-bar"><i class="grow" style="width:${w(pia)}%;background:var(--color-pia)"></i></div></div>
+      <div class="step"><div class="step-l"><span>Terminaron teniendo (PIM)</span><b>${esc(soles(pim))}</b></div>
+        <div class="step-bar"><i class="grow" style="--d:.25s;width:${w(pim)}%;background:var(--color-pim)"></i></div>
+        ${isNum(extra) ? `<span class="step-note">${extra >= 0 ? `+${esc(soles(extra))} que llegaron durante el año` : `${esc(soles(-extra))} menos que al inicio`}</span>` : ''}</div>
+      <div class="step"><div class="step-l"><span>Gastaron de verdad (devengado)</span><b>${esc(soles(dev))}</b></div>
+        <div class="step-bar"><i class="gap" style="width:${w(pim)}%"></i><i class="grow" style="--d:.5s;width:${w(dev)}%;background:var(--color-dev)"></i></div>
+        ${isNum(sin) ? `<span class="step-note">${esc(soles(sin))} sin gastar (rayado): el ${esc(pct(div(sin, pim)))} de lo que tenían</span>` : ''}</div>
+    </div>`;
+  }
+  const CATS = [
+    { k: 'p', name: 'Sueldos del personal (2.1)', c: '--color-personal' },
+    { k: 'pe', name: 'Pensiones de cesantes (2.2)', c: '--color-pensiones' },
+    { k: 'b', name: 'Bienes y servicios, incluye CAS (2.3)', c: '--color-bys' },
+    { k: 'ac', name: 'Obras y equipos (2.6)', c: '--color-inversion' },
+    { k: 'o', name: 'Otros', c: '--color-otros' },
+  ];
+  function cents(shares) { // resto mayor → suma 100
+    const raw = shares.map((s) => (isNum(s) ? Math.max(0, s) * 100 : 0));
+    const fl = raw.map(Math.floor); let rest = 100 - sum(fl);
+    raw.map((r, i) => [r - Math.floor(r), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (rest > 0) { fl[i] += 1; rest -= 1; } });
+    return fl;
+  }
+  function waffleHTML(cs, title, plain) {
+    let cells = '', k = 0;
+    cs.forEach((n, ci) => { for (let j = 0; j < n; j++) { cells += `<i class="pop" style="--d:${(k * 0.007).toFixed(3)}s;background:var(${CATS[ci].c})"></i>`; k++; } });
+    return `<div><p class="waffle-t">${title}</p><div class="waffle" role="img" aria-label="${esc(plain + ': ' + CATS.map((c, i) => `${c.name} ${cs[i]} céntimos`).join(', '))}">${cells}</div></div>`;
   }
 
   // ---------- plantillas ----------
-  const stat = (v, l) => `<div class="stat"><span class="v">${esc(v)}</span><span class="l">${esc(l)}</span></div>`;
-  const caveat = (items, open) => `<details class="caveat"${open ? ' open' : ''}><summary>Qué no dice este dato</summary><ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></details>`;
-  const SRC_MEF = 'Fuente: MEF — Consulta Amigable / SIAF (gasto por pliego).';
-  const src = (extra) => `<p class="src">${esc(SRC_MEF)}${extra ? ' ' + esc(extra) : ''} Año ${esc(S.Y)}${S.partial.includes(S.Y) ? ' (parcial)' : ''}.</p>`;
-  // Fuente de contexto (matrícula / publicaciones) leída en vivo de d.fuentes.
-  // Usa f.tema si existe; si no, reconoce el nombre por palabras clave.
+  const SRC_MEF = 'Fuente: MEF, Consulta Amigable / SIAF (gasto por pliego).';
+  const isPartial = () => S.partial.includes(S.Y);
+  const src = (extra) => `<p class="src">${esc(SRC_MEF)}${extra ? ' ' + esc(extra) : ''} Año ${esc(S.Y)}${isPartial() ? ' (parcial)' : ''}.</p>`;
   const FUENTE_RX = {
     estudiantes: /matr[ií]cul|estudiant|alumn|SUNEDU|SIBE|INEI|MINEDU/i,
     pubs: /publicaci|OpenAlex|Scopus|Web of Science|WoS|ORCID|CTI Vitae|RENACYT|bibliom/i,
   };
+  const linkTo = (url, text) => { const u = safeUrl(url); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(text || u)}</a>` : esc(text); };
   function fuenteCtx(tema) {
     const fs = (S.d && Array.isArray(S.d.fuentes)) ? S.d.fuentes : [];
     const hit = fs.filter((f) => f && (f.tema === tema || (!f.tema && FUENTE_RX[tema].test(String(f.nombre || '')))));
-    if (!hit.length) return null;
-    return hit.map((f) => (f.url && /^https?:\/\//.test(f.url)
-      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.nombre || f.url)}</a>` : esc(f.nombre))).join('; ');
+    return hit.length ? hit.map((f) => linkTo(f.url, f.nombre || f.url)).join('; ') : null;
   }
-  // extraHTML ya escapado
-  const srcCtx = (tema, etiqueta) => {
-    const f = fuenteCtx(tema);
-    return `<p class="src">${esc(SRC_MEF)} ${esc(etiqueta)}: ${f || 'ver metodología del observatorio'}. Año ${esc(S.Y)}${S.partial.includes(S.Y) ? ' (parcial)' : ''}.</p>`;
+  const srcCtx = (tema, etiqueta) => `<p class="src">${esc(SRC_MEF)} ${esc(etiqueta)}: ${fuenteCtx(tema) || 'ver metodología del observatorio'}. Año ${esc(S.Y)}${isPartial() ? ' (parcial)' : ''}.</p>`;
+  const caveat = (items) => `<details class="nodice"><summary>Qué no dice este dato</summary><ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></details>`;
+  function unisY(Y) { return S.d.universidades.filter((u) => u.anios && u.anios[Y] && u.anios[Y].total); }
+  const item = (u, v, extra) => ({ key: String(u.pliego), ax: axisLabel(u), full: label(u) + (u.corto && u.corto.length <= 12 ? ', ' + fullName(u) : ''), v, extra });
+  const tuNo = (h, txt) => `<p class="tu">La <mark>${esc(label(h))}</mark> ${txt}</p>`;
+
+  // Color de cada capítulo (portada a sangre) y color del texto encima.
+  const PAL = {
+    anil: ['var(--color-anil)', 'var(--on-dark)'], maiz: ['var(--color-maiz)', 'var(--on-dark)'], chicha: ['var(--color-chicha)', 'var(--on-white)'],
+    rocoto: ['var(--color-rocoto)', 'var(--on-white)'], selva: ['var(--color-selva)', 'var(--on-dark)'], titicaca: ['var(--color-titicaca)', 'var(--on-dark)'],
+    aji: ['var(--color-aji)', 'var(--on-aji)'], cobre: ['var(--color-cobre)', 'var(--on-dark)'], cochinilla: ['var(--color-cochinilla)', 'var(--on-white)'],
   };
-  const hlNote = (text) => (text ? `<p class="note">${text}</p>` : '');
-  function hlUni() { return S.hl ? S.d.universidades.find((u) => String(u.pliego) === S.hl) : null; }
 
   // ---------- historias ----------
-  function unisY(Y) { return S.d.universidades.filter((u) => u.anios && u.anios[Y] && u.anios[Y].total); }
-
   const STORIES = [
-    // 1. PIA → PIM
+    // 1. PIA → PIM → devengado
     {
-      id: 'salto', need: 'base', sec: 'variacion', kicker: 'Empiezan y terminan', toc: 'El salto del PIA al PIM',
+      id: 'salto', need: 'base', col: 'anil', sec: 'variacion', toc: 'Arrancan, terminan, gastan', sk: 'más plata de la que tenían al empezar el año',
       build(Y) {
         const U = unisY(Y);
-        const pia = sum(U.map((u) => val(u.anios[Y].total, 'pia')));
-        const pim = sum(U.map((u) => val(u.anios[Y].total, 'pim')));
-        const dev = sum(U.map((u) => val(u.anios[Y].total, 'dev')));
-        const items = U.map((u) => {
-          const t = u.anios[Y].total; const r = div(val(t, 'pim'), val(t, 'pia'));
-          return { key: String(u.pliego), label: label(u), ax: axisLabel(u), full: u.nombre, vals: [isNum(r) ? r - 1 : null] };
-        }).filter((i) => isNum(i.vals[0])).sort((a, b) => b.vals[0] - a.vals[0]);
-        const h = hlUni(); let hl = '';
-        if (h && h.anios[Y]) { const t = h.anios[Y].total; hl = `${esc(label(h))}: PIA ${esc(soles(val(t, 'pia')))} → PIM ${esc(soles(val(t, 'pim')))} (${esc(pctSigned(isNum(div(val(t, 'pim'), val(t, 'pia'))) ? div(val(t, 'pim'), val(t, 'pia')) - 1 : null))}); devengó ${esc(pct(div(val(t, 'dev'), val(t, 'pim'))))} del PIM.`; }
+        const T = { pia: sum(U.map((u) => val(u.anios[Y].total, 'pia'))), pim: sum(U.map((u) => val(u.anios[Y].total, 'pim'))), dev: sum(U.map((u) => val(u.anios[Y].total, 'dev'))) };
+        const g = div(T.pim, T.pia);
+        const h = hlUni(); const ht = h && h.anios && h.anios[Y] && h.anios[Y].total;
+        let tu = tuInvita(), tuFig = '';
+        if (h && ht) {
+          const hg = div(val(ht, 'pim'), val(ht, 'pia'));
+          tu = `<p class="tu">${EnLa(h)} arrancaron con ${esc(soles(val(ht, 'pia')))} y terminaron con ${esc(soles(val(ht, 'pim')))} (${esc(pctSigned(isNum(hg) ? hg - 1 : null))}). Gastaron el ${esc(pct(div(val(ht, 'dev'), val(ht, 'pim'))))} de lo que tenían.</p>`;
+          tuFig = `<div class="steps-tu">${stepsHTML({ pia: val(ht, 'pia'), pim: val(ht, 'pim'), dev: val(ht, 'dev') }, `Solo la <mark>${esc(label(h))}</mark>`)}</div>`;
+        } else if (h) tu = tuNo(h, `no tiene datos de gasto en ${esc(Y)}.`);
         return {
-          h2: `Empiezan con <em>${esc(soles(pia))}</em> y terminan con <em>${esc(soles(pim))}</em>`,
-          html: `<p>En ${esc(Y)}, las ${esc(U.length)} universidades públicas con datos arrancaron el año con un presupuesto de apertura (PIA) de ${esc(soles(pia))}. Durante el año ese presupuesto se amplió hasta un PIM de ${esc(soles(pim))}, ${esc(pctSigned(isNum(div(pim, pia)) ? div(pim, pia) - 1 : null))} respecto del inicio. Al cierre se devengó ${esc(soles(dev))}: el ${esc(pct(div(dev, pim)))} del PIM.</p>
-            <div class="stats">${stat(soles(pia), 'PIA (inicio)')}${stat(soles(pim), 'PIM (cierre)')}${stat(soles(dev), 'Devengado')}${stat(soles(pim - dev), 'PIM no devengado')}${stat(pct(div(dev, pim)), 'Ejecución (dev./PIM)')}</div>
-            ${hlNote(hl)}
-            <div class="figure"><p class="cap">Conjunto de universidades por año (solo años cerrados)</p><div data-fig="serie"></div></div>
-            <div class="figure"><p class="cap">Variación del PIM respecto del PIA, ${esc(Y)}</p><div data-fig="rank"></div></div>
+          cifra: esc(pctSigned(isNum(g) ? g - 1 : null)),
+          titulo: `más plata tuvieron al final de ${esc(Y)} que al empezar. Al cierre, ${esc(soles(T.pim - T.dev))} quedaron sin gastar.`,
+          html: `<p class="lead">Piensa en tu propina del ciclo: arrancas con un monto, a mitad de camino te cae plata extra (o te recortan) y al final está lo que de verdad gastaste. Con las universidades públicas pasa igual, pero en millones.</p>
+            <p>En ${esc(Y)}, las ${esc(U.length)} universidades con datos arrancaron con ${esc(soles(T.pia))}, terminaron teniendo ${esc(soles(T.pim))} y gastaron ${esc(soles(T.dev))}: el ${esc(pct(div(T.dev, T.pim)))} de lo que tenían.</p>
+            ${tu}
+            <figure class="fig anim">${stepsHTML(T, `Las ${esc(U.length)} universidades juntas, ${esc(Y)}`)}${tuFig}</figure>
             ${caveat([
-              'El PIM crece por créditos suplementarios, transferencias de otras entidades y saldos de balance incorporados durante el año. Un salto alto no es, por sí mismo, una irregularidad.',
-              'Parte del PIM no devengado puede corresponder a recursos que llegaron tarde en el año o a obras plurianuales.',
-              'Montos nominales; no se ajustan por inflación.',
-            ], true)}${src()}`,
-          mount(el) {
-            const C = colors();
-            const yrs = S.closed.filter((y) => S.d.universidades.some((u) => u.anios && u.anios[y]));
-            const agg = (y, f) => sum(S.d.universidades.map((u) => (u.anios && u.anios[y] ? val(u.anios[y].total, f) : null)));
-            const box = $('[data-fig="serie"]', el);
-            if (!hasChart()) box.innerHTML = fallbackTable(yrs.map((y) => ({ label: y, vals: [agg(y, 'pia'), agg(y, 'pim'), agg(y, 'dev')] })), [{ name: 'PIA' }, { name: 'PIM' }, { name: 'Devengado' }], soles);
-            else {
-              const series = [{ name: 'PIA', color: C.pia }, { name: 'PIM', color: C.pim }, { name: 'Devengado', color: C.dev }];
-              box.innerHTML = `<div class="chart" style="height:280px"><canvas role="img" aria-label="PIA, PIM y devengado por año"></canvas></div>${legendHTML(series)}`;
-              S.charts.push(new Chart($('canvas', box), {
-                type: 'bar',
-                data: { labels: yrs, datasets: [
-                  { label: 'PIA', data: yrs.map((y) => agg(y, 'pia')), backgroundColor: C.pia, borderRadius: 2, order: 2 },
-                  { label: 'PIM', data: yrs.map((y) => agg(y, 'pim')), backgroundColor: C.pim, borderRadius: 2, order: 2 },
-                  { label: 'Devengado', type: 'line', data: yrs.map((y) => agg(y, 'dev')), borderColor: C.dev, backgroundColor: C.dev, pointRadius: 3, borderWidth: 2.5, tension: 0.2, order: 1 },
-                ] },
-                options: {
-                  responsive: true, maintainAspectRatio: false, animation: reduced ? false : { duration: 450 },
-                  plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: (c) => `${c.dataset.label}: ${soles(c.raw)}` } } },
-                  scales: { x: { grid: { display: false }, ticks: { color: C.ink2 } }, y: { beginAtZero: true, grid: { color: C.line }, ticks: { color: C.ink2, maxTicksLimit: 5, callback: solesAxis } } },
-                },
-              }));
-            }
-            hbar($('[data-fig="rank"]', el), { items, series: [{ name: 'PIM vs PIA', color: C.pim }], fmt: pctSigned, axis: (v) => pct(v), aria: 'Variación del PIM respecto del PIA por universidad' });
-          },
+              'El presupuesto crece durante el año por transferencias de otras entidades, créditos suplementarios y saldos del año anterior. Un salto grande no es, por sí mismo, una irregularidad.',
+              'Parte de lo no gastado puede ser plata que llegó tarde en el año o de obras que duran varios años.',
+              'Montos en soles corrientes, sin ajuste por inflación.',
+            ])}${src()}`,
         };
       },
     },
 
-    // 2. Planilla
+    // 2. De cada sol
     {
-      id: 'planilla', need: 'year', sec: 'gasto', kicker: 'En qué se gasta', toc: '¿Cuánto de cada sol va a planilla?',
+      id: 'sol', need: 'year', col: 'maiz', sec: 'gasto', toc: 'De cada sol', sk: 'céntimos de cada sol se van en sueldos',
       build(Y) {
         const U = unisY(Y);
         const parts = (a) => {
           const tot = val(a.total, 'dev');
           const p = val(generica(a, '2.1'), 'dev'), pe = val(generica(a, '2.2'), 'dev'), b = val(generica(a, '2.3'), 'dev'), ac = val(generica(a, '2.6'), 'dev');
-          const otros = isNum(tot) ? tot - sum([p, pe, b, ac]) : null;
-          return { tot, p, pe, b, ac, otros: isNum(otros) && otros > 0 ? otros : 0 };
+          const o = isNum(tot) ? tot - sum([p, pe, b, ac]) : null;
+          return { tot, p, pe, b, ac, o: isNum(o) && o > 0 ? o : 0 };
         };
         const all = U.map((u) => ({ u, x: parts(u.anios[Y]) })).filter((r) => isNum(r.x.tot) && r.x.tot > 0 && isNum(r.x.p));
+        if (!all.length) return { cifra: SD, titulo: 'céntimos de cada sol se van en sueldos', html: `<p class="empty">No hay detalle por genérica para ${esc(Y)}.</p>${src()}` };
         const T = sum(all.map((r) => r.x.tot));
-        const sh = (f) => div(sum(all.map((r) => r.x[f])), T);
-        const personal = sh('p'), pens = sh('pe');
-        const items = all.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [div(r.x.p, r.x.tot), div(r.x.pe, r.x.tot), div(r.x.b, r.x.tot), div(r.x.ac, r.x.tot), div(r.x.otros, r.x.tot)] }))
-          .sort((a, b) => b.vals[0] - a.vals[0]);
-        const cents = isNum(personal) ? Math.round(personal * 100) : null;
-        const hi = items[0], lo = items[items.length - 1];
-        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
+        const cN = cents(CATS.map((c) => div(sum(all.map((r) => r.x[c.k])), T)));
+        const h = hlUni(); const hr = h && all.find((r) => r.u === h);
+        const cT = hr ? cents(CATS.map((c) => div(hr.x[c.k], hr.x.tot))) : null;
+        const byP = all.map((r) => ({ r, s: div(r.x.p, r.x.tot) })).sort((a, b) => b.s - a.s);
+        const hi = byP[0], lo = byP[byP.length - 1];
         return {
-          h2: isNum(cents) ? `De cada sol gastado, <em>${esc(cents)}</em> céntimos van a personal` : 'De cada sol gastado, ¿cuánto va a personal?',
-          html: `<p>En ${esc(Y)}, la genérica 2.1 «Personal y obligaciones sociales» representó el ${esc(pct(personal))} del gasto devengado del conjunto de universidades. Si se suman las pensiones (genérica 2.2), la proporción llega a ${esc(pct(isNum(personal) && isNum(pens) ? personal + pens : null))}.${hi && lo && hi !== lo ? ` Entre universidades, la proporción en 2.1 va de ${esc(pct(lo.vals[0]))} (${esc(lo.label)}) a ${esc(pct(hi.vals[0]))} (${esc(hi.label)}).` : ''}</p>
-            <div class="stats">${stat(pct(personal), 'Personal (2.1)')}${stat(pct(pens), 'Pensiones (2.2)')}${stat(pct(sh('b')), 'Bienes y servicios (2.3)')}${stat(pct(sh('ac')), 'Activos no financieros (2.6)')}</div>
-            ${hlNote(hr ? `${esc(hr.label)}: ${esc(pct(hr.vals[0]))} en personal, ${esc(pct(hr.vals[1]))} en pensiones, ${esc(pct(hr.vals[3]))} en activos no financieros.` : '')}
-            <div class="figure"><p class="cap">Composición del devengado por genérica, ${esc(Y)} (ordenado por % en personal)</p><div data-fig="mix"></div></div>
+          cifra: esc(cN[0]),
+          titulo: `céntimos de cada sol que gastaron las universidades en ${esc(Y)} se fueron en sueldos del personal`,
+          html: `<p class="lead">Imagina cada sol como una moneda partida en 100 pedacitos. Cada cuadradito de abajo es un céntimo de lo que gastaron las universidades públicas en ${esc(Y)}.</p>
+            <p>Si a los sueldos les sumas las pensiones de los cesantes, llegas a ${esc(cN[0] + cN[1])} céntimos. Para obras y equipos quedaron ${esc(cN[3])}. Entre universidades cambia bastante: los sueldos van de ${esc(pct(lo.s))} (${esc(axisLabel(lo.r.u))}) a ${esc(pct(hi.s))} (${esc(axisLabel(hi.r.u))}) del gasto.</p>
+            ${hr ? `<p class="tu">${EnLa(h)}, de cada sol, ${esc(cT[0])} céntimos fueron a sueldos, ${esc(cT[2])} a bienes y servicios y ${esc(cT[3])} a obras y equipos.</p>` : (h ? tuNo(h, `no tiene detalle por genérica en ${esc(Y)}.`) : tuInvita())}
+            <figure class="fig anim"><div class="waffles${cT ? ' dos' : ''}">${waffleHTML(cN, 'Todas las universidades', 'Todas las universidades')}${cT ? waffleHTML(cT, `<mark>${esc(label(h))}</mark>`, label(h)) : ''}</div>
+              <ul class="wlegend"><li class="h"><span></span><span>Céntimos de cada sol</span><span>Todas</span>${cT ? `<span>${esc(axisLabel(h, 10))}</span>` : '<span></span>'}</li>
+              ${CATS.map((c, i) => `<li><i style="background:var(${c.c})"></i><span>${esc(c.name)}</span><b>${esc(cN[i])}</b>${cT ? `<em>${esc(cT[i])}</em>` : '<span></span>'}</li>`).join('')}</ul></figure>
             ${caveat([
-              'Los contratos CAS se registran en la genérica 2.3 (Bienes y servicios), no en 2.1. El gasto total en personas es, por lo tanto, mayor que lo que muestra la genérica 2.1.',
-              'Una proporción alta en personal es habitual en instituciones educativas, cuyo servicio principal lo prestan personas. No indica por sí sola ineficiencia.',
-              'La proporción cambia también cuando la inversión de un año es inusualmente alta o baja.',
+              'Los contratos CAS se registran en bienes y servicios (2.3), no en sueldos (2.1). Lo que se gasta en personas es más de lo que muestra el primer color.',
+              'Que la mayor parte se vaya en sueldos es normal en una universidad: el servicio principal lo dan personas (docentes, administrativos).',
+              'Un año con una obra grande baja la proporción de sueldos aunque estos no cambien.',
             ])}${src()}`,
-          mount(el) {
-            const C = colors();
-            hbar($('[data-fig="mix"]', el), {
-              items, stacked: true, max: 1, fmt: (v) => pct(v), axis: (v) => pct(v),
-              series: [{ name: 'Personal (2.1)', color: C.g1 }, { name: 'Pensiones (2.2)', color: C.g2 }, { name: 'Bienes y servicios (2.3)', color: C.g3 }, { name: 'Activos no fin. (2.6)', color: C.g5 }, { name: 'Otros', color: C.g4 }],
-              aria: 'Composición del gasto devengado por genérica y universidad',
-            });
-          },
         };
       },
     },
 
-    // 3. Investigación PP 0137
+    // 3. Por estudiante
     {
-      id: 'idi', need: 'year', sec: 'idi', kicker: 'Investigación', toc: 'La plata de investigación que no se gasta',
+      id: 'estudiante', need: 'base', col: 'chicha', sec: 'ranking', toc: 'Por estudiante', sk: 'al año por cada estudiante',
+      build(Y) {
+        const U = unisY(Y);
+        const rows = U.map((u) => { const a = u.anios[Y]; const e = isNum(a.estudiantes) && a.estudiantes > 0 ? a.estudiantes : null; return { u, e, v: e ? div(val(a.total, 'dev'), e) : null }; }).filter((r) => isNum(r.v));
+        if (!rows.length) return { cifra: SD, titulo: 'por cada estudiante', html: `<p class="empty">No hay datos de matrícula para ${esc(Y)}.</p>${src()}` };
+        const items = rows.map((r) => Object.assign(item(r.u, r.v), { e: r.e })).sort((a, b) => b.v - a.v);
+        const med = median(items.map((i) => i.v));
+        const eYears = [...new Set(rows.map((r) => r.u.anios[Y].estudiantes_anio).filter((x) => x != null && String(x) !== String(Y)).map(String))].sort();
+        const h = hlUni(); const k = h ? items.findIndex((i) => i.key === String(h.pliego)) : -1;
+        const hi = items[0], lo = items[items.length - 1];
+        return {
+          cifra: esc(soles(med)),
+          titulo: `gasta al año la universidad típica por cada estudiante (${esc(Y)})`,
+          html: `<p class="lead">Es todo lo que gastó la universidad en el año dividido entre sus estudiantes. No es lo que cuesta tu clase: incluye investigación, obras, pensiones de cesantes y más. Pero sirve para comparar.</p>
+            <p>La que más gasta por estudiante gasta ${esc(nf0.format(hi.v / lo.v))} veces lo que la que menos: de ${esc(soles(lo.v))} (${esc(lo.ax)}) a ${esc(soles(hi.v))} (${esc(hi.ax)}). Cada barra es una universidad, ordenadas de mayor a menor.${U.length > rows.length ? ` ${esc(U.length - rows.length)} universidades no tienen dato de matrícula.` : ''}${eYears.length ? ` La matrícula es del último dato publicado (${esc(eYears.join(', '))}).` : ''}</p>
+            ${k >= 0 ? `<p class="tu">${EnLa(h)} se gastaron ${esc(soles(items[k].v))} por estudiante (${esc(nf0.format(items[k].e))} estudiantes). Es el puesto ${esc(k + 1)} de ${esc(items.length)}.</p>` : (h ? tuNo(h, `no tiene dato de matrícula para ${esc(Y)}.`) : tuInvita())}
+            <figure class="fig anim"><p class="fig-t">Gasto por estudiante, ${esc(Y)}</p><div data-fig="sky"></div>
+              ${tableHTML(['Universidad', 'Por estudiante', 'Estudiantes'], items.map((i) => ({ key: i.key, cells: [i.ax, soles(i.v), nf0.format(i.e)] })), S.hl)}</figure>
+            ${caveat([
+              'El gasto total incluye investigación, pensiones de cesantes, obras y servicios a la comunidad; no es solo el costo de enseñar.',
+              'Las universidades nuevas o pequeñas, o con carreras de laboratorio (ingeniería, medicina, agronomía), suelen tener un costo por estudiante mayor.',
+              'La matrícula puede referirse solo a pregrado; revisa la fuente indicada abajo.',
+            ])}${srcCtx('estudiantes', 'Estudiantes')}`,
+          mount(el) { const C = colors(); return [[$('[data-fig="sky"]', el), (b, C = colors()) => skyline(b, { items, median: med, color: C.dev, fmt: soles, aria: 'Gasto devengado por estudiante, una barra por universidad' })]]; },
+        };
+      },
+    },
+
+    // 4. Quién pone la plata
+    {
+      id: 'quien-paga', need: 'year', col: 'rocoto', sec: 'fuentes', toc: '¿Quién pone la plata?', sk: 'del gasto sale de lo que cobra la propia universidad',
+      build(Y) {
+        const U = unisY(Y);
+        const FU = [
+          { name: 'Tesoro público (RO)', c: '--color-ro', rx: /ORDINARIOS/i },
+          { name: 'Lo que cobra la universidad (RDR)', c: '--color-rdr', rx: /DIRECTAMENTE\s+RECAUDADOS/i },
+          { name: 'Canon y regalías (RD)', c: '--color-canon', rx: /DETERMINADOS/i },
+          { name: 'Donaciones y transferencias', c: '--color-dyt', rx: /DONACIONES/i },
+        ];
+        const fsum = (a, f) => sum(Object.keys(a.fuente || {}).filter((k) => f.rx.test(k)).map((k) => val(a.fuente[k], 'dev')));
+        const rows = U.map((u) => { const a = u.anios[Y]; return { u, r: val(fuenteRDR(a), 'dev'), t: val(a.total, 'dev') }; }).filter((x) => isNum(x.t) && x.t > 0 && isNum(x.r));
+        if (!rows.length) return { cifra: SD, titulo: 'del gasto sale de lo que cobra la universidad', html: `<p class="empty">Sin datos por fuente de financiamiento para ${esc(Y)}.</p>${src()}` };
+        const TT = sum(U.map((u) => val(u.anios[Y].total, 'dev')));
+        const shares = FU.map((f) => div(sum(U.map((u) => fsum(u.anios[Y], f))), TT));
+        const share = div(sum(rows.map((x) => x.r)), sum(rows.map((x) => x.t)));
+        const items = rows.map((x) => item(x.u, x.r / x.t)).sort((a, b) => b.v - a.v);
+        const hi = items[0], lo = items[items.length - 1];
+        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
+        const stack = shares.map((s, i) => (isNum(s) && s > 0 ? `<i class="pop" style="--d:${i * 0.12}s;width:${(s * 100).toFixed(2)}%;background:var(${FU[i].c})"></i>` : '')).join('');
+        const dmax = Math.min(1, Math.max(0.5, Math.ceil(hi.v * 4) / 4));
+        return {
+          cifra: esc(pct(share)),
+          titulo: `de lo que gastaron las universidades en ${esc(Y)} salió de lo que ellas mismas cobran`,
+          html: `<p class="lead">Es el cachuelo de la universidad: admisión, CEPRE, posgrado, carnés, constancias y servicios. En el MEF se llama RDR, recursos directamente recaudados. El resto llega sobre todo del Tesoro público y, en algunas regiones, del canon minero o gasífero.</p>
+            <p>Va de ${esc(pct(lo.v))} en ${esc(lo.ax)} a ${esc(pct(hi.v))} en ${esc(hi.ax)}. La mitad de las universidades paga con su propia plata menos del ${esc(pct(median(items.map((i) => i.v))))} de lo que gasta.</p>
+            ${hr ? `<p class="tu">${EnLa(h)}, el ${esc(pct(hr.v))} del gasto se pagó con lo que cobra la propia universidad.</p>` : (h ? tuNo(h, `no tiene datos por fuente en ${esc(Y)}.`) : '')}
+            <figure class="fig anim"><p class="fig-t">De dónde sale cada sol, todas las universidades</p>
+              <div class="stack" role="img" aria-label="${esc(FU.map((f, i) => f.name + ' ' + pct(shares[i])).join(', '))}">${stack}</div>
+              <ul class="stack-l">${FU.map((f, i) => `<li><i class="sw" style="background:var(${f.c})"></i><b>${esc(pct(shares[i]))}</b>${esc(f.name)}</li>`).join('')}</ul>
+            </figure>
+            <figure class="fig anim"><p class="fig-t">¿Cuánto pone cada universidad de su bolsillo?</p><p class="fig-s">Cada bolita es una universidad: qué parte de su gasto pagó con lo que cobra (RDR).</p><div data-fig="sw"></div>
+              ${tableHTML(['Universidad', '% con RDR'], items.map((i) => ({ key: i.key, cells: [i.ax, pct(i.v)] })), S.hl)}</figure>
+            ${caveat([
+              'Cobrar más no es gestionar mejor: depende de la oferta de posgrado, la demanda de la zona, la ubicación y el tamaño.',
+              'Buena parte del RDR viene de pagos de estudiantes y postulantes; que crezca también puede significar mayores cobros.',
+              'Lo que se cobra en un año puede gastarse al siguiente (saldo de balance).',
+            ])}${src('Fuente de financiamiento del gasto devengado.')}`,
+          mount(el) { const C = colors(); return [[$('[data-fig="sw"]', el), (b, C = colors()) => swarm(b, { items, color: C.rdr, domain: [0, dmax], ticks: [0, 0.25, 0.5, 0.75, 1].filter((t) => t <= dmax + 1e-9), tickFmt: (t) => pct(t), fmt: (v) => pct(v), refs: [{ v: share, label: `Todas juntas: ${pct(share)}` }], aria: 'Porcentaje del gasto financiado con recursos directamente recaudados por universidad' })]]; },
+        };
+      },
+    },
+
+    // 5. Investigación PP 0137
+    {
+      id: 'investigacion', need: 'year', col: 'selva', sec: 'idi', toc: 'La plata para investigar', sk: 'de cada S/ 100 para investigar se gastaron',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => ({ u, p: programa(u.anios[Y], '0137') })).filter((r) => r.p && isNum(val(r.p, 'pim')) && val(r.p, 'pim') > 0);
+        if (!rows.length) return { cifra: SD, titulo: 'la plata para investigar', html: `<p class="empty">No hay datos del programa 0137 para ${esc(Y)}.</p>${src()}` };
         const pim = sum(rows.map((r) => val(r.p, 'pim'))), dev = sum(rows.map((r) => val(r.p, 'dev')));
-        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [val(r.p, 'pim'), val(r.p, 'dev')], ej: div(val(r.p, 'dev'), val(r.p, 'pim')) }))
-          .sort((a, b) => b.vals[0] - a.vals[0]);
-        const low = items.filter((i) => isNum(i.ej) && i.ej < 0.5).length;
+        const items = rows.map((r) => Object.assign(item(r.u, div(val(r.p, 'dev') || 0, val(r.p, 'pim')), `tenía ${soles(val(r.p, 'pim'))}`), { w: val(r.p, 'pim'), pim: val(r.p, 'pim'), dev: val(r.p, 'dev') })).sort((a, b) => b.v - a.v);
+        const low = items.filter((i) => i.v < 0.5).length;
+        const ej = div(dev, pim);
         const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
-        if (!rows.length) return { h2: 'La plata de investigación', html: `<p class="empty">No hay datos del programa presupuestal 0137 para ${esc(Y)}.</p>${src()}` };
         return {
-          h2: `Investigación: <em>${esc(soles(pim - dev))}</em> quedaron sin devengar en ${esc(Y)}`,
-          html: `<p>El programa presupuestal 0137 «Desarrollo de la ciencia, tecnología e innovación tecnológica» tuvo en ${esc(Y)} un PIM de ${esc(soles(pim))} en ${esc(rows.length)} universidades. Se devengó ${esc(soles(dev))}, el ${esc(pct(div(dev, pim)))}. ${low > 0 ? `En ${esc(low)} de ellas la ejecución del programa fue menor al 50%.` : 'Ninguna tuvo una ejecución del programa menor al 50%.'}</p>
-            <div class="stats">${stat(soles(pim), 'PIM PP 0137')}${stat(soles(dev), 'Devengado PP 0137')}${stat(pct(div(dev, pim)), 'Ejecución')}${stat(String(low), 'Universidades bajo 50%')}</div>
-            ${hlNote(hr ? `${esc(hr.label)}: PIM ${esc(soles(hr.vals[0]))}, devengado ${esc(soles(hr.vals[1]))} (${esc(pct(hr.ej))}).` : '')}
-            <div class="figure"><p class="cap">PP 0137: PIM vs devengado por universidad, ${esc(Y)}</p><div data-fig="idi"></div></div>
+          cifra: `${esc(isNum(ej) ? nf0.format(ej * 100) : SD)}<small>soles</small>`,
+          titulo: `de cada S/ 100 que tenían las universidades para investigar en ${esc(Y)} se llegaron a gastar`,
+          html: `<p class="lead">El presupuesto tiene un programa solo para ciencia y tecnología, el 0137. En ${esc(Y)}, ${esc(rows.length)} universidades tenían ahí ${esc(soles(pim))} y gastaron ${esc(soles(dev))}. Quedaron ${esc(soles(pim - dev))} sin usar.</p>
+            <p>${low > 0 ? `En ${esc(low)} de ellas se gastó menos de la mitad.` : 'Ninguna gastó menos de la mitad.'} El tamaño de cada bolita es cuánta plata tenía para investigar.</p>
+            ${hr ? `<p class="tu">${EnLa(h)} tenían ${esc(soles(hr.pim))} para investigar y gastaron ${esc(soles(hr.dev))}: ${esc(nf0.format(hr.v * 100))} de cada S/ 100.</p>` : (h ? tuNo(h, `no registra presupuesto en el programa 0137 en ${esc(Y)}.`) : '')}
+            <figure class="fig anim"><p class="fig-t">¿Cuánto de su plata para investigar gastó cada una?</p><p class="fig-s">Gasto devengado entre presupuesto final (PIM) del programa 0137, ${esc(Y)}.</p><div data-fig="sw"></div>
+              ${tableHTML(['Universidad', 'Tenía (PIM)', 'Gastó', '%'], items.map((i) => ({ key: i.key, cells: [i.ax, soles(i.pim), soles(i.dev), pct(i.v)] })), S.hl)}</figure>
             ${caveat([
-              'El PP 0137 no recoge toda la investigación universitaria: hay gasto en investigación registrado en otros programas, en proyectos de inversión y en fondos concursables que no pasan por el presupuesto de la universidad.',
-              'Lo no devengado no se «pierde» necesariamente: los recursos de canon y de fuentes con saldo pueden incorporarse al año siguiente como saldo de balance.',
-              'La ejecución financiera no mide la calidad ni el resultado de la investigación.',
-            ])}${src()}`,
-          mount(el) {
-            const C = colors();
-            hbar($('[data-fig="idi"]', el), { items, series: [{ name: 'PIM', color: C.pim }, { name: 'Devengado', color: C.dev }], fmt: soles, axis: solesAxis, aria: 'PIM y devengado del programa 0137 por universidad' });
-          },
+              'El programa 0137 no recoge toda la investigación: hay gasto en investigación en otros programas, en proyectos de inversión y en fondos concursables que no pasan por la universidad.',
+              'Lo que no se gasta no se «pierde» siempre: la plata de canon y de otras fuentes puede pasar al año siguiente como saldo.',
+              'Gastar la plata no mide la calidad ni el resultado de la investigación.',
+            ])}${src('Programa presupuestal 0137.')}`,
+          mount(el) { const C = colors(); return [[$('[data-fig="sw"]', el), (b, C = colors()) => swarm(b, { items, size: true, color: C.dev, domain: [0, Math.max(1, ...items.map((i) => i.v))], ticks: [0, 0.25, 0.5, 0.75, 1], tickFmt: (t) => pct(t), fmt: (v) => pct(v), refs: [{ v: ej, label: `Todas juntas: ${pct(ej)}` }], aria: 'Porcentaje del presupuesto de investigación gastado por universidad' })]]; },
         };
       },
     },
 
-    // 4. Obras
+    // 6. Costo por publicación
     {
-      id: 'obras', need: 'years', sec: 'infra', kicker: 'Inversión', toc: 'Obras que no avanzan',
+      id: 'publicaciones', need: 'year', col: 'titicaca', sec: 'idi', toc: 'Cuánto cuesta un paper', sk: 'de gasto en investigación por publicación',
+      build(Y) {
+        const MINP = 10;
+        const U = unisY(Y);
+        const rows = U.map((u) => { const a = u.anios[Y]; return { u, idi: val(programa(a, '0137'), 'dev'), pubs: isNum(a.pubs) ? a.pubs : null }; });
+        const ok = rows.filter((r) => isNum(r.idi) && r.idi > 0 && isNum(r.pubs) && r.pubs >= MINP);
+        if (!ok.length) return { cifra: SD, titulo: 'por publicación', html: `<p class="empty">No hay datos suficientes de publicaciones y gasto en investigación para ${esc(Y)}.</p>${src()}` };
+        const items = ok.map((r) => Object.assign(item(r.u, r.idi / r.pubs, `${nf0.format(r.pubs)} publicaciones`), { pubs: r.pubs })).sort((a, b) => b.v - a.v);
+        const med = median(items.map((i) => i.v));
+        const pooled = div(sum(ok.map((r) => r.idi)), sum(ok.map((r) => r.pubs)));
+        const excl = rows.length - ok.length;
+        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
+        const lo = items[items.length - 1].v, hi = items[0].v;
+        const ticks = []; for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) ticks.push(Math.pow(10, e));
+        return {
+          cifra: esc(soles(med)),
+          titulo: `de gasto en investigación por cada publicación científica, en la universidad típica (${esc(Y)})`,
+          html: `<p class="lead">Dividimos lo que se gastó en el programa de investigación (0137) entre los artículos publicados por cada universidad. Es una cuenta gruesa, de orden de magnitud: no usamos todo el presupuesto porque la mayor parte paga la enseñanza.</p>
+            <p>Ojo con la regla: cada salto vale diez veces más que el anterior. Para todas juntas sale ${esc(soles(pooled))} por publicación.${excl > 0 ? ` Quedan fuera ${esc(excl)} universidades sin gasto en investigación registrado o con menos de ${esc(MINP)} publicaciones, porque ahí la división se vuelve muy inestable.` : ''}</p>
+            ${hr ? `<p class="tu">${EnLa(h)}: ${esc(soles(hr.v))} por publicación (${esc(nf0.format(hr.pubs))} publicaciones).</p>` : (h ? tuNo(h, `no entra en esta cuenta en ${esc(Y)} (sin dato o con menos de ${esc(MINP)} publicaciones).`) : '')}
+            <figure class="fig anim"><p class="fig-t">Soles del programa 0137 por publicación</p><p class="fig-s">Escala logarítmica. Cada bolita es una universidad.</p><div data-fig="sw"></div>
+              ${tableHTML(['Universidad', 'S/ por publicación', 'Publicaciones'], items.map((i) => ({ key: i.key, cells: [i.ax, soles(i.v), nf0.format(i.pubs)] })), S.hl)}</figure>
+            ${caveat([
+              'Hay desfase: lo que se gasta un año suele convertirse en publicaciones uno o más años después.',
+              'Las publicaciones incluyen coautorías con otras instituciones y trabajos pagados con fondos externos al programa 0137; eso abarata la cuenta.',
+              'Al revés, parte del gasto en investigación está fuera del programa 0137 (obras, otros programas), lo que la encarece.',
+              'No mide productividad ni calidad científica. Qué cuenta como «publicación» depende de la fuente bibliográfica indicada abajo.',
+            ])}${srcCtx('pubs', 'Publicaciones')}`,
+          mount(el) { const C = colors(); return [[$('[data-fig="sw"]', el), (b, C = colors()) => swarm(b, { items, log: true, color: C.pim, domain: [ticks[0], ticks[ticks.length - 1]], ticks, tickFmt: (t) => 'S/ ' + solesAxis(t), fmt: soles, refs: [{ v: med, label: `Mediana: ${soles(med)}` }], aria: 'Gasto en investigación por publicación, por universidad, escala logarítmica' })]]; },
+        };
+      },
+    },
+
+    // 7. Obras
+    {
+      id: 'obras', need: 'years', col: 'aji', sec: 'infra', toc: 'Obras a medio camino', sk: 'obras grandes gastaron menos de la mitad',
       build(Y) {
         const U = unisY(Y);
         const all = [];
         U.forEach((u) => (u.anios[Y].proyectos || []).forEach((p) => { if (p && isNum(p.pim) && p.pim > 0) all.push({ u, p }); }));
-        if (!all.length) return { h2: 'Obras que no avanzan', html: `<p class="empty">No hay detalle de proyectos de inversión para ${esc(Y)}.</p>${src()}` };
+        if (!all.length) return { cifra: SD, titulo: 'obras a medio camino', html: `<p class="empty">No hay detalle de proyectos de inversión para ${esc(Y)}.</p>${src()}` };
         const thr = Math.max(1e6, quantile(all.map((r) => r.p.pim), 0.75) || 0);
         const big = all.filter((r) => r.p.pim >= thr);
         const slow = big.map((r) => ({ ...r, ej: isNum(r.p.dev) ? r.p.dev / r.p.pim : 0 })).filter((r) => r.ej < 0.5)
@@ -409,225 +687,328 @@
         const gap = sum(slow.map((r) => r.p.pim - (r.p.dev || 0)));
         const W = winYears(Y);
         const yearsWith = (u, code) => W.filter((y) => u.anios && u.anios[y] && (u.anios[y].proyectos || []).some((q) => String(q.codigo) === String(code) && isNum(q.pim) && q.pim > 0)).length;
+        const h = hlUni();
+        const tuBig = h ? big.filter((r) => r.u === h) : [], tuSlow = h ? slow.filter((r) => r.u === h) : [];
+        const ordered = h ? [...tuSlow, ...slow.filter((r) => r.u !== h)] : slow;
         const card = (r) => {
           const ej = Math.max(0, Math.min(1, r.ej)); const n = r.p.codigo != null ? yearsWith(r.u, r.p.codigo) : null;
-          return `<li class="proj${String(r.u.pliego) === S.hl ? ' hl' : ''}"><div class="u">${esc(label(r.u))}${r.p.codigo != null ? ' · CUI ' + esc(r.p.codigo) : ''}</div>
-            <div class="n">${esc(r.p.nombre || SD)}</div>
-            <div class="bar" role="img" aria-label="Devengado ${esc(pct(ej))} del PIM"><span style="width:${(ej * 100).toFixed(1)}%"></span></div>
-            <div class="f"><span>PIM ${esc(soles(r.p.pim))}</span><span>Dev. ${esc(soles(r.p.dev))} (${esc(pct(r.ej))})</span>${n ? `<span>Con PIM en ${esc(n)} de los últimos ${esc(W.length)} años (${esc(W[0])}–${esc(Y)})</span>` : ''}</div></li>`;
+          const isTu = r.u === h;
+          return `<li class="obra${isTu ? ' es-tu' : ''}"><div class="u">${isTu ? `<mark>${esc(label(r.u))}</mark>` : esc(label(r.u))}${r.p.codigo != null ? ' / CUI ' + esc(r.p.codigo) : ''}</div>
+            <div class="n">${esc(sentence(r.p.nombre) || SD)}</div>
+            <div class="bar" role="img" aria-label="Gastó ${esc(pct(ej))} de su presupuesto del año"><i class="grow" style="width:${(ej * 100).toFixed(1)}%"></i></div>
+            <div class="f"><span>Gastó <strong>${esc(pct(r.ej))}</strong> de ${esc(soles(r.p.pim))}</span>${n ? `<span>Con presupuesto en ${esc(n)} de los últimos ${esc(W.length)} años</span>` : ''}</div></li>`;
         };
-        const LIM = 8;
+        const LIM = 6;
+        let tu = '';
+        if (h) {
+          if (!tuBig.length) tu = tuNo(h, `no tuvo obras de ese tamaño en ${esc(Y)}.`);
+          else if (!tuSlow.length) tu = `<p class="tu">${EnLa(h)} hubo ${esc(tuBig.length)} obra${tuBig.length > 1 ? 's' : ''} grande${tuBig.length > 1 ? 's' : ''} y ninguna gastó menos de la mitad.</p>`;
+          else tu = `<p class="tu">${EnLa(h)} hubo ${esc(tuBig.length)} obra${tuBig.length > 1 ? 's' : ''} grande${tuBig.length > 1 ? 's' : ''}; ${esc(tuSlow.length)} ${tuSlow.length > 1 ? 'gastaron' : 'gastó'} menos de la mitad y ${tuSlow.length > 1 ? 'van' : 'va'} primero en la lista.</p>`;
+        }
         return {
-          h2: `<em>${esc(slow.length)}</em> de ${esc(big.length)} proyectos grandes devengaron menos de la mitad de su presupuesto`,
-          html: `<p>Se consideran «grandes» los proyectos de inversión con PIM de al menos ${esc(soles(thr))} en ${esc(Y)} (el cuarto superior de todos los proyectos universitarios del año). De ellos, ${esc(slow.length)} devengaron menos del 50% de su PIM; en conjunto quedaron ${esc(soles(gap))} sin devengar.</p>
-            <div class="stats">${stat(String(big.length), 'Proyectos grandes')}${stat(String(slow.length), 'Con ejecución < 50%')}${stat(soles(gap), 'PIM no devengado en ellos')}</div>
-            ${slow.length ? `<ul class="projects" data-list>${slow.slice(0, LIM).map(card).join('')}</ul>${slow.length > LIM ? `<button type="button" class="more" data-more aria-expanded="false">Ver los ${esc(slow.length)}</button>` : ''}` : '<p class="empty">Ningún proyecto grande quedó bajo 50% de ejecución.</p>'}
+          cifra: `${esc(slow.length)}<small>de ${esc(big.length)}</small>`,
+          titulo: `obras grandes de las universidades gastaron menos de la mitad de su presupuesto en ${esc(Y)}`,
+          html: `<p class="lead">Una obra grande (un pabellón, un laboratorio, una biblioteca) recibe presupuesto cada año. Aquí van las que gastaron menos de la mitad de lo que tenían en ${esc(Y)}: juntas dejaron ${esc(soles(gap))} sin gastar ese año.</p>
+            <p>Llamamos «grande» a todo proyecto con presupuesto de al menos ${esc(soles(thr))} en el año: el cuarto más caro de todos los proyectos universitarios.</p>
+            ${tu}
+            <figure class="fig anim">${ordered.length ? `<ul class="obras" data-list>${ordered.slice(0, LIM).map(card).join('')}</ul>${ordered.length > LIM ? `<button type="button" class="more" data-more aria-expanded="false">Ver las ${esc(ordered.length)}</button>` : ''}` : '<p class="empty">Ninguna obra grande quedó por debajo de la mitad.</p>'}</figure>
             ${caveat([
-              'Devengado / PIM es avance financiero, no avance físico de obra. Un proyecto puede estar en expediente técnico, licitación, controversia o paralizado por causas ajenas a la universidad.',
-              'Muchas obras son plurianuales: un año de baja ejecución puede ser normal en su fase inicial.',
-              'Para el estado real de cada obra, consulta su código CUI en el Banco de Inversiones del MEF o en INFObras (Contraloría).',
+              'Lo gastado sobre lo presupuestado es avance financiero, no avance físico. Una obra puede estar en expediente técnico, en licitación, en controversia o paralizada por causas ajenas a la universidad.',
+              'Muchas obras duran varios años: un año de poco gasto puede ser normal al inicio.',
+              'Para ver el estado real de cada obra, busca su código CUI en el Banco de Inversiones del MEF o en INFObras (Contraloría).',
             ])}${src('Proyectos de inversión por pliego.')}`,
           mount(el) {
-            const btn = $('[data-more]', el); if (!btn) return;
+            const btn = $('[data-more]', el); if (!btn) return null;
             let open = false;
             btn.addEventListener('click', () => {
               open = !open;
-              $('[data-list]', el).innerHTML = (open ? slow : slow.slice(0, LIM)).map(card).join('');
-              btn.textContent = open ? `Ver solo ${LIM}` : `Ver los ${slow.length}`;
+              $('[data-list]', el).innerHTML = (open ? ordered : ordered.slice(0, LIM)).map(card).join('');
+              btn.textContent = open ? `Ver solo ${LIM}` : `Ver las ${ordered.length}`;
               btn.setAttribute('aria-expanded', String(open));
             });
+            return null;
           },
         };
       },
     },
 
-    // 5. RDR
+    // 8. ¿Subió o bajó? En soles reales
     {
-      id: 'rdr', need: 'year', sec: 'fuentes', kicker: 'De dónde sale la plata', toc: 'Quién vive de sus propios ingresos',
-      build(Y) {
-        const U = unisY(Y);
-        const rows = U.map((u) => { const a = u.anios[Y]; return { u, r: val(fuenteRDR(a), 'dev'), t: val(a.total, 'dev'), ing: ingresoRDR(a) }; }).filter((x) => isNum(x.t) && x.t > 0 && isNum(x.r));
-        const share = div(sum(rows.map((x) => x.r)), sum(rows.map((x) => x.t)));
-        const items = rows.map((x) => ({ key: String(x.u.pliego), label: label(x.u), ax: axisLabel(x.u), full: x.u.nombre, vals: [x.r / x.t] })).sort((a, b) => b.vals[0] - a.vals[0]);
-        const ingRows = rows.filter((x) => x.ing && isNum(val(x.ing, 'pim')) && isNum(val(x.ing, 'recaudado')));
-        const recVsPim = div(sum(ingRows.map((x) => val(x.ing, 'recaudado'))), sum(ingRows.map((x) => val(x.ing, 'pim'))));
-        const hi = items[0], lo = items[items.length - 1];
-        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
-        if (!items.length) return { h2: 'Quién vive de sus propios ingresos', html: `<p class="empty">Sin datos por fuente de financiamiento para ${esc(Y)}.</p>${src()}` };
+      id: 'real', need: 'base', col: 'cobre', sec: 'trayectoria', toc: '¿Subió o bajó?', sk: 'creció el gasto descontando la inflación',
+      build() {
+        const N = S.d.nacional || {};
+        const yrs = S.closed.filter((y) => N[y] && isNum(N[y].dev));
+        if (yrs.length < 2 || !ipcIdx(yrs[yrs.length - 1])) return { cifra: SD, titulo: 'en soles de hoy', html: '<p class="empty">Faltan datos de inflación o de años anteriores.</p>' };
+        const yB = String(ipcBase());
+        const yA = yrs.includes('2016') ? '2016' : yrs[0], yZ = yrs[yrs.length - 1];
+        const iA = yrs.indexOf(yA);
+        const nom = yrs.map((y) => N[y].dev), rea = yrs.map((y) => real(N[y].dev, y));
+        const gR = div(real(N[yZ].dev, yZ), real(N[yA].dev, yA));
+        const gN = div(N[yZ].dev, N[yA].dev);
+        const same = S.d.universidades.filter((u) => u.anios && u.anios[yA] && u.anios[yZ] && isNum(val(u.anios[yA].total, 'dev')) && isNum(val(u.anios[yZ].total, 'dev')));
+        const gS = div(sum(same.map((u) => real(u.anios[yZ].total.dev, yZ))), sum(same.map((u) => real(u.anios[yA].total.dev, yA))));
+        const h = hlUni();
+        const hA = h && h.anios && h.anios[yA] && val(h.anios[yA].total, 'dev'), hZ = h && h.anios && h.anios[yZ] && val(h.anios[yZ].total, 'dev');
+        const hg = isNum(hA) && isNum(hZ) ? div(real(hZ, yZ), real(hA, yA)) : null;
+        const nA = N[yA].n_unis, nZ = N[yZ].n_unis;
         return {
-          h2: `Ingresos propios: de <em>${esc(pct(lo.vals[0]))}</em> a <em>${esc(pct(hi.vals[0]))}</em> del gasto`,
-          html: `<p>En ${esc(Y)}, los recursos directamente recaudados (RDR) —lo que la universidad cobra por posgrado, admisión, centros preuniversitarios, servicios y centros de producción— financiaron el ${esc(pct(share))} del gasto devengado del conjunto. La proporción va de ${esc(pct(lo.vals[0]))} en ${esc(lo.label)} a ${esc(pct(hi.vals[0]))} en ${esc(hi.label)}.${isNum(recVsPim) ? ` Lo efectivamente recaudado por RDR equivalió al ${esc(pct(recVsPim))} de lo previsto en el PIM de ingresos.` : ''}</p>
-            <div class="stats">${stat(pct(share), 'Gasto financiado con RDR')}${stat(pct(median(items.map((i) => i.vals[0]))), 'Mediana por universidad')}${isNum(recVsPim) ? stat(pct(recVsPim), 'Recaudado / PIM de RDR') : ''}</div>
-            ${hlNote(hr ? `${esc(hr.label)}: el ${esc(pct(hr.vals[0]))} de su gasto devengado se financió con RDR.` : '')}
-            <div class="figure"><p class="cap">% del devengado financiado con RDR, ${esc(Y)}</p><div data-fig="rdr"></div></div>
+          cifra: esc(pctSigned(isNum(gR) ? gR - 1 : null)),
+          titulo: `creció el gasto de las universidades entre ${esc(yA)} y ${esc(yZ)}, ya descontada la inflación`,
+          html: `<p class="lead">Un sol de ${esc(yA)} no compra lo mismo que uno de ${esc(yZ)}. Para comparar de verdad, pasamos todo a «soles de ${esc(yB)}» con el índice de precios del BCRP. Sin ese ajuste, el crecimiento parece de ${esc(pctSigned(isNum(gN) ? gN - 1 : null))}.</p>
+            <p>Un detalle importante: en ${esc(yA)} había ${esc(nA)} universidades con presupuesto propio y en ${esc(yZ)}, ${esc(nZ)}. Si solo miras las ${esc(same.length)} que existían en ambos años, el crecimiento real es ${esc(pctSigned(isNum(gS) ? gS - 1 : null))}.</p>
+            ${h ? (isNum(hg) ? `<p class="tu">${EnLa(h)}: ${esc(pctSigned(hg - 1))} en soles de ${esc(yB)}, de ${esc(soles(real(hA, yA)))} a ${esc(soles(real(hZ, yZ)))}.</p>` : tuNo(h, `no tiene datos en ${esc(yA)} y ${esc(yZ)} para comparar.`)) : ''}
+            <figure class="fig anim"><p class="fig-t">Gasto devengado de todas las universidades, por año</p><div data-fig="line"></div>
+              <ul class="legend"><li><i style="background:var(--color-dev)"></i>En soles de ${esc(yB)} (real)</li><li><i style="background:var(--color-pia)"></i>En soles de cada año (nominal)</li></ul></figure>
             ${caveat([
-              'Una proporción alta de RDR no implica mejor gestión: depende de la oferta de posgrado, la demanda local, la ubicación y el tamaño de la universidad.',
-              'El RDR proviene en buena parte de pagos de estudiantes y postulantes; su crecimiento también puede reflejar mayores cobros.',
-              'Lo recaudado en un año puede gastarse en el siguiente (saldo de balance).',
-            ])}${src('Ingresos: MEF — Consulta Amigable (ingresos por pliego).')}`,
-          mount(el) {
-            const C = colors();
-            hbar($('[data-fig="rdr"]', el), { items, series: [{ name: 'Financiado con RDR', color: C.f2 }], fmt: (v) => pct(v), axis: (v) => pct(v), aria: 'Porcentaje del gasto financiado con recursos directamente recaudados' });
-          },
+              'El ajuste usa el IPC de Lima (promedio anual). Los precios que paga una universidad (sueldos, obras, equipos) pueden subir a otro ritmo.',
+              'Parte del crecimiento viene de universidades nuevas, no de más plata para las que ya existían.',
+              'Crecer no es mejor ni peor por sí mismo: puede reflejar más estudiantes, nuevas sedes, canon u obras puntuales.',
+            ])}<p class="src">${esc(SRC_MEF)} Inflación: ${S.d.ipc && S.d.ipc.url ? linkTo(S.d.ipc.url, 'BCRP') : 'BCRP'}${S.d.ipc && S.d.ipc.fuente ? ', ' + esc(S.d.ipc.fuente) : ''}. Años cerrados ${esc(yrs[0])}–${esc(yZ)}.</p>`,
+          mount(el) { const C = colors(); return [[$('[data-fig="line"]', el), (b, C = colors()) => lines(b, { years: yrs, markA: iA, notes: [`${nA} universidades`, `${nZ} universidades`], series: [{ name: `Soles de ${yB}`, vals: rea, color: C.dev, width: 4 }, { name: 'Nominal', vals: nom, color: C.pia, dash: true, width: 2.5 }], aria: `Gasto devengado total por año en soles reales y nominales, ${yrs[0]} a ${yZ}` })]]; },
         };
       },
     },
 
-    // 6. Costo por publicación
+    // 9. Las que más crecieron (año anterior → año elegido, en soles reales)
     {
-      id: 'pubs', need: 'year', sec: 'idi', kicker: 'Investigación y resultados', toc: 'El costo de una publicación',
+      id: 'crecieron', need: 'base', col: 'cochinilla', sec: 'trayectoria', toc: 'Las que más crecieron', sk: 'cambió el gasto de la universidad típica en un año',
       build(Y) {
-        const MINP = 10;
-        const U = unisY(Y);
-        const rows = U.map((u) => { const a = u.anios[Y]; return { u, idi: val(programa(a, '0137'), 'dev'), pubs: isNum(a.pubs) ? a.pubs : null }; });
-        const ok = rows.filter((r) => isNum(r.idi) && r.idi > 0 && isNum(r.pubs) && r.pubs >= MINP);
-        const excl = rows.length - ok.length;
-        const items = ok.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [r.idi / r.pubs], pubs: r.pubs })).sort((a, b) => b.vals[0] - a.vals[0]);
-        const med = median(items.map((i) => i.vals[0]));
-        const pooled = div(sum(ok.map((r) => r.idi)), sum(ok.map((r) => r.pubs)));
-        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
-        if (!items.length) return { h2: 'El costo de una publicación', html: `<p class="empty">No hay datos suficientes de publicaciones y gasto en I+D para ${esc(Y)}.</p>${src()}` };
-        return {
-          h2: `Mediana: <em>${esc(soles(med))}</em> de gasto en investigación por publicación`,
-          html: `<p>Dividimos el gasto <strong>devengado en investigación</strong> (programa presupuestal 0137) entre las publicaciones registradas de cada universidad en ${esc(Y)}. No usamos el presupuesto total: la mayor parte del presupuesto universitario financia la enseñanza, no la investigación, y dividirlo entre artículos exageraría el costo.</p>
-            <p>La mediana es ${esc(soles(med))} por publicación; para el conjunto, ${esc(soles(pooled))}. ${excl > 0 ? `Se excluyen ${esc(excl)} universidades sin dato de gasto en I+D o con menos de ${esc(MINP)} publicaciones, donde el cociente es muy inestable.` : `Todas las universidades con datos tienen al menos ${esc(MINP)} publicaciones y gasto en I+D registrado; por debajo de ese umbral se excluirían, porque el cociente es muy inestable.`}</p>
-            <div class="stats">${stat(soles(med), 'Mediana por universidad')}${stat(soles(pooled), 'Conjunto (I+D total / pubs)')}${stat(String(items.length), 'Universidades incluidas')}</div>
-            ${hlNote(hr ? `${esc(hr.label)}: ${esc(soles(hr.vals[0]))} por publicación (${esc(nf0.format(hr.pubs))} publicaciones).` : (h ? `${esc(label(h))} no entra en este cálculo para ${esc(Y)} (sin dato o menos de ${esc(MINP)} publicaciones).` : ''))}
-            <div class="figure"><p class="cap">Devengado PP 0137 por publicación, ${esc(Y)}</p><div data-fig="pubs"></div></div>
-            ${caveat([
-              'Hay desfase: el gasto de un año suele traducirse en publicaciones uno o más años después.',
-              'Las publicaciones incluyen coautorías con otras instituciones y trabajos financiados por fondos externos que no pasan por el PP 0137; ambas cosas abaratan el cociente.',
-              'Al revés, parte del gasto en investigación está fuera del PP 0137 (proyectos de inversión, otros programas), lo que lo subestima.',
-              'Es un indicador de orden de magnitud, no de productividad ni de calidad científica. La definición de «publicación» depende de la fuente bibliográfica indicada abajo.',
-            ])}${srcCtx('pubs', 'Publicaciones')}`,
-          mount(el) {
-            const C = colors();
-            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.g1 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
-          },
-        };
-      },
-    },
-
-    // 7. Crecimiento
-    {
-      id: 'crecimiento', need: 'base', sec: 'trayectoria', kicker: 'Evolución', toc: 'Las que más crecieron',
-      build(Y) {
-        const Y0 = S.closed.find((y) => y < Y);
-        if (!Y0) return { h2: 'Las que más crecieron', html: `<p class="empty">Se necesita al menos un año anterior a ${esc(Y)}.</p>` };
+        const Y0 = [...S.closed, ...S.partial].filter((y) => y < Y).pop();
+        if (!Y0) return { cifra: SD, titulo: 'las que más crecieron', html: `<p class="empty">Se necesita un año anterior a ${esc(Y)}.</p>` };
+        const useReal = !!(ipcIdx(Y) && ipcIdx(Y0));
+        const adj = (v, y) => (useReal ? real(v, y) : v);
         const rows = S.d.universidades.map((u) => ({ u, a: val(u.anios && u.anios[Y0] && u.anios[Y0].total, 'dev'), b: val(u.anios && u.anios[Y] && u.anios[Y].total, 'dev') }))
           .filter((r) => isNum(r.a) && r.a > 0 && isNum(r.b));
-        const A = sum(rows.map((r) => r.a)), B = sum(rows.map((r) => r.b));
-        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [r.b / r.a - 1] })).sort((a, b) => b.vals[0] - a.vals[0]);
-        const missing = unisY(Y).length - rows.length;
-        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
+        if (!rows.length) return { cifra: SD, titulo: 'las que más crecieron', html: `<p class="empty">Sin datos para comparar ${esc(Y0)} y ${esc(Y)}.</p>` };
+        const items = rows.map((r) => Object.assign(item(r.u, adj(r.b, Y) / adj(r.a, Y0) - 1), { a: r.a, b: r.b })).sort((a, b) => b.v - a.v);
+        const med = median(items.map((i) => i.v));
+        const up = items.filter((i) => i.v > 0).length;
+        const h = hlUni(); const k = h ? items.findIndex((i) => i.key === String(h.pliego)) : -1;
+        const TOP = 6, BOT = 4;
+        const show = items.length <= TOP + BOT + 1 ? items.slice() : [...items.slice(0, TOP), { sep: true }, ...items.slice(-BOT)];
+        if (k >= TOP && k < items.length - BOT) { const j = show.findIndex((r) => r.sep); show.splice(j + 1, 0, items[k], { sep: true }); }
         return {
-          h2: `Entre ${esc(Y0)} y ${esc(Y)}, el gasto devengado creció <em>${esc(pctSigned(isNum(div(B, A)) ? div(B, A) - 1 : null))}</em>`,
-          html: `<p>Las ${esc(rows.length)} universidades con datos en ambos años pasaron de devengar ${esc(soles(A))} en ${esc(Y0)} a ${esc(soles(B))} en ${esc(Y)} (variación nominal). ${items.length ? `El mayor crecimiento fue el de ${esc(items[0].label)} (${esc(pctSigned(items[0].vals[0]))}); el menor, el de ${esc(items[items.length - 1].label)} (${esc(pctSigned(items[items.length - 1].vals[0]))}).` : ''}${missing > 0 ? ` ${esc(missing)} universidades no tienen datos en ${esc(Y0)} (p. ej., por creación posterior) y no se incluyen.` : ''}</p>
-            <div class="stats">${stat(soles(A), `Devengado ${Y0}`)}${stat(soles(B), `Devengado ${Y}`)}${stat(pctSigned(median(items.map((i) => i.vals[0]))), 'Mediana de crecimiento')}</div>
-            ${hlNote(hr ? `${esc(hr.label)}: ${esc(pctSigned(hr.vals[0]))} entre ${esc(Y0)} y ${esc(Y)}.` : '')}
-            <div class="figure"><p class="cap">Variación del devengado ${esc(Y0)}→${esc(Y)} (nominal)</p><div data-fig="crec"></div></div>
+          cifra: esc(pctSigned(med)),
+          titulo: `cambió el gasto de la universidad típica de ${esc(Y0)} a ${esc(Y)}${useReal ? `, en soles de ${esc(ipcBase())}` : ''}`,
+          html: `<p class="lead">De un año a otro, unas universidades pisan el acelerador y otras frenan. ${esc(up)} de ${esc(items.length)} gastaron más que el año anterior${useReal ? ', ya descontada la inflación' : ''}. Aquí las que más subieron y las que más bajaron.</p>
+            ${k >= 0 ? `<p class="tu">${EnLa(h)}: ${esc(pctSigned(items[k].v))}, puesto ${esc(k + 1)} de ${esc(items.length)}.</p>` : (h ? tuNo(h, `no tiene datos en ${esc(Y0)} y ${esc(Y)}.`) : '')}
+            <figure class="fig anim"><p class="fig-t">Variación del gasto devengado, ${esc(Y0)} a ${esc(Y)}</p><div data-fig="bars"></div>
+              ${tableHTML(['Universidad', `Devengado ${Y0}`, `Devengado ${Y}`, 'Variación'], items.map((i) => ({ key: i.key, cells: [i.ax, soles(i.a), soles(i.b), pctSigned(i.v)] })), S.hl)}</figure>
             ${caveat([
-              'Variación nominal: no descuenta la inflación del periodo, por lo que el crecimiento real es menor.',
-              'Un año final con una obra grande puede inflar el crecimiento; compara también con años intermedios en el observatorio.',
-              'Crecer más no es mejor ni peor por sí mismo: puede reflejar más estudiantes, nuevas sedes, canon o transferencias puntuales.',
+              'Un año con una obra grande puede inflar el crecimiento, y el año siguiente parecer una caída.',
+              'Crecer más no es mejor ni peor: puede reflejar más estudiantes, nuevas sedes, canon o transferencias puntuales.',
+              useReal ? 'Ajustado con el IPC de Lima del BCRP; los precios de una universidad pueden moverse a otro ritmo. La tabla muestra montos nominales.' : 'Variación nominal: no descuenta la inflación.',
             ])}${src()}`,
-          mount(el) {
-            const C = colors();
-            hbar($('[data-fig="crec"]', el), { items, series: [{ name: 'Variación', color: C.dev }], fmt: pctSigned, axis: (v) => pct(v), aria: 'Crecimiento del gasto devengado por universidad' });
-          },
+          mount(el) { const C = colors(); return [[$('[data-fig="bars"]', el), (b, C = colors()) => hbars(b, { rows: show, color: C.ink, colorNeg: C.ink2, fmt: (v) => pctSigned(v), aria: `Universidades que más y menos cambiaron su gasto entre ${Y0} y ${Y}` })]]; },
         };
       },
     },
 
-    // 8. Gasto por estudiante
+    // 10. Lo que viene en 2027
     {
-      id: 'estudiante', need: 'base', sec: 'ranking', kicker: 'Por estudiante', toc: 'Cuánto se gasta por estudiante',
-      build(Y) {
-        const U = unisY(Y);
-        const rows = U.map((u) => { const a = u.anios[Y]; const e = isNum(a.estudiantes) && a.estudiantes > 0 ? a.estudiantes : null; return { u, e, v: e ? div(val(a.total, 'dev'), e) : null }; }).filter((r) => isNum(r.v));
-        const eYears = [...new Set(rows.map((r) => r.u.anios[Y].estudiantes_anio).filter((x) => x != null && String(x) !== String(Y)).map(String))].sort();
-        const eNote = eYears.length ? ` La matrícula disponible corresponde a ${eYears.length > 1 ? 'los años ' + eYears.join(', ') : 'el año ' + eYears[0]} (no a ${Y}): se usa el último dato publicado.` : '';
-        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [r.v], e: r.e })).sort((a, b) => b.vals[0] - a.vals[0]);
-        const excl = U.length - rows.length;
-        const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
-        if (!items.length) return { h2: 'Cuánto se gasta por estudiante', html: `<p class="empty">No hay datos de matrícula para ${esc(Y)}.</p>${src()}` };
-        const hi = items[0], lo = items[items.length - 1];
+      id: 'en-2027', need: 'base', col: 'maiz', sec: 'ley2027', toc: 'Lo que viene en 2027', sk: 'propone el presupuesto 2027',
+      build() {
+        const E = S.d.expectativa_2027;
+        if (!E || !E.total_universidades) return { cifra: SD, titulo: 'lo que viene en 2027', html: '<p class="empty">Aún no hay datos del presupuesto 2027.</p>' };
+        const T = E.total_universidades;
+        const vp = isNum(T.var_pct) ? T.var_pct / 100 : null;
+        const items = S.d.universidades.filter((u) => u.expectativa_2027 && isNum(u.expectativa_2027.var_pct)).map((u) => Object.assign(item(u, u.expectativa_2027.var_pct / 100), { e: u.expectativa_2027 }));
+        const B = [
+          { label: 'Baja', test: (v) => v < 0, neg: true }, { label: '0 a 10%', test: (v) => v >= 0 && v < 0.1 },
+          { label: '10 a 25%', test: (v) => v >= 0.1 && v < 0.25 }, { label: '25 a 50%', test: (v) => v >= 0.25 && v < 0.5 }, { label: '+50%', test: (v) => v >= 0.5 },
+        ];
+        const h = hlUni(); const he = h && h.expectativa_2027;
+        const bins = B.map((b) => ({ label: b.label, neg: b.neg, count: items.filter((i) => b.test(i.v)).length, tu: h && he && isNum(he.var_pct) && b.test(he.var_pct / 100) ? label(h) : '' }));
+        const ET = E.estado_tramite || {};
+        const steps = [['proyecto', 'Proyecto del Ejecutivo'], ['dictamen', 'Dictamen de la Comisión de Presupuesto'], ['autografa', 'Aprobado por el Pleno (autógrafa)'], ['ley_publicada', 'Publicación de la ley']]
+          .filter(([k]) => ET[k]).map(([k, n]) => {
+            const s = ET[k]; const f = s.fecha ? new Date(s.fecha + 'T12:00:00') : null;
+            const fd = f && !isNaN(f) ? f.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Pendiente';
+            return `<li class="${s.fecha ? '' : 'pend'}"><b>${esc(n)}</b><span>${esc(fd)}${s.url && safeUrl(s.url) ? ' / ' + linkTo(s.url, 'ver documento') : ''}</span></li>`;
+          }).join('');
+        const docs = (E.documentos || []).filter((d) => /proyecto|anexo/.test(d.tipo || '')).slice(0, 3).map((d) => linkTo(d.url, d.titulo)).join('; ');
+        const vpTxt = (v) => (isNum(v) ? pctSigned(v / 100, Math.abs(v) >= 100 ? 0 : 1) : SD);
         return {
-          h2: `Por estudiante, el gasto anual va de <em>${esc(soles(lo.vals[0]))}</em> a <em>${esc(soles(hi.vals[0]))}</em>`,
-          html: `<p>Dividimos el gasto devengado total de ${esc(Y)} entre el número de estudiantes reportado. La mediana es ${esc(soles(median(items.map((i) => i.vals[0]))))} por estudiante al año; el valor más alto corresponde a ${esc(hi.label)} y el más bajo a ${esc(lo.label)}.${excl > 0 ? ` ${esc(excl)} universidades no tienen dato de matrícula para ${esc(Y)}.` : ''}${esc(eNote)}</p>
-            <div class="stats">${stat(soles(median(items.map((i) => i.vals[0]))), 'Mediana por estudiante')}${stat(soles(lo.vals[0]), `Mínimo (${lo.label})`)}${stat(soles(hi.vals[0]), `Máximo (${hi.label})`)}</div>
-            ${hlNote(hr ? `${esc(hr.label)}: ${esc(soles(hr.vals[0]))} por estudiante (${esc(nf0.format(hr.e))} estudiantes).` : '')}
-            <div class="figure"><p class="cap">Devengado total por estudiante, ${esc(Y)}</p><div data-fig="est"></div></div>
+          cifra: esc(isNum(vp) ? vpTxt(T.var_pct) : SD),
+          titulo: 'más plata para las universidades públicas propone el presupuesto 2027, frente al de apertura de 2026',
+          html: `<p class="lead">Ojo: es una propuesta. El Congreso aprobó la ley de presupuesto 2027 el 20 de noviembre, pero el detalle por universidad de esa versión final aún no se publica. Estas cifras salen de los anexos del proyecto que mandó el Ejecutivo, y pueden cambiar.</p>
+            <p>El proyecto asigna ${esc(soles(T.pia_2027))} a ${esc(T.n_pliegos_2027)} universidades, frente a ${esc(soles(T.pia_2026))} con que arrancaron 2026.${isNum(T.var_pct_mismos_pliegos) ? ` Si solo cuentas las que ya tenían presupuesto en 2026, la subida es ${esc(vpTxt(T.var_pct_mismos_pliegos))}.` : ''} Pero no a todas les toca igual:</p>
+            ${he && isNum(he.pia_2027) ? `<div class="tu-card"><p>Para la <mark>${esc(label(h))}</mark>, el proyecto propone</p><p class="big">${esc(soles(he.pia_2027))}</p><p>frente a ${esc(soles(he.pia_2026))} con que arrancó 2026 (${esc(vpTxt(he.var_pct))}).</p></div>` : (h ? tuNo(h, 'no tiene un monto propio en el proyecto 2027; las universidades nuevas se financian desde la reserva de contingencia durante el año.') : '')}
+            <figure class="fig anim"><p class="fig-t">¿Cuántas universidades suben o bajan en 2027?</p><p class="fig-s">Presupuesto de apertura 2027 propuesto frente al de 2026, ${esc(items.length)} universidades.</p><div data-fig="hist"></div>
+              ${tableHTML(['Universidad', 'PIA 2026', 'PIA 2027 propuesto', 'Variación'], items.slice().sort((a, b) => b.v - a.v).map((i) => ({ key: i.key, cells: [i.ax, soles(i.e.pia_2026), soles(i.e.pia_2027), vpTxt(i.e.var_pct)] })), S.hl)}</figure>
+            <figure class="fig"><p class="fig-t">En qué va el trámite</p><ol class="tramite">${steps}</ol></figure>
             ${caveat([
-              'El gasto total incluye investigación, pensiones de cesantes, inversión en infraestructura y servicios a la comunidad; no es solo el costo de enseñar.',
-              'Universidades pequeñas, nuevas o con carreras de laboratorio (ingeniería, ciencias, agronomía, medicina) tienden a tener un costo por estudiante mayor.',
-              'La matrícula puede referirse solo a pregrado; revisa la fuente indicada abajo.',
-            ])}${srcCtx('estudiantes', 'Estudiantes')}`,
-          mount(el) {
-            const C = colors();
-            hbar($('[data-fig="est"]', el), { items, series: [{ name: 'Soles por estudiante', color: C.dev }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado por estudiante' });
-          },
+              'Es el presupuesto de apertura (PIA) propuesto. Durante 2027 cambiará con transferencias y saldos, como cada año (capítulo 1).',
+              'Las subidas muy grandes suelen ser de universidades nuevas o con una obra puntual; no implican más plata para el funcionamiento diario.',
+              'La versión aprobada por el Pleno mantiene el total del sector público pero movió plata del Gobierno Nacional a regiones y municipios; el monto final de cada universidad puede diferir.',
+            ])}<p class="src">Fuente: ${docs || esc(E.norma || 'Proyecto de Ley de Presupuesto 2027')}. Comparación con el PIA 2026 del MEF.</p>`,
+          mount(el) { const C = colors(); return [[$('[data-fig="hist"]', el), (b, C = colors()) => histo(b, { bins, color: C.pia, colorNeg: C.ink2, aria: 'Número de universidades por rango de variación del presupuesto 2027 propuesto' })]]; },
         };
       },
     },
   ];
 
   // ---------- render ----------
-  let io = null, gen = 0;
+  let io = null, animIO = null, gen = 0;
+  const portada = (i, inner) => `<header class="portada"><div class="portada-in"><p class="cap-n">Capítulo ${i + 1}</p>${inner}</div></header>`;
   function render() {
-    destroyCharts();
     gen += 1;
     const myGen = gen;
-    const host = $('#stories');
+    S.mounts = [];
+    const host = $('#capitulos');
     const prevH = {};
-    host.querySelectorAll('.story').forEach((sec) => { prevH[sec.id] = sec.offsetHeight; });
+    host.querySelectorAll('.cap').forEach((sec) => { prevH[sec.id] = sec.offsetHeight; });
     host.innerHTML = '';
     if (io) io.disconnect();
     STORIES.forEach((st, i) => {
+      const [c, on] = PAL[st.col];
       const sec = document.createElement('section');
-      sec.className = 'story is-loading';
+      sec.className = 'cap is-loading';
       sec.id = st.id;
       sec.dataset.i = String(i);
+      sec.style.setProperty('--c', c); sec.style.setProperty('--on', on);
       sec.setAttribute('aria-busy', 'true');
+      sec.setAttribute('aria-labelledby', 'h-' + st.id);
       if (prevH[st.id]) sec.style.minHeight = prevH[st.id] + 'px';
-      sec.innerHTML = `<p class="kicker"><b>${String(i + 1).padStart(2, '0')}</b>${esc(st.kicker)}</p>
-        <h2 class="sk-title">${esc(st.toc)}</h2>
-        <div class="skeleton" role="status"><span>Cargando…</span><i></i><i></i><i></i></div>`;
+      sec.innerHTML = portada(i, `<h2 id="h-${esc(st.id)}"><span class="cifra">…</span><span class="cap-t">${esc(st.sk)}</span></h2>`) +
+        '<div class="cuerpo"><div class="skel" role="status" aria-label="Cargando"></div></div>';
       host.appendChild(sec);
     });
-    const fl = $('#uni-ficha'), hu = hlUni();
-    if (fl) {
-      fl.hidden = !hu;
-      fl.innerHTML = hu ? `<a href="index.html#u=${encodeURIComponent(hu.pliego)}">Ver ficha completa de ${esc(label(hu))} →</a>` : '';
-    }
-    $('#toc').innerHTML = STORIES.map((st) => `<li><a href="#${esc(st.id)}">${esc(st.toc)}</a></li>`).join('');
+    $('#toc').innerHTML = STORIES.map((st, i) => { const [c, on] = PAL[st.col]; return `<li><a href="#${esc(st.id)}" style="--c:${c};--on:${on}"><b>${i + 1}</b><span>${esc(st.toc)}</span></a></li>`; }).join('');
     syncURL();
+    heroText();
+    shareLinks();
     const go = (sec) => {
       const i = Number(sec.dataset.i), st = STORIES[i];
       prepStory(st, S.Y).then(() => { if (myGen === gen) fillStory(sec, st, i); });
     };
-    const secs = [...host.querySelectorAll('.story')];
+    const secs = [...host.querySelectorAll('.cap')];
     if ('IntersectionObserver' in window) {
       io = new IntersectionObserver((ents) => ents.forEach((e) => {
         if (e.isIntersecting) { io.unobserve(e.target); go(e.target); }
-      }), { rootMargin: '600px 0px' });
+      }), { rootMargin: '800px 0px' });
       secs.forEach((sec) => io.observe(sec));
     } else secs.forEach(go);
   }
 
   function fillStory(sec, st, i) {
     const Y = S.Y;
-    const partial = S.partial.includes(Y);
     let out;
-    try { out = st.build(Y); } catch (e) { console.error(e); out = { h2: esc(st.toc), html: '<p class="empty">No se pudo calcular esta historia con los datos disponibles.</p>' }; }
-    sec.innerHTML = `<p class="kicker"><b>${String(i + 1).padStart(2, '0')}</b>${esc(st.kicker)}</p><h2>${out.h2}</h2>` +
-      (partial ? `<p class="note">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): el devengado es parcial y no es comparable con años cerrados.</p>` : '') + out.html +
-      (st.sec ? `<p><a class="explore" href="index.html#${esc(st.sec)}">Explorar en el observatorio →</a></p>` : '');
+    try { out = st.build(Y); } catch (e) { console.error(e); out = { cifra: '?', titulo: esc(st.sk), html: '<p class="empty">No se pudo calcular esta historia con los datos disponibles.</p>' }; }
+    const partialNote = isPartial() && st.id !== 'real' && st.id !== 'en-2027'
+      ? `<p class="parcial">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): lo gastado aún es parcial y no se compara con años cerrados.</p>` : '';
+    sec.innerHTML = portada(i, `<h2 id="h-${esc(st.id)}"><span class="cifra">${out.cifra}</span><span class="cap-t">${out.titulo}</span></h2>`) +
+      `<div class="cuerpo">${partialNote}${out.html}${st.sec ? `<p class="ver"><a href="index.html#${esc(st.sec)}">Verlo a fondo en el observatorio</a></p>` : ''}</div>`;
     sec.classList.remove('is-loading');
     sec.removeAttribute('aria-busy');
     sec.style.minHeight = '';
-    if (!reduced) sec.classList.add('enter');
-    if (out.mount) { try { out.mount(sec); } catch (e) { console.error(e); } }
+    if (out.mount) {
+      try {
+        const m = out.mount(sec) || [];
+        m.forEach(([box, fn]) => { if (box) { fn(box); S.mounts.push({ box, fn }); } });
+      } catch (e) { console.error(e); }
+    }
+    sec.querySelectorAll('.anim').forEach((f) => { if (reduced || !animIO) f.classList.add('in'); else animIO.observe(f); });
+  }
+
+  // ---------- hero, buscador y compartir ----------
+  function heroText() {
+    const Y = S.Y, h = hlUni();
+    const U = unisY(Y);
+    const tot = sum(U.map((u) => val(u.anios[Y].total, 'dev')));
+    const ht = h && h.anios && h.anios[Y] && h.anios[Y].total;
+    const par = isPartial() ? ' (hasta ahora)' : '';
+    if (h && ht && isNum(ht.dev)) {
+      { const [c, u] = heroParts(ht.dev); $('#hero-cifra').textContent = c; $('#hero-unidad').textContent = u; }
+      $('#hero-dek').innerHTML = `gastó la <mark>${esc(label(h))}</mark> en ${esc(Y)}${par}. Baja y mira a dónde se fue cada sol.`;
+    } else {
+      { const [c, u] = heroParts(tot); $('#hero-cifra').textContent = c; $('#hero-unidad').textContent = u; }
+      $('#hero-dek').innerHTML = `gastaron en ${esc(Y)}${par} las ${esc(U.length)} universidades públicas del Perú.${h ? ` La <mark>${esc(label(h))}</mark> no tiene datos ese año.` : ' Elige la tuya y mira a dónde se fue cada sol.'}`;
+    }
+    $('#uni-hint').innerHTML = h ? `Mostrando <strong>${esc(fullName(h))}</strong>. <a href="${esc(fichaHref(h))}">Ver su ficha completa</a>` : 'Las diez historias se personalizan con la tuya.';
+    $('#year-note').textContent = isPartial() ? `${Y} está en curso: cifras parciales.` : `Último año cerrado: ${S.closed[S.closed.length - 1]}.`;
+  }
+
+  function shareURL() {
+    const base = 'https://unimauro.github.io/presupuesto-universidades/historias.html';
+    const p = new URLSearchParams();
+    if (S.hl) p.set('u', S.hl);
+    if (S.Y !== S.closed[S.closed.length - 1]) p.set('y', S.Y);
+    const q = p.toString();
+    return base + (q ? '?' + q : '');
+  }
+  function shareText() {
+    const h = hlUni(), Y = S.Y;
+    const ht = h && h.anios && h.anios[Y] && h.anios[Y].total;
+    if (h && ht && isNum(ht.dev)) return `La ${label(h)} gastó ${soles(ht.dev)} en ${Y}. ¿A dónde se fue la plata? Míralo aquí:`;
+    const tot = sum(unisY(Y).map((u) => val(u.anios[Y].total, 'dev')));
+    return `Las universidades públicas del Perú gastaron ${soles(tot)} en ${Y}. ¿A dónde se va la plata de la tuya?`;
+  }
+  function shareLinks() {
+    const url = shareURL(), txt = shareText();
+    $('#sh-wa').href = 'https://wa.me/?text=' + encodeURIComponent(txt + ' ' + url);
+    $('#sh-x').href = 'https://x.com/intent/post?text=' + encodeURIComponent(txt) + '&url=' + encodeURIComponent(url);
+    const h = hlUni();
+    $('#share-dek').innerHTML = h ? `Que tu promo de la <mark>${esc(label(h))}</mark> sepa a dónde se va la plata. El link abre con tu universidad ya elegida.` : 'Que tu promo sepa a dónde se va la plata de su universidad.';
+    $('#explore-uni').innerHTML = h ? `<a href="${esc(fichaHref(h))}">Explora la ficha completa de la ${esc(label(h))}</a>` : '<a href="u/">Explora tu universidad en el observatorio</a>';
+    $('#sh-ok').textContent = '';
+  }
+  function setupShare() {
+    const ok = $('#sh-ok');
+    $('#sh-copy').addEventListener('click', async () => {
+      const url = shareURL();
+      try { await navigator.clipboard.writeText(url); ok.textContent = 'Link copiado. Pégalo en tu grupo.'; } catch (e) { ok.textContent = url; }
+    });
+    const nb = $('#sh-native');
+    if (navigator.share) {
+      nb.hidden = false;
+      nb.addEventListener('click', () => { navigator.share({ title: document.title, text: shareText(), url: shareURL() }).catch(() => {}); });
+    }
+  }
+
+  function selectUni(p) {
+    S.hl = p ? String(p) : '';
+    const u = hlUni();
+    $('#uni-q').value = u ? label(u) : '';
+    $('#uni-clear').hidden = !u;
+    render();
+  }
+  function setupPicker() {
+    const inp = $('#uni-q'), list = $('#uni-list'), clr = $('#uni-clear');
+    const unis = [...S.d.universidades].sort((a, b) => label(a).localeCompare(label(b), 'es'));
+    const idx = unis.map((u) => ({ u, s: norm([u.corto, u.nombre, u.ciudad, u.departamento].join(' ')) }));
+    let cur = -1, res = [];
+    const close = () => { list.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); cur = -1; };
+    const paint = () => {
+      list.innerHTML = res.length ? res.map((u, k) => `<li id="opt-${esc(u.pliego)}" role="option" data-p="${esc(u.pliego)}" aria-selected="${k === cur}"><b>${esc(label(u))}</b>${esc(fullName(u))}<small>${esc(titleCase(String(u.ciudad || u.departamento || '')))}</small></li>`).join('')
+        : '<li class="vacio" role="option" aria-disabled="true">No encontramos esa universidad. Prueba con la sigla o la ciudad.</li>';
+      list.hidden = false; inp.setAttribute('aria-expanded', 'true');
+      if (cur >= 0 && res[cur]) inp.setAttribute('aria-activedescendant', 'opt-' + res[cur].pliego);
+    };
+    const search = () => {
+      const q = norm(inp.value.trim());
+      const cur0 = hlUni();
+      if (!q || (cur0 && q === norm(label(cur0)))) res = unis.slice(0, 8);
+      else {
+        const terms = q.split(/\s+/);
+        // Orden: sigla que empieza igual, luego nombre que contiene la búsqueda, luego las más grandes (gasto del año).
+        const score = (r) => (norm(r.u.corto).startsWith(q) ? 2e12 : 0) + (norm(r.u.nombre).includes(q) ? 1e12 : 0) + (val(r.u.anios && r.u.anios[S.Y] && r.u.anios[S.Y].total, 'dev') || 0);
+        res = idx.filter((r) => terms.every((t) => r.s.includes(t))).sort((a, b) => score(b) - score(a)).slice(0, 8).map((r) => r.u);
+      }
+      cur = res.length ? 0 : -1; paint();
+    };
+    inp.addEventListener('input', search);
+    inp.addEventListener('focus', () => { inp.select(); search(); });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (list.hidden) search(); else { cur = Math.min(res.length - 1, cur + 1); paint(); } }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); cur = Math.max(0, cur - 1); paint(); }
+      else if (e.key === 'Enter') { if (!list.hidden && res[cur]) { e.preventDefault(); selectUni(res[cur].pliego); close(); inp.blur(); } }
+      else if (e.key === 'Escape') close();
+    });
+    list.addEventListener('pointerdown', (e) => { const li = e.target.closest('li[data-p]'); if (!li) return; e.preventDefault(); selectUni(li.dataset.p); close(); inp.blur(); });
+    document.addEventListener('pointerdown', (e) => { if (!e.target.closest('#picker')) close(); });
+    inp.addEventListener('blur', () => setTimeout(() => { close(); const u = hlUni(); inp.value = u ? label(u) : ''; }, 150));
+    clr.addEventListener('click', () => { selectUni(''); inp.focus(); });
   }
 
   function syncURL() {
@@ -641,53 +1022,61 @@
   function setupControls() {
     const p = new URLSearchParams(location.search);
     const ys = $('#sel-year');
-    const opts = [...S.closed].reverse().map((y) => `<option value="${esc(y)}">${esc(y)}</option>`)
-      .concat([...S.partial].reverse().map((y) => `<option value="${esc(y)}">${esc(y)} (parcial)</option>`));
-    ys.innerHTML = opts.join('');
+    ys.innerHTML = [...S.closed].reverse().map((y) => `<option value="${esc(y)}">${esc(y)}</option>`)
+      .concat([...S.partial].reverse().map((y) => `<option value="${esc(y)}">${esc(y)} (en curso)</option>`)).join('');
     const wantY = p.get('y');
     S.Y = (wantY && (S.closed.includes(wantY) || S.partial.includes(wantY))) ? wantY : (S.closed[S.closed.length - 1] || S.partial[0]);
     ys.value = S.Y;
     ys.addEventListener('change', () => { S.Y = ys.value; render(); });
-
-    const us = $('#sel-uni');
-    const unis = [...S.d.universidades].sort((a, b) => label(a).localeCompare(label(b), 'es'));
-    us.innerHTML = '<option value="">— ninguna —</option>' + unis.map((u) => `<option value="${esc(u.pliego)}">${esc(u.corto && u.corto.length <= 12 ? u.corto + ' — ' : '')}${esc(titleCase(String(u.nombre || u.pliego)))}</option>`).join('');
     const wantU = p.get('u');
-    if (wantU && unis.some((u) => String(u.pliego) === wantU)) { S.hl = wantU; us.value = wantU; }
-    us.addEventListener('change', () => { S.hl = us.value; render(); });
+    if (wantU && S.d.universidades.some((u) => String(u.pliego) === wantU)) { S.hl = wantU; $('#uni-q').value = label(hlUni()); $('#uni-clear').hidden = false; }
   }
 
   function setupMeta() {
     const d = S.d;
-    const n = d.universidades.length;
-    const first = S.closed[0], last = S.closed[S.closed.length - 1];
-    $('#hero-lede').textContent = `Ocho historias calculadas en vivo con los datos presupuestales de ${n} universidades públicas (${first || SD}–${last || SD}). Por defecto se muestra ${last || SD}, el último año cerrado.`;
     if (S.isSample) {
       const b = $('#sample-banner');
       b.hidden = false;
-      b.innerHTML = '<strong>Datos de ejemplo.</strong> Esta página está mostrando un archivo de muestra con cifras ficticias, mientras se integran los datos reales del MEF. No uses estas cifras para conclusiones.';
+      b.innerHTML = '<strong>Datos de ejemplo.</strong> Esta página muestra un archivo de muestra con cifras ficticias. No uses estas cifras para conclusiones.';
     }
     const fs = Array.isArray(d.fuentes) ? d.fuentes : [];
-    $('#sources').innerHTML = fs.length ? 'Fuentes: ' + fs.map((f) => (f && f.url && /^https?:\/\//.test(f.url)
-      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.nombre || f.url)}</a>` : esc(f && f.nombre))).join(' · ') : esc(SRC_MEF);
+    $('#sources').innerHTML = fs.length ? 'Fuentes de los datos:<ul class="fuentes">' + fs.filter(Boolean).map((f) => `<li>${linkTo(f.url, f.nombre || f.url)}</li>`).join('') + '</ul>' : esc(SRC_MEF);
     if (d.generado) $('#generated').textContent = `Datos generados: ${d.generado}`;
+  }
+
+  // ---------- tooltip táctil ----------
+  function setupTip() {
+    const tip = $('#tip'); let on = null;
+    const show = (el, x, y) => {
+      on = el; tip.textContent = el.getAttribute('data-tip'); tip.hidden = false;
+      const r = tip.getBoundingClientRect();
+      const left = Math.max(8, Math.min(window.innerWidth - r.width - 8, x - r.width / 2));
+      let top = y - r.height - 14; if (top < 8) top = y + 18;
+      tip.style.left = left + 'px'; tip.style.top = top + 'px';
+    };
+    const hide = () => { on = null; tip.hidden = true; };
+    const at = (e) => e.target && e.target.closest && e.target.closest('[data-tip]');
+    document.addEventListener('pointerover', (e) => { const t = at(e); if (t && e.pointerType === 'mouse') show(t, e.clientX, e.clientY); });
+    document.addEventListener('pointerout', (e) => { const t = at(e); if (t && t === on && e.pointerType === 'mouse') hide(); });
+    document.addEventListener('pointerdown', (e) => { const t = at(e); if (t) show(t, e.clientX, e.clientY); else hide(); });
+    window.addEventListener('scroll', () => { if (on) hide(); }, { passive: true });
   }
 
   function progress() {
     const bar = $('#progress');
+    let raf = 0;
     const on = () => {
+      raf = 0;
       const h = document.documentElement.scrollHeight - window.innerHeight;
       bar.style.width = (h > 0 ? Math.min(100, (window.scrollY / h) * 100) : 0) + '%';
     };
-    window.addEventListener('scroll', on, { passive: true });
+    window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(on); }, { passive: true });
     on();
   }
 
-  function chartDefaults() {
-    if (!hasChart()) return;
-    Chart.defaults.font.family = '"Plus Jakarta Sans", system-ui, sans-serif';
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = colors().ink2;
+  function redrawAll() {
+    S.mounts = S.mounts.filter((m) => m.box.isConnected);
+    S.mounts.forEach((m) => { try { m.fn(m.box); } catch (e) { console.error(e); } });
   }
 
   function setupTheme() {
@@ -702,7 +1091,7 @@
       document.documentElement.setAttribute('data-theme', t);
       try { localStorage.setItem('rp-theme', t); } catch (e) { /* sin almacenamiento */ }
       sync();
-      if (S.d) { chartDefaults(); render(); }
+      if (S.d) redrawAll();
     });
     return sync;
   }
@@ -710,24 +1099,36 @@
   async function init() {
     const syncTheme = setupTheme();
     progress();
+    setupTip();
+    if ('IntersectionObserver' in window && !reduced) {
+      animIO = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); animIO.unobserve(e.target); } }), { threshold: 0.2 });
+    }
     try {
       const { d, isSample, full } = await load();
       S.d = d; S.isSample = isSample; L.full = full;
     } catch (e) {
-      $('#hero-lede').textContent = 'No se pudieron cargar los datos. Intenta recargar la página.';
+      $('#hero-cifra').textContent = '—';
+      $('#hero-dek').textContent = 'No se pudieron cargar los datos. Revisa tu conexión y recarga la página.';
       return;
     }
+    getJSON('u/slugs.json').then((j) => { S.slugs = (j && j.slugs) || null; if (S.hl) { heroText(); shareLinks(); } }).catch(() => {});
     setupYears(S.d);
-    chartDefaults();
     setupControls();
+    setupPicker();
+    setupShare();
     setupMeta();
     render();
-    // Los gráficos (canvas) se dibujan antes de que llegue la fuente web: se repintan al cargarla.
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => S.charts.forEach((c) => { try { c.update('none'); } catch (e) { /* destruido */ } }));
-    if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(redrawAll);
+    let lastW = window.innerWidth, t = 0;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === lastW) return;
+      lastW = window.innerWidth; clearTimeout(t);
+      t = setTimeout(() => { redrawAll(); document.querySelectorAll('.anim').forEach((f) => f.classList.add('in')); }, 180);
+    });
+    if (location.hash) { const tg = document.getElementById(location.hash.slice(1)); if (tg) tg.scrollIntoView(); }
     window.addEventListener('storage', (e) => {
       if (e.key !== 'rp-theme' || (e.newValue !== 'dark' && e.newValue !== 'light')) return;
-      document.documentElement.setAttribute('data-theme', e.newValue); syncTheme(); chartDefaults(); render();
+      document.documentElement.setAttribute('data-theme', e.newValue); syncTheme(); redrawAll();
     });
   }
 

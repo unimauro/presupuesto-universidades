@@ -117,8 +117,49 @@ Formato de cifras igual al index: `S/ 6,954.6 M`, porcentajes `49%`.
   `prefers-reduced-motion: reduce`.
 
 ## 5. Tema
-`data-theme="light|dark"` en `<html>`: `localStorage["rp-theme"]` → `?tema=oscuro|claro` → `prefers-color-scheme`.
-Las portadas de capítulo mantienen su color en ambos temas (el contraste del texto encima no cambia).
+**Claro siempre por defecto** (no se sigue `prefers-color-scheme`). Oscuro solo si el usuario lo elige: botón `#theme-toggle`
+(guarda `localStorage["rp-theme"]="dark"`) o `?tema=oscuro`. Script en `<head>`: `rp-theme` → `?tema=` → `light`, y fija
+`data-theme` en `<html>`. Los tokens oscuros viven solo en `:root[data-theme="dark"]`.
+Las portadas de capítulo mantienen su color en ambos temas.
+
+## 5b. Formato de cifras (adaptativo)
+- ≥ 1,000 M → `S/ 7.7 mil M` · ≥ 1 M → `S/ 53.4 M` · ≥ 100 mil → `S/ 850 mil` · ≥ 1 mil → `S/ 19.7 mil` · menos → `S/ 40`
+- Espacios no separables entre `S/`, número y unidad (no se parte en dos líneas).
+- Porcentajes: ≥ 100 % sin decimales; variaciones ≥ 1000 % como `×11.5 veces`; signo menos tipográfico `−`.
+- Cifra héroe: número + unidad aparte (`S/ 7.0` + `mil millones`).
+
+## 5c. Equivalencias para `styles.css` (index)
+| Token actual de index | Token v2 | Claro | Oscuro |
+|---|---|---|---|
+| `--bg` | `--color-papel` | `#F4EEE2` | `#16101D` |
+| `--surface` | `--color-papel` (tarjetas sin relleno; separar con borde) | `#F4EEE2` | `#16101D` |
+| `--surface-2` | `--color-papel-2` | `#EAE1CF` | `#221A2B` |
+| `--ink` | `--color-tinta` | `#1E1428` | `#F2EBDF` |
+| `--muted` | `--color-tinta-2` | `#5E5468` | `#B3A8BD` |
+| `--line` | `--color-linea` | `#D6CAB5` | `#3A2F45` |
+| `--line-strong` | `--color-tinta` | `#1E1428` | `#F2EBDF` |
+| `--accent` | `--color-anil` (enlaces/UI) | `#2B3FA8` | `#7C8EF0` |
+| `--accent-soft` | — | `#DCE0F4` | `#262A4A` |
+| `--ochre` | `--color-aji` (resaltado, barras) | `#F2B705` | `#F7C843` |
+| `--ochre-text` | `--color-cobre` (texto pequeño) | `#8A3B12` | `#F7C843` |
+| `--c-pia` / `--c-pim` / `--c-dev` | `--color-pia` / `--color-pim` / `--color-dev` | `#8A7756` / `#2B3FA8` / `#C81E64` | `#B5A68C` / `#7C8EF0` / `#FF5C9A` |
+| `--good` / `--warn` / `--bad` | (semáforo) | `#0B6B4E` / `#A27A00` / `#C4122F` | `#3FBF8C` / `#E0B341` / `#FF6B7A` |
+| `--good-bg` / `--warn-bg` / `--bad-bg` | | `#D7EBDF` / `#F6E9C2` / `#F6D6DA` | `#163326` / `#3A2F12` / `#3E1820` |
+| `--g1` 2.1 | `--color-personal` | `#4A1F6B` | `#A57BD6` |
+| `--g2` 2.2 | `--color-pensiones` | `#9B7BC0` | `#D2BDF0` |
+| `--g3` 2.3 | `--color-bys` | `#D9651A` | `#F59A45` |
+| `--g4` 2.5 | `--color-otros` | `#B0A38B` | `#6F6579` |
+| `--g5` 2.6 | `--color-inversion` | `#0B6B4E` | `#3FBF8C` |
+| `--g6` 2.4 | `--color-dyt-gasto` | `#6E5B46` | `#B79E82` |
+| `--g7` 2.8 | `--color-deuda` | `#17637D` | `#4FB3D1` |
+| `--f1` RO | `--color-ro` | `#17637D` | `#4FB3D1` |
+| `--f2` RDR | `--color-rdr` | `#C2410C` | `#FF7A3D` |
+| `--f3` RD (canon) | `--color-canon` | `#A27A00` | `#E0B341` |
+| `--f4` DyT | `--color-dyt` | `#8C7FA0` | `#A89BBB` |
+| `--f5` ROOC | `--color-rooc` | `#5E5468` | `#B3A8BD` |
+| `--serif` (títulos) | `--font-display` | Archivo 62–75 %, 800–900 | |
+| `--font` (texto) | `--font-texto` | Atkinson Hyperlegible Next | |
+Historias agrupa 2.4, 2.5 y 2.8 en "Otros"; index puede separarlos con `--g4`, `--g6`, `--g7`.
 
 ## 6. Logo y OG
 Archivos sin cambios: `logo.svg`, `logo-dark.svg`, `logo-mark.svg`, favicons, `assets/og/*.png` (generadas por

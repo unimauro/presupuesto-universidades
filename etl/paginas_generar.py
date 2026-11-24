@@ -48,7 +48,7 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800'
          '&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">')
 
-# Tema: respeta la preferencia guardada por la app principal (rp-theme) o ?tema=; si no, prefers-color-scheme.
+# Tema: CLARO por defecto siempre; oscuro solo si el usuario lo eligió en el sitio (localStorage rp-theme) o ?tema=oscuro.
 THEME_JS = ("<script>(function(){var t=null;try{t=localStorage.getItem('rp-theme')}catch(e){}"
             "var m=/[?&]tema=(oscuro|claro)/.exec(location.search);if(m)t=m[1]==='oscuro'?'dark':'light';"
             "if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)})();</script>")
@@ -61,24 +61,47 @@ def num(v):
     return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
 
 
+NB = "\u00a0"
+
+
+def _d1(x):
+    return f"{x:,.1f}"
+
+
 def fm(v):
-    """Soles en millones: 'S/ 370.6 M'."""
+    """Montos adaptativos: >=1,000 M -> 'S/ 7.7 mil M'; >=1 M -> 'S/ 53.4 M'; <1 M -> 'S/ 850 mil'; <1,000 -> 'S/ 850'."""
     v = num(v)
     if v is None:
         return SD
-    if abs(v) < 1e5:
-        return f"S/\u00a0{v:,.0f}"
-    return f"S/\u00a0{v / 1e6:,.{2 if abs(v) < 1e7 else 1}f}\u00a0M"
+    a, sg = abs(v), "−" if v < 0 else ""
+    if a >= 1e9:
+        return f"{sg}S/{NB}{_d1(a / 1e9)}{NB}mil{NB}M"
+    if a >= 1e6:
+        return f"{sg}S/{NB}{_d1(a / 1e6)}{NB}M"
+    if a >= 1e3:
+        return f"{sg}S/{NB}{a / 1e3:,.0f}{NB}mil"
+    return f"{sg}S/{NB}{a:,.0f}"
 
 
 def fs(v):
+    """Per cápita: >=1,000 -> 'S/ 87.7 mil'; si no, 'S/ 850'."""
     v = num(v)
-    return SD if v is None else f"S/\u00a0{v:,.0f}"
+    if v is None:
+        return SD
+    return f"S/{NB}{_d1(v / 1e3)}{NB}mil" if abs(v) >= 1e3 else f"S/{NB}{v:,.0f}"
 
 
 def fp(r, d=1):
+    """Porcentaje adaptativo: >=1000 % -> '×11.5 veces'; >=100 % sin decimales; si no, d decimales."""
     r = num(r)
-    return SD if r is None else f"{r * 100:.{d}f}\u00a0%"
+    if r is None:
+        return SD
+    pc = r * 100
+    if abs(pc) >= 1000:
+        return f"×{r:,.1f}{NB}veces"
+    if abs(pc) >= 100:
+        return f"{pc:,.0f}{NB}%"
+    return f"{pc:.{d}f}{NB}%"
 
 
 def fn(v):
@@ -440,8 +463,7 @@ def head(title, desc, canon, og, extra=""):
 <meta name="description" content="{E(desc)}">
 <link rel="canonical" href="{E(canon)}">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#26346F" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#26346F">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="es_PE">
 <meta property="og:site_name" content="{E(SITE)}">

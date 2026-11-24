@@ -150,7 +150,7 @@
     if (!hasChart()) return;
     const C = window.Chart;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    C.defaults.font.family = cssVar('--font') || 'system-ui';
+    C.defaults.font.family = cssVar('--font-cifras') || cssVar('--font') || 'system-ui';
     C.defaults.font.size = 12;
     C.defaults.color = cssVar('--muted');
     C.defaults.borderColor = cssVar('--line');
@@ -186,15 +186,8 @@
     C.defaults.responsive = true;
   }
   // Degradado vertical bajo una línea (áreas suaves)
-  const areaFill = (cssName, alpha = 0.22) => ctx => {
-    const { chart } = ctx; const { ctx: c, chartArea } = chart;
-    const col = cssVar(cssName);
-    if (!chartArea) return col + '22';
-    const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-    g.addColorStop(0, col + Math.round(alpha * 255).toString(16).padStart(2, '0'));
-    g.addColorStop(1, col + '00');
-    return g;
-  };
+  // Área plana translúcida bajo una línea (el sistema visual no usa degradados)
+  const areaFill = (cssName, alpha = 0.14) => cssVar(cssName) + Math.round(alpha * 255).toString(16).padStart(2, '0');
   function mkChart(id, cfg, label) {
     const old = S.charts.get(id);
     if (old) { old.destroy(); S.charts.delete(id); }
@@ -413,7 +406,7 @@
         if (!ds.valueLabel) return;
         const meta = chart.getDatasetMeta(di); if (meta.hidden) return;
         ctx.save();
-        ctx.font = `600 11.5px ${cssVar('--font') || 'sans-serif'}`;
+        ctx.font = `700 12px ${cssVar('--font-cifras') || 'sans-serif'}`;
         ctx.fillStyle = cssVar('--ink');
         meta.data.forEach((el, i) => {
           const v = ds.data[i]; if (num(v) === null) return;
@@ -817,15 +810,16 @@
       if (hl && !list.includes(hl)) { list = list.concat([hl]); extra = true; }
       $('#tr-sub', el).textContent = `Millones de soles. Ordenado por ${ordLbl}. Mostrando ${list.length - (extra ? 1 : 0)} de ${all.length}${extra ? ` + ${uName(hl)} (resaltada)` : ''}.${hl ? '' : S.tray.hl.trim() ? ' No encontramos esa universidad.' : ''}`;
       const col = (v, u) => (hl && u !== hl) ? cssVar(v) + '59' : cssVar(v);
+      const hlBorder = { borderColor: list.map(u => u === hl ? cssVar('--tu-borde') : 'transparent'), borderWidth: list.map(u => u === hl ? 2 : 0) };
       sizeFor('ch-tray', list.length, isMobile() ? 34 : 28);
       mkChart('ch-tray', {
         type: 'bar',
         data: {
           labels: list.map(u => uName(u) + (u === hl ? ' ◀' : '')),
           datasets: [
-            { label: 'PIA', data: list.map(u => mill(tot(u, y, 'pia'))), backgroundColor: list.map(u => col('--c-pia', u)) },
-            { label: 'PIM', data: list.map(u => mill(tot(u, y, 'pim'))), backgroundColor: list.map(u => col('--c-pim', u)) },
-            { label: 'Devengado', data: list.map(u => mill(tot(u, y, 'dev'))), backgroundColor: list.map(u => col('--c-dev', u)) },
+            Object.assign({ label: 'PIA', data: list.map(u => mill(tot(u, y, 'pia'))), backgroundColor: list.map(u => col('--c-pia', u)) }, hlBorder),
+            Object.assign({ label: 'PIM', data: list.map(u => mill(tot(u, y, 'pim'))), backgroundColor: list.map(u => col('--c-pim', u)) }, hlBorder),
+            Object.assign({ label: 'Devengado', data: list.map(u => mill(tot(u, y, 'dev'))), backgroundColor: list.map(u => col('--c-dev', u)) }, hlBorder),
           ],
         },
         options: {

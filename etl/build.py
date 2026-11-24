@@ -235,6 +235,17 @@ def main():
         obs["expectativa_2027"] = {k: l27.get(k) for k in
                                    ("version", "norma", "fecha", "url", "estado_tramite", "documentos", "notas",
                                     "total_universidades", "disposiciones")}
+    bl = load("baseline", "baseline.json")
+    if bl.get("anios"):
+        # línea base: universidades vs presupuesto público total, Educación, PBI (participación precalculada)
+        for y, b in bl["anios"].items():
+            n = nacional.get(y)
+            if n and (b.get("total") or {}).get("pim"):
+                b["pct_unis_en_total_pim"] = ratio(n["pim"], b["total"]["pim"])
+                b["pct_unis_en_total_dev"] = ratio(n["dev"], (b["total"] or {}).get("dev"))
+            if n and b.get("pbi_nominal"):
+                b["pct_unis_en_pbi_dev"] = ratio(n["dev"], b["pbi_nominal"])
+        obs["baseline"] = {k: bl.get(k) for k in ("fuente", "notas", "anios")}
     def rnd(x):  # soles enteros: los céntimos no aportan y engordan el JSON
         if isinstance(x, float):
             return round(x) if abs(x) >= 100 else round(x, 4)
