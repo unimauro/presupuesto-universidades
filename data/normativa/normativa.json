@@ -1,19 +1,22 @@
 {
- "generado": "2026-11-23T23:50:06",
+ "generado": "2026-11-23T23:50:39",
  "notas": [
   "Fuente de normas: buscador de normas legales de gob.pe (MEF y MINEDU) + PDFs oficiales (El Peruano/anexos).",
   "PIA por pliego: Anexo 4 de cada Ley de Presupuesto (copias de mef.gob.pe vía gob.pe o Internet Archive; mef.gob.pe bloquea la descarga automatizada). 2016 (Ley 30372) y Proyecto 2027 no ubicados.",
   "transferencias: solo DS/DU de transferencia de partidas o crédito suplementario que mencionan universidades en gob.pe; la cobertura NO es exhaustiva (hay DS que transfieren a 'diversos pliegos' sin mencionar universidades en el sumario).",
   "por_pliego vacío = el PDF no desagrega por universidad o no se pudo leer; no se imputa.",
+  "desglose_fuente: 'anexo' (tabla del anexo), 'cuerpo' (filas 5xx en el texto), 'cuerpo_pliego_unico' (DS a favor de UNA universidad: recibe el total), 'cuerpo_tabla_a_la' (TOTAL EGRESOS bajo el pliego en la tabla A LA).",
+  "finalidad se extrae automáticamente (art. 1 o título del anexo); en PDFs de El Peruano a dos columnas puede salir mezclada con otra norma: contrastar con 'descripcion' (sumilla oficial de gob.pe) y el PDF.",
   "monto_universidades puede ser menor que monto_total cuando el DS también beneficia a otros pliegos.",
   "Las Resoluciones Ministeriales de MINEDU (desagregación de recursos) se listan en documentos pero no se suman, para no duplicar montos ya transferidos por DS.",
-  "canon: MEF 'Consulta de Transferencias' (Gobierno Nacional), monto acreditado en soles, recursos de canon/sobrecanon/regalías/FOCAM, tipos de operación 'Recursos autorizados' y 'Transferencia a universidades'."
+  "canon: MEF 'Consulta de Transferencias' (Gobierno Nacional), monto acreditado en soles, recursos de canon/sobrecanon/regalías/FOCAM, tipos de operación 'Recursos autorizados' y 'Transferencia a universidades'.",
+  "Regenerar (venv ~/.venvs/pu-normativa): normativa_descubrir.py → normativa_descargar.py → normativa_texto.py → normativa_leyes.py → normativa_canon.py → normativa_build.py (todos en etl/)."
  ],
  "resumen": {
   "documentos": 141,
   "transferencias": 73,
-  "transferencias_con_desglose": 59,
-  "transferencias_que_cuadran": 42,
+  "transferencias_con_desglose": 58,
+  "transferencias_que_cuadran": 40,
   "leyes_con_pia": [
    2017,
    2018,
@@ -1608,15 +1611,13 @@
    "descripcion": "Autorizan Crédito Suplementario en el Presupuesto del Sector Público para el Año Fiscal 2019 a favor de la Universidad Nacional Autónoma de Alto Amazonas, del Gobierno Regional del departamento de Huánuco y de diversos Gobiernos Locales",
    "monto_total": 21259995.0,
    "monto_total_fuente": "repetido",
-   "monto_universidades": 21259995.0,
-   "n_universidades": 1,
-   "cuadra": true,
+   "monto_universidades": null,
+   "n_universidades": 0,
+   "cuadra": null,
    "anexo_duplicado_corregido": null,
-   "por_pliego": {
-    "557": 21259995.0
-   },
-   "desglose_fuente": "cuerpo_pliego_unico",
-   "nota": null
+   "por_pliego": {},
+   "desglose_fuente": null,
+   "nota": "El PDF no desagrega montos por universidad (o no se pudo leer la tabla); no se imputa."
   },
   {
    "norma": "DS N° 288-2020-EF",
@@ -1901,17 +1902,17 @@
    ],
    "finalidad": "Autorizan Transferencia de Partidas en el Presupuesto del Sector Público para el Año Fiscal 2021 a favor de la Reserva de Contingencia y de la Universidad Nacional Mayor de San Marcos",
    "descripcion": "Autorizan Transferencia de Partidas en el Presupuesto del Sector Público para el Año Fiscal 2021 a favor de la Reserva de Contingencia y de la Universidad Nacional Mayor de San Marcos",
-   "monto_total": 5642147.0,
-   "monto_total_fuente": "total_egresos_a_la",
+   "monto_total": 8552035.0,
+   "monto_total_fuente": "repetido",
    "monto_universidades": 5642147.0,
    "n_universidades": 1,
-   "cuadra": true,
+   "cuadra": false,
    "anexo_duplicado_corregido": null,
    "por_pliego": {
     "510": 5642147.0
    },
-   "desglose_fuente": "cuerpo_pliego_unico",
-   "nota": null
+   "desglose_fuente": "cuerpo_tabla_a_la",
+   "nota": "Suma de universidades < monto total: el DS también transfiere a otros pliegos (p. ej. MINEDU, SUNEDU, gobiernos regionales) o parte del anexo no se pudo leer."
   },
   {
    "norma": "DS N° 008-2022-EF",

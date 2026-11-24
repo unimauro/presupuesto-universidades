@@ -49,8 +49,6 @@ LEYES = {
            "https://www.gob.pe/institucion/mef/normas-legales/6278077-32185"),
     2026: ("Ley N° 32513", MEF + "ppto2026/Anexo_4.PDF", ["mef"],
            "https://www.gob.pe/institucion/mef/normas-legales/7475743-32513"),
-    2027: ("Proyecto de Ley de Presupuesto 2027", "https://www.mef.gob.pe/contenidos/presu_publ/sectr_publ/proy_2027/Anexos/Anexo_4.PDF",
-           ["mef"], None),
 }
 
 S = requests.Session()

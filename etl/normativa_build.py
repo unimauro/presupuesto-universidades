@@ -317,11 +317,19 @@ def main():
                 te = [(m.start(), ultimo_monto(m.group(1))) for m in
                       re.finditer(r"TOTAL\s*EGRESOS\s*([\d .,]+\d)", cuerpo_ds, re.I)]
                 sig = [v for st, v in te if pos and st > pos[0] and v]
-                monto_u = sig[0] if sig else total
-                filas = [(p1, n1, monto_u)]
-                if sig and abs(monto_u - total) > 1:
-                    total, via_total = monto_u, "total_egresos_a_la"
-                desglose = "cuerpo_pliego_unico"
+                fav = desc.split("a favor", 1)[-1] if "a favor" in desc else ""
+                unico = bool(re.search(r"universidad", fav, re.I)) and not re.search(
+                    r"\by de\b|,\s*del?\b|diversos|diversas|gobierno|reserva|ministerio", fav, re.I)
+                monto_u = sig[0] if sig else None
+                if unico:
+                    monto_u = monto_u or total
+                    if abs(monto_u - total) > 1:
+                        total, via_total = monto_u, "total_egresos_a_la"
+                elif monto_u is not None and abs(monto_u - total) <= 1:
+                    monto_u = None  # varios beneficiarios y el único monto visible es el total: no imputar
+                if monto_u:
+                    filas = [(p1, n1, monto_u)]
+                    desglose = "cuerpo_pliego_unico" if unico else "cuerpo_tabla_a_la"
         por = {}
         for p, nom, v in filas:
             por[p] = por.get(p, 0) + v
@@ -379,12 +387,6 @@ def main():
                                    "tipo": "ley"})
     # documentos agregados a mano (no están en gob.pe)
     documentos.append({
-        "titulo": "Proyecto de Ley de Presupuesto del Sector Público para el AF 2027 (PL 00002/2026-2031-CR, "
-                  "presentado por el Ejecutivo el 28-ago-2026, Oficio 242-2026-PR) — dictamen; copia NO oficial "
-                  "(lpderecho.pe). Anexo 4 por pliego no ubicado en fuente oficial accesible.",
-        "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-        "anio": 2026, "tipo": "ley"})
-    documentos.append({
         "titulo": "MEF — Consulta de Transferencias a los Gobiernos Nacional, Regional, Local y EPS "
                   "(canon, sobrecanon, regalías y FOCAM a universidades)",
         "url": "https://apps5.mineco.gob.pe/transferencias/gn/default.aspx", "anio": 2026, "tipo": "otro"})
@@ -405,16 +407,22 @@ def main():
     notas += [
         "Fuente de normas: buscador de normas legales de gob.pe (MEF y MINEDU) + PDFs oficiales (El Peruano/anexos).",
         "PIA por pliego: Anexo 4 de cada Ley de Presupuesto (copias de mef.gob.pe vía gob.pe o Internet Archive; "
-        "mef.gob.pe bloquea la descarga automatizada). 2016 (Ley 30372) y Proyecto 2027 no ubicados.",
+        "mef.gob.pe bloquea la descarga automatizada). 2016 (Ley 30372) no ubicado. El presupuesto 2027 lo cubre data/ley2027/.",
         "transferencias: solo DS/DU de transferencia de partidas o crédito suplementario que mencionan universidades en "
         "gob.pe; la cobertura NO es exhaustiva (hay DS que transfieren a 'diversos pliegos' sin mencionar universidades en el sumario).",
         "por_pliego vacío = el PDF no desagrega por universidad o no se pudo leer; no se imputa.",
+        "desglose_fuente: 'anexo' (tabla del anexo), 'cuerpo' (filas 5xx en el texto), 'cuerpo_pliego_unico' (DS a favor "
+        "de UNA universidad: recibe el total), 'cuerpo_tabla_a_la' (TOTAL EGRESOS bajo el pliego en la tabla A LA).",
+        "finalidad se extrae automáticamente (art. 1 o título del anexo); en PDFs de El Peruano a dos columnas puede salir "
+        "mezclada con otra norma: contrastar con 'descripcion' (sumilla oficial de gob.pe) y el PDF.",
         "monto_universidades puede ser menor que monto_total cuando el DS también beneficia a otros pliegos.",
         "Las Resoluciones Ministeriales de MINEDU (desagregación de recursos) se listan en documentos pero no se suman, "
         "para no duplicar montos ya transferidos por DS.",
         "canon: MEF 'Consulta de Transferencias' (Gobierno Nacional), monto acreditado en soles, recursos de "
         "canon/sobrecanon/regalías/FOCAM, tipos de operación 'Recursos autorizados' y 'Transferencia a universidades'.",
     ]
+    notas.append("Regenerar (venv ~/.venvs/pu-normativa): normativa_descubrir.py → normativa_descargar.py → "
+                 "normativa_texto.py → normativa_leyes.py → normativa_canon.py → normativa_build.py (todos en etl/).")
     tr_ok = [t for t in transferencias if t["por_pliego"]]
     out = {
         "generado": datetime.now().isoformat(timespec="seconds"),

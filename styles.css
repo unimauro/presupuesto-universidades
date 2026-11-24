@@ -428,3 +428,13 @@ body { font-size: 15.5px; line-height: 1.6; }
 .card { border-radius: 16px; }
 .legend li { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-weight: 600; color: var(--ink); }
 .legend i { border-radius: 3px; }
+
+/* UX P1-6 (restantes): objetivos táctiles ≥ 44 px y sin desborde horizontal (P2) */
+html, body { overflow-x: clip; }
+@media (pointer: coarse) {
+  details.deps summary { padding: 12px 0; }
+  .deps-grid a { display: block; padding: 12px 0; margin: 0; }
+  #body-expectativa .tlist strong a, #body-expectativa .tlist a { display: inline-block; padding: 12px 0; }
+  #fi-link, #fi-seo a, .card p.sub a, .note a { display: inline-block; padding: 12px 0; }
+  a.brand { min-height: 44px; }
+}

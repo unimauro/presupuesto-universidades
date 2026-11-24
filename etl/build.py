@@ -126,7 +126,7 @@ def main():
         y = (t.get("fecha") or "")[:4]
         for pl, m in (t.get("por_pliego") or {}).items():
             trans.setdefault(pl, {}).setdefault(y, []).append(
-                {"norma": t.get("norma"), "fecha": t.get("fecha"), "monto": m, "finalidad": t.get("finalidad"), "url": t.get("url")})
+                {"norma": t.get("norma"), "fecha": t.get("fecha"), "monto": m, "finalidad": t.get("descripcion") or t.get("finalidad"), "url": t.get("url")})
     canon = nor.get("canon", {})
     ley_pia = {}
     for l in nor.get("leyes", []):
