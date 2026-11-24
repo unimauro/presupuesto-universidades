@@ -45,7 +45,10 @@ for u in obs["universidades"]:
          "pia_2026": pia26, "pim_2026": (a26.get("total") or {}).get("pim"), "pia_2027": p27,
          "delta": p27 - pia26, "var_pct": (p27 / pia26 - 1) if pia26 else None, "nueva": not pia26,
          "estudiantes": est, "ejec_2025": k25.get("ejec"), "ejec_proy_2025": k25.get("ejec_proyectos"),
-         "dev_2025": (a25.get("total") or {}).get("dev")}
+         "dev_2025": (a25.get("total") or {}).get("dev"),
+         "pia_2025": (a25.get("total") or {}).get("pia"), "pim_2025": (a25.get("total") or {}).get("pim")}
+    r["var_vs_pim_2026"] = (p27 / r["pim_2026"] - 1) if r.get("pim_2026") else None
+    r["var_pia_2026_vs_2025"] = (pia26 / r["pia_2025"] - 1) if r.get("pia_2025") and pia26 else None
     # descomposición del delta por genérica y por fuente
     for k, pref in GEN.items():
         r[f"d_{k}"] = g(e.get("generica"), pref) - gen26(a26, pref)
