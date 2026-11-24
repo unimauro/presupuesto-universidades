@@ -10,7 +10,7 @@ Concepto: fachada universitaria (frontón) cuyas columnas son barras de presupue
 | Logo horizontal (fondo oscuro) | `assets/brand/logo-dark.svg` |
 | Símbolo | `assets/brand/logo-mark.svg` |
 | Favicon | `assets/brand/favicon.svg`, `favicon-32.png`, `favicon-180.png` (apple-touch), `favicon-512.png` |
-| OG 1200×630 | `assets/og/og.png` (fuente `og.svg`) |
+| OG 1200×630 | `assets/og/og.png` (index), `og-historias.png` (historias), `og-2027.png`; variantes en `assets/og/variantes/`. **Generados** por `python3 etl/og_generar.py` con cifras reales de `data/observatorio.json` — no editar a mano; regenerar tras `etl/build.py`. |
 
 ```html
 <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">

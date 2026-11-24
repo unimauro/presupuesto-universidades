@@ -71,6 +71,7 @@
     fuentes: { metric: 'pim', uni: '' },
     ficha: { uni: null, cmp: [] },
     exp: { sort: 'var', dir: -1, q: '' },
+    vr: { a: null, b: null, m: 'dev', real: true, sort: 'dv', dir: -1, q: '', comp: 'generica' },
     map: null, mapLayer: null, tiles: null,
   };
   const kpiCache = new Map();
@@ -276,6 +277,237 @@
         scales: { y: { min: 0, max: 100, ticks: { callback: tickP } } },
       },
     }, 'Porcentaje de ejecución anual del conjunto de universidades');
+  }
+
+  // ================================================================== ¿SUBIÓ O BAJÓ?
+  const ipcIdx = y => { const i = S.data && S.data.ipc && S.data.ipc.indice; return i ? num(i[String(y)]) : null; };
+  const hasIpc = () => S.years.some(y => ipcIdx(y) !== null);
+  const toReal = (v, y) => { const i = ipcIdx(y); return (num(v) === null || !i) ? null : v * 100 / i; };
+  const ipcBase = () => (S.data && S.data.ipc && S.data.ipc.base) || '2025';
+  const METRIC_LBL = { pia: 'PIA', pim: 'PIM', dev: 'Devengado' };
+  const COMP_GEN = [
+    { lbl: 'Personal y obligaciones sociales', frags: ['2.1'], c: '--k1' },
+    { lbl: 'Pensiones', frags: ['2.2'], c: '--k2' },
+    { lbl: 'Bienes y servicios', frags: ['2.3'], c: '--k3' },
+    { lbl: 'Infraestructura y equipos (2.6)', frags: ['2.6'], c: '--k5' },
+    { lbl: 'Otros (2.4, 2.5, 2.8)', frags: ['2.4', '2.5', '2.7', '2.8'], c: '--k4' },
+  ];
+  const COMP_FUE = [
+    { lbl: 'Recursos ordinarios (RO)', frags: ['ORDINARIOS'], c: '--k1' },
+    { lbl: 'Recursos directamente recaudados (RDR)', frags: ['DIRECTAMENTE'], c: '--k3' },
+    { lbl: 'Recursos determinados (canon)', frags: ['DETERMINADOS'], c: '--k5' },
+    { lbl: 'Donaciones, transferencias y crédito', frags: ['DONACIONES', 'OPERACIONES OFICIALES'], c: '--k6' },
+  ];
+  function vrDefaults() {
+    const closed = S.years.filter(y => !isPartial(y) && S.unis.some(u => A(u, y)));
+    const cnt = y => S.unis.filter(u => num(tot(u, y, 'dev')) !== null).length;
+    const maxC = Math.max(0, ...closed.map(cnt));
+    let a = closed.includes('2016') ? '2016' : (closed.find(y => cnt(y) >= 0.7 * maxC) || closed[0]);
+    const b = S.lastClosed;
+    if (a === b) a = closed[0];
+    return { a, b };
+  }
+  function readVrParams() {
+    const p = new URLSearchParams(location.search);
+    const ys = S.years.map(String);
+    if (ys.includes(p.get('a'))) S.vr.a = p.get('a');
+    if (ys.includes(p.get('b'))) S.vr.b = p.get('b');
+    if (['pia', 'pim', 'dev'].includes(p.get('m'))) S.vr.m = p.get('m');
+    if (p.get('r') === '0' || p.get('r') === '1') S.vr.real = p.get('r') === '1';
+    return p.has('a') || p.has('b');
+  }
+  function writeVrParams() {
+    try {
+      const p = new URLSearchParams(location.search);
+      p.set('a', S.vr.a); p.set('b', S.vr.b); p.set('m', S.vr.m); p.set('r', S.vr.real ? '1' : '0');
+      history.replaceState(null, '', location.pathname + '?' + p.toString() + location.hash);
+    } catch (e) { /* sin history */ }
+  }
+  // Valor de una universidad en un año, según métrica y modo
+  const vrVal = (u, y, real) => { const v = tot(u, y, S.vr.m); return real ? toReal(v, y) : v; };
+  const compVal = (u, y, field, comp, real) => {
+    const o = (A(u, y) || {})[field];
+    const v = sum(comp.frags.map(f => (pick(o, f) || {})[S.vr.m]));
+    return real ? toReal(v, y) : v;
+  };
+  const pctChg = (a, b) => (num(a) !== null && num(b) !== null && a !== 0) ? (b - a) / Math.abs(a) : null;
+  const arrow = v => num(v) === null ? '' : v > 0.0005 ? '▲' : v < -0.0005 ? '▼' : '＝';
+  function renderVariacion() {
+    const el = $('#body-variacion');
+    if (!S.vr.a || !S.vr.b) Object.assign(S.vr, vrDefaults(), S.vr.a ? { a: S.vr.a } : {}, S.vr.b ? { b: S.vr.b } : {});
+    if (!hasIpc()) S.vr.real = false;
+    const { a, b, m } = S.vr; const real = S.vr.real;
+    const modeLbl = real ? `soles reales de ${ipcBase()}` : 'soles corrientes';
+    const unisA = S.unis.filter(u => num(tot(u, a, m)) !== null);
+    const unisB = S.unis.filter(u => num(tot(u, b, m)) !== null);
+    const both = unisB.filter(u => num(tot(u, a, m)) !== null);
+    const nuevas = unisB.filter(u => num(tot(u, a, m)) === null);
+    const TA = sum(unisA.map(u => vrVal(u, a, real))), TB = sum(unisB.map(u => vrVal(u, b, real)));
+    const CA = sum(both.map(u => vrVal(u, a, real))), CB = sum(both.map(u => vrVal(u, b, real)));
+    const dT = pctChg(TA, TB), dC = pctChg(CA, CB);
+    const verbo = v => v === null ? 'varió' : v > 0.0005 ? 'subió' : v < -0.0005 ? 'bajó' : 'se mantuvo';
+    const what = { pia: 'el presupuesto de apertura (PIA)', pim: 'el presupuesto modificado (PIM)', dev: 'el gasto ejecutado (devengado)' }[m];
+    const frase = dT === null ? 'No hay datos suficientes para comparar esos años.'
+      : `${real ? 'En términos reales' : 'En soles corrientes'}, ${what} de las universidades públicas ${verbo(dT)}${Math.abs(dT) > 0.0005 ? ' ' + fmtP(Math.abs(dT)) : ''} entre ${a} y ${b}.`;
+    const yOpts = sel => S.years.map(y => `<option value="${esc(y)}"${String(y) === String(sel) ? ' selected' : ''}>${esc(yearLbl(y))}</option>`).join('');
+    const compCats = S.vr.comp === 'fuente' ? COMP_FUE : COMP_GEN;
+    const field = S.vr.comp === 'fuente' ? 'fuente' : 'generica';
+    const compRows = compCats.map(c => {
+      const va = sum(unisA.map(u => compVal(u, a, field, c, real))), vb = sum(unisB.map(u => compVal(u, b, field, c, real)));
+      return Object.assign({}, c, { va, vb, d: pctChg(va, vb) });
+    }).filter(c => c.va !== null || c.vb !== null);
+    // por universidad
+    const rows = unisB.map(u => {
+      const va = vrVal(u, a, real), vb = vrVal(u, b, real);
+      const ra = toReal(tot(u, a, m), a), rb = toReal(tot(u, b, m), b);
+      const ea = num((A(u, a) || {}).estudiantes), eb = num((A(u, b) || {}).estudiantes);
+      const pa = div(va, ea), pb = div(vb, eb);
+      return { u, va, vb, dabs: (va !== null && vb !== null) ? vb - va : null, dv: pctChg(va, vb), dr: pctChg(ra, rb), pa, pb, dp: pctChg(pa, pb), nueva: va === null };
+    });
+    const ranked = rows.filter(r => r.dv !== null).sort((x, y) => y.dv - x.dv);
+    const N = isMobile() ? 8 : 10;
+    const chartRows = ranked.length > 2 * N ? ranked.slice(0, N).concat(ranked.slice(-N)) : ranked;
+    const partialWarn = [a, b].filter(isPartial);
+    el.innerHTML = `
+      <div class="controls">
+        <label>Año A<select id="vr-a">${yOpts(a)}</select></label>
+        <label>Año B<select id="vr-b">${yOpts(b)}</select></label>
+        ${seg('Métrica', [['dev', 'Devengado'], ['pim', 'PIM'], ['pia', 'PIA']], m)}
+        ${hasIpc() ? `<div class="seg" data-real role="group" aria-label="Moneda"><button type="button" data-v="1" aria-pressed="${real}">Real</button><button type="button" data-v="0" aria-pressed="${!real}">Nominal</button></div>` : ''}
+      </div>
+      <p class="note">${hasIpc() ? (real ? `<strong>Real</strong>: soles de ${esc(ipcBase())}, descontando la inflación (IPC Lima, BCRP).` : '<strong>Nominal</strong>: soles de cada año, sin ajustar por inflación.') : 'No hay índice de precios en los datos: solo se puede comparar en soles corrientes.'}</p>
+      ${partialWarn.length ? `<p class="note warn"><strong>${esc(partialWarn.join(' y '))}</strong> es un año en curso: su ${m === 'dev' ? 'devengado es parcial y la comparación exagera la caída' : 'presupuesto aún puede modificarse'}.</p>` : ''}
+      ${a === b ? '<p class="note warn">Elige dos años distintos.</p>' : ''}
+      <div class="card">
+        <div class="big-var ${dT > 0.0005 ? 'up' : dT < -0.0005 ? 'down' : ''}">
+          <div class="bv-row"><span class="bv-arrow" aria-hidden="true">${arrow(dT)}</span><div><div class="bv-pct">${dT === null ? SD : (dT > 0 ? '+' : dT < 0 ? '−' : '') + esc(fmtP(Math.abs(dT)))}</div><div class="bv-abs">${esc(fmtDelta(TB, TA))} · ${esc(METRIC_LBL[m])}, ${esc(modeLbl)}</div></div></div>
+          <div>
+            <p class="bv-ab">${esc(a)}: <b>${esc(fmtM(TA))}</b> (${unisA.length} univ.) → ${esc(b)}: <b>${esc(fmtM(TB))}</b> (${unisB.length} univ.)</p>
+            <p class="sentence">${esc(frase)}</p>
+            ${nuevas.length ? `<p class="note">${esc(b)} incluye ${nuevas.length} universidades sin datos en ${esc(a)} (nuevas o sin presupuesto propio). Solo con las ${both.length} presentes en ambos años, la variación es <strong>${dC === null ? SD : (dC >= 0 ? '+' : '−') + esc(fmtP(Math.abs(dC)))}</strong>.</p>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <div class="controls" style="margin-bottom:4px">${seg('Componente', [['generica', 'En qué gastan'], ['fuente', 'De dónde viene']], S.vr.comp)}</div>
+          <h3>Por componente: ${esc(a)} vs ${esc(b)}</h3>
+          <p class="sub">${esc(METRIC_LBL[m])} en millones de ${esc(modeLbl)}.</p>
+          <div class="chart"><canvas id="ch-vr-comp"></canvas></div>
+          <ul class="comp-list">${compRows.map(c => `<li><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${cssVar(c.c)};margin-right:6px"></i>${esc(c.lbl)}</span><span>${fmtVar(c.d)}</span></li>`).join('')}</ul>
+        </div>
+        <div class="card">
+          <h3>Universidades que más suben y más bajan</h3>
+          <p class="sub">Variación % del ${esc(METRIC_LBL[m])} entre ${esc(a)} y ${esc(b)} (${esc(modeLbl)}). ${chartRows.length < ranked.length ? `Las ${N} que más suben y las ${N} que más bajan.` : ''} Las nuevas no se incluyen.</p>
+          <div class="chart"><canvas id="ch-vr-uni"></canvas></div>
+        </div>
+      </div>
+      <h3 style="margin:20px 0 8px">Todas las universidades</h3>
+      <div class="controls"><label class="grow">Buscar<input type="search" id="vr-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.vr.q)}"></label></div>
+      <div class="table-wrap"><table id="vr-table"><caption>${esc(METRIC_LBL[m])} ${esc(a)} vs ${esc(b)}, ${esc(modeLbl)}.</caption><thead></thead><tbody></tbody></table></div>
+      <p class="count"><button type="button" class="btn" id="vr-share">Copiar enlace a esta comparación</button></p>`;
+
+    const cols = [
+      ['nombre', 'Universidad', r => uName(r.u)], ['va', esc(a), r => r.va], ['vb', esc(b), r => r.vb],
+      ['dabs', 'Δ S/', r => r.dabs], ['dv', real ? 'Δ % (real)' : 'Δ % (nominal)', r => r.dv],
+      ['dr', 'Δ real %', r => r.dr], ['pb', `S/ por estudiante ${esc(b)}`, r => r.pb], ['dp', 'Δ % por estudiante', r => r.dp],
+    ].filter(c => !(real && c[0] === 'dr')).filter(c => !(['pb', 'dp'].includes(c[0]) && !rows.some(r => r.pb !== null)));
+    const draw = () => {
+      const q = S.vr.q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const col = cols.find(c => c[0] === S.vr.sort) || cols.find(c => c[0] === 'dv');
+      const list = rows.filter(r => !q || [r.u.nombre, r.u.corto, r.u.pliego, r.u.departamento].join(' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q))
+        .sort((x, y) => {
+          const va = col[2](x), vb = col[2](y);
+          if (typeof va === 'string') return S.vr.dir * va.localeCompare(vb, LOC);
+          if (va === null && vb === null) return 0; if (va === null) return 1; if (vb === null) return -1;
+          return S.vr.dir * (va - vb);
+        });
+      $('#vr-table thead', el).innerHTML = '<tr>' + cols.map((c, i) => `<th scope="col" class="${i === 0 ? 'txt sticky-col' : ''}" aria-sort="${S.vr.sort === c[0] ? (S.vr.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-k="${c[0]}">${c[1]}</button></th>`).join('') + '</tr>';
+      const cell = (c, r) => {
+        if (c[0] === 'nombre') return `<td class="txt sticky-col"><a class="uni-link" title="${esc(r.u.nombre || '')}" href="#u=${encodeURIComponent(r.u.pliego)}">${esc(uName(r.u))}</a>${r.nueva ? '<span class="tag new">nueva</span>' : ''}<span class="uni-sub">${esc(r.u.nombre || '')}</span></td>`;
+        const v = c[2](r);
+        if (['dv', 'dr', 'dp'].includes(c[0])) return `<td>${fmtVar(v)}</td>`;
+        if (c[0] === 'dabs') return `<td>${esc(num(v) === null ? SD : fmtSigned(v))}</td>`;
+        if (c[0] === 'pb') return `<td>${esc(fmtS(v))}</td>`;
+        return `<td>${esc(fmtM(v))}</td>`;
+      };
+      $('#vr-table tbody', el).innerHTML = list.map(r => '<tr>' + cols.map(c => cell(c, r)).join('') + '</tr>').join('') || `<tr><td colspan="${cols.length}" class="txt muted">Sin resultados.</td></tr>`;
+    };
+    draw();
+
+    const rerun = () => { writeVrParams(); renderVariacion(); if (S.rendered.has('ficha')) renderFicha(); };
+    $('#vr-a', el).addEventListener('change', e => { S.vr.a = e.target.value; rerun(); });
+    $('#vr-b', el).addEventListener('change', e => { S.vr.b = e.target.value; rerun(); });
+    bindSeg(el, (v, g) => {
+      const lbl = g.getAttribute('aria-label');
+      if (lbl === 'Métrica') S.vr.m = v;
+      else if (lbl === 'Moneda') S.vr.real = v === '1';
+      else if (lbl === 'Componente') S.vr.comp = v;
+      rerun();
+    });
+    $('#vr-q', el).addEventListener('input', debounce(e => { S.vr.q = e.target.value; draw(); }));
+    $('#vr-table thead', el).addEventListener('click', e => {
+      const bt = e.target.closest('button.sort'); if (!bt) return;
+      if (S.vr.sort === bt.dataset.k) S.vr.dir *= -1; else { S.vr.sort = bt.dataset.k; S.vr.dir = bt.dataset.k === 'nombre' ? 1 : -1; }
+      draw();
+    });
+    $('#vr-share', el).addEventListener('click', async e => {
+      writeVrParams();
+      const url = location.href.split('#')[0] + '#variacion';
+      try { await navigator.clipboard.writeText(url); e.target.textContent = 'Enlace copiado'; }
+      catch (err) { e.target.textContent = 'Copia la URL de la barra del navegador'; }
+      setTimeout(() => { e.target.textContent = 'Copiar enlace a esta comparación'; }, 2200);
+    });
+
+    mkChart('ch-vr-comp', {
+      type: 'bar',
+      data: { labels: compRows.map(c => c.lbl), datasets: [
+        { label: String(a), data: compRows.map(c => mill(c.va)), backgroundColor: cssVar('--c-pia'), borderRadius: 3 },
+        { label: String(b), data: compRows.map(c => mill(c.vb)), backgroundColor: compRows.map(c => cssVar(c.c)), borderRadius: 3 },
+      ] },
+      options: {
+        indexAxis: 'y', interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttM, afterBody: it => { const c = compRows[it[0].dataIndex]; return c && c.d !== null ? `Variación: ${c.d > 0 ? '+' : ''}${fmtP(c.d)}` : ''; } } } },
+        scales: { x: { beginAtZero: true, ticks: { callback: tickM, maxTicksLimit: isMobile() ? 4 : 7 } }, y: { ticks: { autoSkip: false, callback: function (v) { const l = this.getLabelForValue(v); return isMobile() && l.length > 18 ? l.slice(0, 17) + '…' : l; } } } },
+      },
+    }, `Comparación por componente entre ${a} y ${b}`);
+    const vals = chartRows.map(r => +(r.dv * 100).toFixed(1));
+    sizeFor('ch-vr-uni', chartRows.length, isMobile() ? 26 : 22);
+    mkChart('ch-vr-uni', {
+      type: 'bar',
+      data: { labels: chartRows.map(r => uName(r.u)), datasets: [{ label: 'Variación', data: vals, borderRadius: 3, backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: it => (chartRows[it[0].dataIndex] || {}).u.nombre || it[0].label,
+          label: ctx => { const r = chartRows[ctx.dataIndex]; return [`Variación: ${ctx.raw > 0 ? '+' : ''}${ctx.raw.toLocaleString(LOC)} %`, `${a}: ${fmtM(r.va)}`, `${b}: ${fmtM(r.vb)}`]; },
+        } } },
+        scales: { x: { ticks: { callback: tickP } }, y: { ticks: { autoSkip: false } } },
+      },
+    }, `Universidades con mayor subida y bajada entre ${a} y ${b}`);
+  }
+  // Mini bloque en la ficha: serie nominal vs real
+  function fichaVrHtml(u) {
+    if (!hasIpc()) return '';
+    if (!S.vr.a || !S.vr.b) Object.assign(S.vr, vrDefaults());
+    const m = S.vr.m, a = S.vr.a, b = S.vr.b;
+    const na = tot(u, a, m), nb = tot(u, b, m);
+    const dn = pctChg(na, nb), dr = pctChg(toReal(na, a), toReal(nb, b));
+    return `<div class="card" style="margin-top:12px"><h3>¿Subió o bajó? ${esc(uName(u))}</h3>
+      <p class="sub">${esc(METRIC_LBL[m])} ${esc(a)} → ${esc(b)}: nominal ${fmtVar(dn)} · real ${fmtVar(dr)} (soles de ${esc(ipcBase())}). <a href="#variacion">Cambiar años o métrica</a>.</p>
+      <div class="chart"><canvas id="ch-fi-vr"></canvas></div></div>`;
+  }
+  function fichaVrChart(u) {
+    if (!hasIpc() || !document.getElementById('ch-fi-vr')) return;
+    const m = S.vr.m, yrs = S.years;
+    mkChart('ch-fi-vr', {
+      type: 'line',
+      data: { labels: yrs.map(String), datasets: [
+        { label: 'Nominal', data: yrs.map(y => mill(tot(u, y, m))), borderColor: cssVar('--c-pia'), backgroundColor: cssVar('--c-pia'), borderDash: [4, 3], tension: .25, pointRadius: 2 },
+        { label: `Real (soles de ${ipcBase()})`, data: yrs.map(y => mill(toReal(tot(u, y, m), y))), borderColor: cssVar('--c-pim'), backgroundColor: cssVar('--c-pim'), borderWidth: 2.5, tension: .25, pointRadius: 2 },
+      ] },
+      options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ttM, title: it => yearLbl(it[0].label) } } }, scales: { y: { beginAtZero: true, ticks: { callback: tickM } } } },
+    }, `${METRIC_LBL[m]} de ${uName(u)} en soles nominales y reales`);
   }
 
   // ================================================================== 2. RANKING
@@ -935,6 +1167,7 @@
         ${proys.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Avance</th></tr></thead><tbody>${proys.slice().sort((p, q) => (num(q.pim) || 0) - (num(p.pim) || 0)).map(p => `<tr><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pia)))}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td>${pill(div(p.dev, p.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin proyectos de inversión registrados este año.</p>'}
       </div>
 
+      ${fichaVrHtml(u)}
       ${fichaExpHtml(u)}
 
       <h3 style="margin:24px 0 8px">Comparador</h3>
@@ -990,6 +1223,7 @@
     mkChart('ch-fi-gen', { type: 'bar', data: { labels: yrs.map(String), datasets: stackSer('generica', GENERICAS, 'dev') }, options: stackOpts }, `Gasto por genérica de ${uName(u)}`);
     mkChart('ch-fi-fue', { type: 'bar', data: { labels: yrs.map(String), datasets: stackSer('fuente', FUENTES.filter(c => yrs.some(yy => pick((A(u, yy) || {}).fuente, c.frag))), 'pim') }, options: stackOpts }, `Fuentes de financiamiento de ${uName(u)}`);
 
+    fichaVrChart(u);
     const pal = ['--c-pim', '--c-dev', '--k5'];
     mkChart('ch-radar', {
       type: 'radar',
@@ -1119,7 +1353,7 @@
 
   // ================================================================== registro / lazy render
   const SECTIONS = {
-    resumen: renderResumen, ranking: renderRanking, trayectoria: renderTrayectoria, expectativa: renderExpectativa, gasto: renderGasto,
+    resumen: renderResumen, variacion: renderVariacion, ranking: renderRanking, trayectoria: renderTrayectoria, expectativa: renderExpectativa, gasto: renderGasto,
     fuentes: renderFuentes, infra: renderInfra, idi: renderIdi, ficha: renderFicha, mapa: renderMapa,
     metodologia: renderMetodologia,
   };
@@ -1264,6 +1498,7 @@
       if (isMobile() !== wasMobile) { wasMobile = isMobile(); rerenderAll(); }
     }, 250));
     window.addEventListener('hashchange', handleHash);
+    const vrLinked = readVrParams();
 
     // Expectativa 2027: solo si viene en los datos
     if (d.expectativa_2027 && typeof d.expectativa_2027 === 'object') {
@@ -1282,6 +1517,7 @@
     const renderAll = () => Object.keys(SECTIONS).forEach(id => { if (!S.rendered.has(id)) renderSection(id); });
     window.addEventListener('beforeprint', renderAll);
     if (/[?&]completo\b/.test(location.search)) renderAll();
+    if (vrLinked && !location.hash) { renderSection('variacion'); requestAnimationFrame(() => $('#variacion').scrollIntoView({ behavior: 'auto' })); }
     handleHash();
   }
 

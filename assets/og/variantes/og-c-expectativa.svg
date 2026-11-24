@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0 H0 V40" fill="none" stroke="#2B323E" stroke-width="1"/></pattern></defs>
+<rect width="1200" height="630" fill="#1B2230"/><rect width="1200" height="630" fill="url(#g)" opacity=".7"/>
+<rect x="40" y="40" width="550" height="490" rx="18" fill="#26346F"/>
+<rect x="610" y="40" width="550" height="490" rx="18" fill="#B0741A"/>
+<text x="315" y="120" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="46" font-weight="700" fill="#C6CCF5" text-anchor="middle" letter-spacing="4">EXPECTATIVA</text>
+<text x="315" y="300" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="132" font-weight="700" fill="#FFFFFF" text-anchor="middle" >S/ 7.7</text>
+<text x="315" y="360" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="40" font-weight="600" fill="#C6CCF5" text-anchor="middle" >mil millones</text>
+<text x="315" y="470" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="32" font-weight="400" fill="#C6CCF5" text-anchor="middle" >presupuesto 2025 (PIM)</text>
+<text x="885" y="120" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="46" font-weight="700" fill="#FFF4DF" text-anchor="middle" letter-spacing="4">REALIDAD</text>
+<text x="885" y="300" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="132" font-weight="700" fill="#FFFFFF" text-anchor="middle" >S/ 7.0</text>
+<text x="885" y="360" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="40" font-weight="600" fill="#FFF4DF" text-anchor="middle" >mil millones</text>
+<text x="885" y="470" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="32" font-weight="400" fill="#FFF4DF" text-anchor="middle" >gastado: 90%</text>
+<rect x="0" y="560" width="1200" height="70" fill="#12151B" opacity=".92"/>
+<g transform="translate(40 573) scale(0.6875)"><rect width="64" height="64" rx="12" fill="#26346F"/><path d="M12 22 L32 11 L52 22 Z" fill="none" stroke="#E6E8F3" stroke-width="2.6" stroke-linejoin="round"/><rect x="15" y="34" width="6" height="16" rx="1" fill="#E6E8F3"/><rect x="25" y="27" width="6" height="23" rx="1" fill="#E6E8F3"/><rect x="35" y="38" width="6" height="12" rx="1" fill="#E6E8F3" opacity=".7"/><rect x="45" y="30" width="4" height="20" rx="1" fill="#E0A447"/><path d="M11 53 H53" stroke="#E6E8F3" stroke-width="2.6" stroke-linecap="round"/><path d="M8 42 H56" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2 2" opacity=".55"/></g>
+<text x="98" y="604" font-family="Georgia, 'Source Serif 4', serif" font-size="24" font-weight="700" fill="#E9E6DF" text-anchor="start" >Radiografía Presupuestal</text>
+<text x="98" y="622" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="13" font-weight="400" fill="#9BA3B1" text-anchor="start" >65 universidades públicas · 2025 · Fuente: MEF – SIAF</text>
+<text x="1160" y="606" font-family="'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif" font-size="26" font-weight="600" fill="#E0A447" text-anchor="end" >unimauro.github.io/presupuesto-universidades</text>
+
+</svg>

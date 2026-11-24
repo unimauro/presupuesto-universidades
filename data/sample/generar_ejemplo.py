@@ -240,6 +240,9 @@ def main():
             {"norma": "[Ejemplo] Ley de Presupuesto del Sector Público 2025", "titulo": "Asigna el PIA a los pliegos universitarios", "fecha": "2024-12-05", "tipo": "Ley", "url": None},
         ],
         "expectativa_2027": expectativa,
+        "ipc": {"base": 2025, "fuente": "[Ejemplo] IPC Lima, promedio anual", "url": None,
+                "nota": "Soles reales de 2025 = nominal × 100 / índice del año.",
+                "indice": {str(y): round(100 / (1.03 ** (2025 - y)), 3) for y in ANIOS}},
         "nacional": nacional,
         "universidades": unis,
     }
