@@ -59,6 +59,22 @@ for u in obs["universidades"]:
     r["por_estudiante_2026"] = round(pia26 / est) if est and pia26 else None
     rows.append(r)
 
+def clasificar(r):
+    """Sube de verdad: PIA 2027 > PIA 2026 y > PIM 2026. Solo en papel: > PIA 2026 pero < PIM 2026. Baja: < PIA 2026."""
+    if r.get("sin_2027"):
+        return "sin_2027"
+    if r.get("nueva"):
+        return "nueva"
+    if r["pia_2027"] < r["pia_2026"]:
+        return "baja"
+    if r.get("pim_2026") and r["pia_2027"] < r["pim_2026"]:
+        return "sube_en_papel"
+    return "sube"
+
+
+for r in rows:
+    r["categoria"] = clasificar(r)
+
 con = [r for r in rows if not r.get("sin_2027")]
 tot_d = sum(r["delta"] for r in con)
 sube = sorted([r for r in con if r["delta"] > 0], key=lambda r: -r["delta"])
@@ -120,6 +136,9 @@ out = {
               "top5_delta": top5, "top5_pct_del_aumento": top5 / tot_d if tot_d else None,
               "top10_pct_del_aumento": top10 / tot_d if tot_d else None,
               "suma_subidas": sum(r["delta"] for r in sube), "suma_bajadas": sum(r["delta"] for r in baja)},
+    "categorias": {c: {"n": sum(1 for r in rows if r["categoria"] == c),
+                       "delta_vs_pia": sum((r.get("delta") or 0) for r in rows if r["categoria"] == c)}
+                   for c in ("sube", "sube_en_papel", "baja", "nueva", "sin_2027")},
     "por_generica": comp, "por_fuente": fuentes,
     "rho_ejecucion_vs_aumento": rho_ejec, "rho_ejec_proyectos_vs_aumento_inversion": rho_inv,
     "por_departamento": deps,

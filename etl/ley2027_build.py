@@ -157,17 +157,17 @@ def texto_paginas(pdfname, filtro):
     return out
 
 
-def parse_anexo5(codigos):
-    """Por pliego: categorías, productos/actividades, proyectos, genéricas."""
+def parse_anexo5(codigos=None):
+    """Por pliego (todos los del GN si codigos es None): categorías, productos/actividades, proyectos, genéricas."""
     res = {}
-    pat = re.compile(r"Pliego : ?(\d{3})")
-    pages = texto_paginas("Anexo_5.pdf", lambda t: bool(re.search(r"Pliego : ?5\d\d", t)))
+    pat = re.compile(r"Pliego : ?(\d{3}) ?(.*)")
+    pages = texto_paginas("Anexo_5.pdf", lambda t: bool(re.search(r"Pliego : ?\d{3}", t)))
     for _, t in pages:
         m = pat.search(t)
         cod = m.group(1)
-        if cod not in codigos:
+        if codigos is not None and cod not in codigos:
             continue
-        d = res.setdefault(cod, {"categorias": OrderedDict(), "productos": OrderedDict(),
+        d = res.setdefault(cod, {"nombre": m.group(2).strip(), "categorias": OrderedDict(), "productos": OrderedDict(),
                                  "actividades": OrderedDict(), "proyectos": OrderedDict(),
                                  "generica": OrderedDict(), "total": None})
         lines = t.splitlines()
@@ -294,7 +294,8 @@ def main():
     univ_a4 = {c: {"nombre": n, "fuente": f, "total": t} for c, n, f, t in filas4
                if c.startswith("5") and ES_UNIV.match(n)}
     codigos = set(univ_a4) | set(univ_gasto)
-    a5 = parse_anexo5(codigos)
+    a5_todos = parse_anexo5()
+    a5 = {c: v for c, v in a5_todos.items() if c in codigos}
     a8 = parse_anexo8(codigos)
 
     # Sector 10 (Educación) en el Anexo 4: bloque desde "010 M. DE EDUCACION" hasta "011 ..."
