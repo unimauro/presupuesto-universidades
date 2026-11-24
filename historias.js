@@ -55,7 +55,7 @@
   const programa = (a, code) => pick(a && a.programa, (k) => k.trim().startsWith(code));
   const fuenteRDR = (a) => pick(a && a.fuente, (k) => /DIRECTAMENTE\s+RECAUDADOS/i.test(k));
   const ingresoRDR = (a) => pick(a && a.ingresos && a.ingresos.fuente, (k) => /DIRECTAMENTE\s+RECAUDADOS/i.test(k));
-  const label = (u) => u.corto || u.nombre || u.pliego;
+  const label = (u) => { const t = String(u.corto || u.nombre || u.pliego); return t.length > 24 ? t.slice(0, 23) + '…' : t; };
 
   // ---------- estado ----------
   const S = { d: null, isSample: false, Y: null, hl: '', closed: [], partial: [], charts: [] };
@@ -66,7 +66,7 @@
     return {
       ink: v('--ink'), ink2: v('--ink-2'), line: v('--line'), card: v('--card'),
       pia: v('--c-pia'), pim: v('--c-pim'), dev: v('--c-dev'), hl: v('--c-hl'),
-      accent: v('--accent'), amber: v('--amber'), s3: v('--s3'), s4: v('--s4'), s5: v('--s5'),
+      accent: v('--accent'), amber: v('--amber'), k1: v('--k1'), k2: v('--k2'), k3: v('--k3'), k4: v('--k4'), k5: v('--k5'),
     };
   }
 
@@ -284,7 +284,7 @@
             const C = colors();
             hbar($('[data-fig="mix"]', el), {
               items, stacked: true, max: 1, fmt: (v) => pct(v), axis: (v) => pct(v),
-              series: [{ name: 'Personal (2.1)', color: C.pim }, { name: 'Pensiones (2.2)', color: C.s3 }, { name: 'Bienes y servicios (2.3)', color: C.dev }, { name: 'Activos no fin. (2.6)', color: C.s5 }, { name: 'Otros', color: C.s4 }],
+              series: [{ name: 'Personal (2.1)', color: C.k1 }, { name: 'Pensiones (2.2)', color: C.k2 }, { name: 'Bienes y servicios (2.3)', color: C.k3 }, { name: 'Activos no fin. (2.6)', color: C.k5 }, { name: 'Otros', color: C.k4 }],
               aria: 'Composición del gasto devengado por genérica y universidad',
             });
           },
@@ -395,7 +395,7 @@
             ])}${src('Ingresos: MEF — Consulta Amigable (ingresos por pliego).')}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="rdr"]', el), { items, series: [{ name: 'Financiado con RDR', color: C.accent }], fmt: (v) => pct(v), axis: (v) => pct(v), aria: 'Porcentaje del gasto financiado con recursos directamente recaudados' });
+            hbar($('[data-fig="rdr"]', el), { items, series: [{ name: 'Financiado con RDR', color: C.k3 }], fmt: (v) => pct(v), axis: (v) => pct(v), aria: 'Porcentaje del gasto financiado con recursos directamente recaudados' });
           },
         };
       },
@@ -430,7 +430,7 @@
             ])}${srcCtx('pubs', 'Publicaciones')}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.s3 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
+            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.k2 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
           },
         };
       },
@@ -461,7 +461,7 @@
             ])}${src()}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="crec"]', el), { items, series: [{ name: 'Variación', color: C.amber }], fmt: pctSigned, axis: (v) => pct(v), aria: 'Crecimiento del gasto devengado por universidad' });
+            hbar($('[data-fig="crec"]', el), { items, series: [{ name: 'Variación', color: C.dev }], fmt: pctSigned, axis: (v) => pct(v), aria: 'Crecimiento del gasto devengado por universidad' });
           },
         };
       },
@@ -473,6 +473,8 @@
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => { const a = u.anios[Y]; const e = isNum(a.estudiantes) && a.estudiantes > 0 ? a.estudiantes : null; return { u, e, v: e ? div(val(a.total, 'dev'), e) : null }; }).filter((r) => isNum(r.v));
+        const eYears = [...new Set(rows.map((r) => r.u.anios[Y].estudiantes_anio).filter((x) => x != null && String(x) !== String(Y)).map(String))].sort();
+        const eNote = eYears.length ? ` La matrícula disponible corresponde a ${eYears.length > 1 ? 'los años ' + eYears.join(', ') : 'el año ' + eYears[0]} (no a ${Y}): se usa el último dato publicado.` : '';
         const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), vals: [r.v], e: r.e })).sort((a, b) => b.vals[0] - a.vals[0]);
         const excl = U.length - rows.length;
         const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
@@ -480,7 +482,7 @@
         const hi = items[0], lo = items[items.length - 1];
         return {
           h2: `Por estudiante, el gasto anual va de <em>${esc(soles(lo.vals[0]))}</em> a <em>${esc(soles(hi.vals[0]))}</em>`,
-          html: `<p>Dividimos el gasto devengado total de ${esc(Y)} entre el número de estudiantes reportado. La mediana es ${esc(soles(median(items.map((i) => i.vals[0]))))} por estudiante al año; el valor más alto corresponde a ${esc(hi.label)} y el más bajo a ${esc(lo.label)}.${excl > 0 ? ` ${esc(excl)} universidades no tienen dato de matrícula para ${esc(Y)}.` : ''}</p>
+          html: `<p>Dividimos el gasto devengado total de ${esc(Y)} entre el número de estudiantes reportado. La mediana es ${esc(soles(median(items.map((i) => i.vals[0]))))} por estudiante al año; el valor más alto corresponde a ${esc(hi.label)} y el más bajo a ${esc(lo.label)}.${excl > 0 ? ` ${esc(excl)} universidades no tienen dato de matrícula para ${esc(Y)}.` : ''}${esc(eNote)}</p>
             <div class="stats">${stat(soles(median(items.map((i) => i.vals[0]))), 'Mediana por estudiante')}${stat(soles(lo.vals[0]), `Mínimo (${lo.label})`)}${stat(soles(hi.vals[0]), `Máximo (${hi.label})`)}</div>
             ${hlNote(hr ? `${esc(hr.label)}: ${esc(soles(hr.vals[0]))} por estudiante (${esc(nf0.format(hr.e))} estudiantes).` : '')}
             <div class="figure"><p class="cap">Devengado total por estudiante, ${esc(Y)}</p><div data-fig="est"></div></div>
@@ -605,8 +607,10 @@
     setupMeta();
     render();
     if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
-    const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-    if (mq && mq.addEventListener) mq.addEventListener('change', () => { chartDefaults(); render(); });
+    window.addEventListener('storage', (e) => {
+      if (e.key !== 'rp-theme' || (e.newValue !== 'dark' && e.newValue !== 'light')) return;
+      document.documentElement.setAttribute('data-theme', e.newValue); chartDefaults(); render();
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

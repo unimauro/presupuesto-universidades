@@ -188,6 +188,34 @@ def main():
     # quita un componente a una para probar tolerancia a nulls
     unis[-1]["indice"]["componentes"]["eficiencia"] = None
 
+    # Expectativa 2027 (ficticia): PIA 2027 vs PIA 2026
+    t26 = t27 = 0
+    for i, x in enumerate(unis):
+        a = x["anios"][str(PARCIAL)]
+        p26 = a["total"]["pia"]
+        p27 = round(p26 * r(0.9, 1.16))
+        t26 += p26
+        t27 += p27
+        f = p27 / p26
+        exp = {"pia_2027": p27, "pia_2026": p26, "var_pct": round((p27 / p26 - 1) * 100, 2),
+               "generica": {k: round(v["pia"] * f * r(0.95, 1.05)) for k, v in a["generica"].items()},
+               "fuente": {k: round(v["pia"] * f * r(0.95, 1.05)) for k, v in a["fuente"].items()}}
+        if i == len(unis) - 1:
+            exp = {"pia_2027": None, "pia_2026": p26, "var_pct": None}  # prueba de nulls
+        x["expectativa_2027"] = exp
+    expectativa = {
+        "version": "proyecto",
+        "norma": "[Ejemplo] Proyecto de Ley de Presupuesto del Sector Público para el Año Fiscal 2027",
+        "fecha": "2026-08-30", "url": None,
+        "documentos": [{"titulo": "[Ejemplo] Exposición de motivos", "url": None, "tipo": "PDF"}],
+        "notas": ["Cifras ficticias de ejemplo para probar la sección."],
+        "total_universidades": {"pia_2027": t27, "pia_2026": t26, "var_pct": round((t27 / t26 - 1) * 100, 2)},
+        "disposiciones": [
+            {"articulo": "[Ejemplo] Art. 25", "resumen": "Autoriza modificaciones presupuestales para el pago de la homologación docente.", "url": None},
+            {"articulo": "[Ejemplo] 45.ª Disposición Complementaria Final", "resumen": "Recursos para mantenimiento de infraestructura universitaria.", "url": None},
+        ],
+    }
+
     nacional = {}
     for y in ANIOS:
         ys = str(y)
@@ -211,6 +239,7 @@ def main():
             {"norma": "Ley N° 30220", "titulo": "Ley Universitaria", "fecha": "2014-07-09", "tipo": "Ley", "url": None},
             {"norma": "[Ejemplo] Ley de Presupuesto del Sector Público 2025", "titulo": "Asigna el PIA a los pliegos universitarios", "fecha": "2024-12-05", "tipo": "Ley", "url": None},
         ],
+        "expectativa_2027": expectativa,
         "nacional": nacional,
         "universidades": unis,
     }

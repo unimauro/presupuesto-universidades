@@ -6,7 +6,7 @@ Concepto: fachada universitaria (frontón) cuyas columnas son barras de presupue
 ## Archivos
 | Uso | Ruta |
 |---|---|
-| Logo horizontal (fondo claro) | `assets/brand/logo.svg` |
+| Logo horizontal 400×64 (fondo claro) | `assets/brand/logo.svg` |
 | Logo horizontal (fondo oscuro) | `assets/brand/logo-dark.svg` |
 | Símbolo | `assets/brand/logo-mark.svg` |
 | Favicon | `assets/brand/favicon.svg`, `favicon-32.png`, `favicon-180.png` (apple-touch), `favicon-512.png` |
@@ -16,28 +16,34 @@ Concepto: fachada universitaria (frontón) cuyas columnas son barras de presupue
 <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/brand/favicon-180.png">
-<meta property="og:image" content="assets/og/og.png">  <!-- usar URL absoluta al desplegar -->
+<meta property="og:image" content="https://unimauro.github.io/presupuesto-universidades/assets/og/og.png">
 <meta name="twitter:card" content="summary_large_image">
 ```
 
-## Paleta
-| Token | Hex | Uso |
-|---|---|---|
-| `--ink` | `#0F2233` | texto principal, fondos oscuros, header |
-| `--ink-2` | `#4A5A68` | texto secundario |
-| `--paper` | `#F7F6F2` | fondo de página |
-| `--card` | `#FFFFFF` | tarjetas |
-| `--line` | `#DDE3E8` | bordes, rejilla |
-| `--xray` | `#7FD6D0` | acento sobre fondo oscuro (logo) |
-| `--accent` | `#0E7C86` | acento sobre fondo claro (links, serie principal) — contraste AA en blanco |
-| `--amber` | `#C77D12` | segunda serie / resaltado (logo: `#E3A33B`) |
-| `--warn` | `#B4462E` | alertas / avisos de datos (no para "culpables") |
-| `--ok` | `#2F7D4F` | ejecución alta |
+## Paleta (unificada con `styles.css` de la página principal: azul tinta + ocre)
+Fuente de verdad: `styles.css` (`:root` y `:root[data-theme="dark"]`). Si cambia allí, actualizar aquí y en `historias.css`.
 
-Series de gráficos (orden): `#0E7C86`, `#C77D12`, `#5B6EAE`, `#8A9AA6`, `#2F7D4F`, `#B4462E`.
-PIA = gris `#8A9AA6`, PIM = `#0E7C86`, Devengado = `#C77D12`.
+| Rol | Token en styles.css | Claro | Oscuro |
+|---|---|---|---|
+| Fondo de página | `--bg` | `#F5F3EE` | `#12151B` |
+| Superficie / tarjeta | `--surface` | `#FFFFFF` | `#1A1F28` |
+| Texto | `--ink` | `#1B2230` | `#E9E6DF` |
+| Texto secundario | `--muted` | `#5A6373` | `#9BA3B1` |
+| Bordes | `--line` | `#E3DED4` | `#2B323E` |
+| Acento (azul tinta) | `--accent` | `#26346F` | `#9AA6F0` |
+| Ocre | `--ochre` | `#B0741A` | `#E0A447` |
+| Bien / alerta / mal | `--good` `--warn` `--bad` | `#2C7A4B` `#B7860B` `#B23A3A` | `#5CBF83` `#E2B440` `#EC7570` |
 
-Modo oscuro: `--paper #0B1824`, `--card #12263A`, `--ink #EAF0F4`, `--ink-2 #A9BAC6`, `--line #24405A`, `--accent #7FD6D0`, `--amber #E3A33B`.
+Series fijas (iguales en app.js e historias.js): **PIA** `--c-pia` `#8B94A6` / `#6F7889` · **PIM** `--c-pim` `#26346F` / `#8F9CF0` · **Devengado** `--c-dev` `#B0741A` / `#E0A447`.
+Categóricas `--k1…--k7` (claro): `#26346F` `#8791C9` `#B0741A` `#B8B0A0` `#55753A` `#8E4A68` `#6E5B46`.
+Genéricas: 2.1→k1, 2.2→k2, 2.3→k3, 2.5→k4, 2.6→k5. Fuentes: RO→k1, RDR→k3.
+Resaltado de una universidad en historias: `#8E4A68` (claro) / `#D48AAB` (oscuro).
+
+Colores del logo/OG: fondo del símbolo `#26346F`, trazos `#E6E8F3`, barra ocre `#E0A447`, línea de escaneo blanca.
+OG: fondo `#1B2230`, rejilla `#2B323E`, edificio `#C6CCF5`/`#8F9CF0`, ocre `#E0A447`.
+(Se descartó el teal `#0E7C86` de la versión inicial para no confundirse con otro observatorio.)
+
+Tema: atributo `data-theme="light|dark"` en `<html>`, persistido en `localStorage["rp-theme"]`, forzable con `?tema=oscuro|claro`. Por defecto claro.
 
 ## Tipografías (Google Fonts)
 - Títulos: **Source Serif 4** (600/700)
@@ -51,21 +57,7 @@ Modo oscuro: `--paper #0B1824`, `--card #12263A`, `--ink #EAF0F4`, `--ink-2 #A9B
 ```
 
 ## Tokens CSS
-```css
-:root{
-  --ink:#0F2233; --ink-2:#4A5A68; --paper:#F7F6F2; --card:#FFFFFF; --line:#DDE3E8;
-  --xray:#7FD6D0; --accent:#0E7C86; --amber:#C77D12; --warn:#B4462E; --ok:#2F7D4F;
-  --c-pia:#8A9AA6; --c-pim:#0E7C86; --c-dev:#C77D12;
-  --font-head:"Source Serif 4",Georgia,serif;
-  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --font-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --radius:10px; --shadow:0 1px 2px rgba(15,34,51,.06),0 4px 16px rgba(15,34,51,.06);
-}
-@media (prefers-color-scheme:dark){:root{
-  --ink:#EAF0F4; --ink-2:#A9BAC6; --paper:#0B1824; --card:#12263A; --line:#24405A;
-  --accent:#7FD6D0; --amber:#E3A33B; --c-pim:#7FD6D0; --c-dev:#E3A33B;
-}}
-```
+Usar directamente los de `styles.css`. `historias.css` replica los mismos valores con nombres propios (`--paper`=`--bg`, `--card`=`--surface`, `--ink-2`=`--muted`, `--amber`=`--ochre`).
 
 ## Tono
 Describir datos, no acusar. Evitar "despilfarro", "malgasto", "corrupción". Preferir "no se ejecutó",

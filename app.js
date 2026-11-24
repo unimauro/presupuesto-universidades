@@ -70,6 +70,7 @@
     gasto: { metric: 'dev', uni: '' },
     fuentes: { metric: 'pim', uni: '' },
     ficha: { uni: null, cmp: [] },
+    exp: { sort: 'var', dir: -1, q: '' },
     map: null, mapLayer: null, tiles: null,
   };
   const kpiCache = new Map();
@@ -729,6 +730,141 @@
     }, 'Evolución del programa 0137 del conjunto de universidades');
   }
 
+  // ================================================================== EXPECTATIVA 2027
+  const EXP_VERSION = {
+    proyecto: ['Proyecto de ley', 'Es la propuesta del Poder Ejecutivo: puede cambiar durante el debate en el Congreso.'],
+    dictamen: ['Dictamen', 'Aprobado por la Comisión de Presupuesto del Congreso; aún debe votarse en el Pleno y puede cambiar.'],
+    autografa: ['Autógrafa', 'Aprobada por el Pleno del Congreso; pendiente de promulgación y publicación.'],
+    ley: ['Ley publicada', 'Ley de Presupuesto aprobada y publicada. Son los montos de apertura oficiales de 2027.'],
+  };
+  const expOf = u => (u && u.expectativa_2027 && typeof u.expectativa_2027 === 'object') ? u.expectativa_2027 : null;
+  // Variación como fracción: se calcula con los montos; si faltan, var_pct (acepta % o fracción)
+  function expVar(e) {
+    if (!e) return null;
+    const v = div(num(e.pia_2027) !== null && num(e.pia_2026) !== null ? e.pia_2027 - e.pia_2026 : null, e.pia_2026);
+    if (v !== null) return v;
+    const p = num(e.var_pct);
+    return p === null ? null : (Math.abs(p) > 1.5 ? p / 100 : p);
+  }
+  const fmtVar = v => num(v) === null ? SD : `<span class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : v < 0 ? '−' : ''}${esc(fmtP(Math.abs(v)))}</span>`;
+  const fmtDelta = (a, b) => (num(a) === null || num(b) === null) ? SD : fmtSigned(a - b);
+  const linkOrText = (url, txt) => { const u = safeUrl(url); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(txt)}</a>` : esc(txt); };
+  function versionBox(x) {
+    const v = String(x.version || '').toLowerCase();
+    const [badge, text] = EXP_VERSION[v] || [x.version || 'Documento', 'Versión del documento no identificada: trata las cifras como referenciales.'];
+    return `<div class="version${v === 'ley' ? ' v-ley' : ''}" role="note"><span class="v-badge">${esc(badge)}</span><div><p><strong>${linkOrText(x.url, x.norma || 'Presupuesto del Sector Público 2027')}</strong>${x.fecha ? ` · ${esc(x.fecha)}` : ''}</p><p class="v-sub">${esc(text)}</p></div></div>`;
+  }
+  function renderExpectativa() {
+    const el = $('#body-expectativa'); const x = S.data.expectativa_2027;
+    if (!x) return;
+    const rows = S.unis.filter(u => expOf(u) && (num(expOf(u).pia_2027) !== null || num(expOf(u).pia_2026) !== null));
+    const t = x.total_universidades || {};
+    const p27 = num(t.pia_2027) ?? sum(rows.map(u => expOf(u).pia_2027));
+    const p26 = num(t.pia_2026) ?? sum(rows.map(u => expOf(u).pia_2026));
+    const vT = expVar({ pia_2027: p27, pia_2026: p26, var_pct: t.var_pct });
+    const withVar = rows.filter(u => expVar(expOf(u)) !== null);
+    const nUp = withVar.filter(u => expVar(expOf(u)) > 0).length, nDown = withVar.filter(u => expVar(expOf(u)) < 0).length;
+    const sorted = withVar.slice().sort((a, b) => expVar(expOf(b)) - expVar(expOf(a)));
+    const N = isMobile() ? 8 : 10;
+    const chartList = sorted.length > 2 * N ? sorted.slice(0, N).concat(sorted.slice(-N)) : sorted;
+    const disp = Array.isArray(x.disposiciones) ? x.disposiciones : [];
+    const docs = Array.isArray(x.documentos) ? x.documentos : [];
+    const notas = Array.isArray(x.notas) ? x.notas : [];
+    el.innerHTML = `
+      ${versionBox(x)}
+      <div class="kpis">
+        ${kpiBox('PIA 2027 (universidades)', fmtM(p27), rows.length + ' universidades', 'accent')}
+        ${kpiBox('PIA 2026', fmtM(p26), 'apertura del año en curso')}
+        ${kpiBox('Variación', vT === null ? SD : (vT >= 0 ? '+' : '−') + fmtP(Math.abs(vT)), fmtDelta(p27, p26), 'ochre')}
+        ${kpiBox('Suben', fmtN(withVar.length ? nUp : null), 'universidades con más PIA')}
+        ${kpiBox('Bajan', fmtN(withVar.length ? nDown : null), 'universidades con menos PIA')}
+        ${kpiBox('Sin dato 2027', fmtN(S.unis.length - rows.length), 'de ' + S.unis.length)}
+      </div>
+      <div class="card">
+        <h3>Mayores subidas y bajadas del PIA 2027 frente al PIA 2026</h3>
+        <p class="sub">Variación porcentual. ${chartList.length < sorted.length ? `Las ${N} que más suben y las ${N} que más bajan.` : ''} Una subida grande en una universidad pequeña puede ser poco dinero: revisa los montos en la tabla.</p>
+        <div class="chart"><canvas id="ch-exp"></canvas></div>
+      </div>
+      <h3 style="margin:20px 0 8px">Todas las universidades</h3>
+      <div class="controls"><label class="grow">Buscar<input type="search" id="ex-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.exp.q)}"></label></div>
+      <div class="table-wrap"><table id="ex-table"><caption>PIA 2027 vs PIA 2026 por universidad. Montos en soles.</caption><thead></thead><tbody></tbody></table></div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card"><h3>Disposiciones relevantes para universidades</h3>
+          ${disp.length ? '<ul class="tlist">' + disp.map(d => `<li><span class="t-top"><strong>${linkOrText(d.url, d.articulo || 'Disposición')}</strong></span><span class="t-fin">${esc(d.resumen || '')}</span></li>`).join('') + '</ul>' : '<p class="empty">Aún no se han extraído disposiciones del documento.</p>'}
+        </div>
+        <div class="card"><h3>Documentos</h3>
+          ${docs.length ? '<ul class="tlist">' + docs.map(d => `<li><span class="t-top"><strong>${linkOrText(d.url, d.titulo || 'Documento')}</strong>${d.tipo ? `<span class="pill na">${esc(d.tipo)}</span>` : ''}</span></li>`).join('') + '</ul>' : '<p class="empty">Sin documentos enlazados.</p>'}
+          ${notas.length ? '<ul class="note" style="padding-left:18px">' + notas.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : ''}
+        </div>
+      </div>`;
+    const draw = () => {
+      const q = S.exp.q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const cols = [
+        ['nombre', 'Universidad', u => uName(u)],
+        ['p26', 'PIA 2026', u => num(expOf(u).pia_2026)],
+        ['p27', 'PIA 2027', u => num(expOf(u).pia_2027)],
+        ['delta', 'Δ S/', u => (num(expOf(u).pia_2027) !== null && num(expOf(u).pia_2026) !== null) ? expOf(u).pia_2027 - expOf(u).pia_2026 : null],
+        ['var', 'Δ %', u => expVar(expOf(u))],
+      ];
+      const col = cols.find(c => c[0] === S.exp.sort) || cols[4];
+      const list = rows.filter(u => !q || [u.nombre, u.corto, u.pliego, u.departamento].join(' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q))
+        .sort((a, b) => {
+          const va = col[2](a), vb = col[2](b);
+          if (typeof va === 'string') return S.exp.dir * va.localeCompare(vb, LOC);
+          if (va === null && vb === null) return 0; if (va === null) return 1; if (vb === null) return -1;
+          return S.exp.dir * (va - vb);
+        });
+      $('#ex-table thead', el).innerHTML = '<tr>' + cols.map((c, i) => `<th scope="col" class="${i === 0 ? 'txt sticky-col' : ''}" aria-sort="${S.exp.sort === c[0] ? (S.exp.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-k="${c[0]}">${esc(c[1])}</button></th>`).join('') + '</tr>';
+      $('#ex-table tbody', el).innerHTML = list.map(u => { const e = expOf(u); return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(num(e.pia_2026)))}</td><td><strong>${esc(fmtM(num(e.pia_2027)))}</strong></td><td>${esc(fmtDelta(e.pia_2027, e.pia_2026))}</td><td>${fmtVar(expVar(e))}</td></tr>`; }).join('') || `<tr><td colspan="5" class="txt muted">Sin resultados.</td></tr>`;
+    };
+    draw();
+    $('#ex-q', el).addEventListener('input', debounce(e => { S.exp.q = e.target.value; draw(); }));
+    $('#ex-table thead', el).addEventListener('click', e => {
+      const b = e.target.closest('button.sort'); if (!b) return;
+      if (S.exp.sort === b.dataset.k) S.exp.dir *= -1; else { S.exp.sort = b.dataset.k; S.exp.dir = b.dataset.k === 'nombre' ? 1 : -1; }
+      draw();
+    });
+    const vals = chartList.map(u => +(expVar(expOf(u)) * 100).toFixed(1));
+    sizeFor('ch-exp', chartList.length, isMobile() ? 26 : 22);
+    mkChart('ch-exp', {
+      type: 'bar',
+      data: { labels: chartList.map(uName), datasets: [{ label: 'Variación PIA 2027 vs 2026', data: vals, borderRadius: 3, backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: it => (chartList[it[0].dataIndex] || {}).nombre || it[0].label,
+          label: ctx => { const e = expOf(chartList[ctx.dataIndex]); return [`Variación: ${ctx.raw > 0 ? '+' : ''}${ctx.raw.toLocaleString(LOC)} %`, `PIA 2026: ${fmtM(num(e.pia_2026))}`, `PIA 2027: ${fmtM(num(e.pia_2027))}`]; },
+        } } },
+        scales: { x: { ticks: { callback: tickP } }, y: { ticks: { autoSkip: false } } },
+      },
+    }, 'Universidades con mayor subida y bajada del PIA 2027 frente al PIA 2026');
+  }
+  // Bloque "2027 esperado" dentro de la ficha
+  function fichaExpHtml(u) {
+    const x = S.data.expectativa_2027; const e = expOf(u);
+    if (!x || !e) return '';
+    const v = String(x.version || '').toLowerCase();
+    const a26 = A(u, 2026) || {};
+    const tbl = (obj, base, title) => {
+      const ent = obj && typeof obj === 'object' ? Object.entries(obj).filter(([, n]) => num(n) !== null) : [];
+      if (!ent.length) return '';
+      return `<div class="table-wrap" style="margin-top:10px"><table><caption>${esc(title)}</caption><thead><tr><th class="txt" scope="col">Concepto</th><th scope="col">PIA 2026</th><th scope="col">PIA 2027</th><th scope="col">Δ %</th></tr></thead><tbody>${ent.sort((p, q) => q[1] - p[1]).map(([k, n]) => {
+        const b = num((pick(base, k.slice(0, 12)) || {}).pia);
+        return `<tr><td class="txt wrap">${esc(k)}</td><td>${esc(fmtM(b))}</td><td>${esc(fmtM(n))}</td><td>${fmtVar(div(b !== null ? n - b : null, b))}</td></tr>`;
+      }).join('')}</tbody></table></div>`;
+    };
+    return `<div class="card" style="margin-top:12px" id="ficha-2027">
+      <h3>2027 esperado</h3>
+      <p class="sub">${esc((EXP_VERSION[v] || [x.version || 'Documento'])[0])}${v !== 'ley' ? ' — cifras sujetas a cambio' : ''}. <a href="#expectativa">Ver la sección completa</a>.</p>
+      <div class="kpis">
+        ${kpiBox('PIA 2026', fmtM(num(e.pia_2026)), '', 'accent')}
+        ${kpiBox('PIA 2027', fmtM(num(e.pia_2027)), x.norma || '', 'ochre')}
+        <div class="kpi"><span class="k-lbl">Variación</span><span class="k-val">${fmtVar(expVar(e))}</span><span class="k-note">${esc(fmtDelta(e.pia_2027, e.pia_2026))}</span></div>
+      </div>
+      <div class="grid two">${tbl(e.generica, a26.generica, 'Por genérica de gasto')}${tbl(e.fuente, a26.fuente, 'Por fuente de financiamiento')}</div>
+    </div>`;
+  }
+
   // ================================================================== 8. FICHA + COMPARADOR
   const IDX_LBL = { ejecucion: 'Ejecución', inversion: 'Inversión', investigacion: 'Investigación', prioridad_idi: 'Prioridad I+D', autonomia_rdr: 'Autonomía (RDR)', eficiencia: 'Eficiencia I+D' };
   const idxComp = () => {
@@ -798,6 +934,8 @@
       <div class="card" style="margin-top:12px"><h3>Proyectos de inversión, ${esc(y)}</h3>
         ${proys.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Avance</th></tr></thead><tbody>${proys.slice().sort((p, q) => (num(q.pim) || 0) - (num(p.pim) || 0)).map(p => `<tr><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pia)))}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td>${pill(div(p.dev, p.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin proyectos de inversión registrados este año.</p>'}
       </div>
+
+      ${fichaExpHtml(u)}
 
       <h3 style="margin:24px 0 8px">Comparador</h3>
       <div class="controls">
@@ -981,7 +1119,7 @@
 
   // ================================================================== registro / lazy render
   const SECTIONS = {
-    resumen: renderResumen, ranking: renderRanking, trayectoria: renderTrayectoria, gasto: renderGasto,
+    resumen: renderResumen, ranking: renderRanking, trayectoria: renderTrayectoria, expectativa: renderExpectativa, gasto: renderGasto,
     fuentes: renderFuentes, infra: renderInfra, idi: renderIdi, ficha: renderFicha, mapa: renderMapa,
     metodologia: renderMetodologia,
   };
@@ -1127,6 +1265,17 @@
     }, 250));
     window.addEventListener('hashchange', handleHash);
 
+    // Expectativa 2027: solo si viene en los datos
+    if (d.expectativa_2027 && typeof d.expectativa_2027 === 'object') {
+      $('#expectativa').hidden = false; $('#nav-expectativa').hidden = false;
+    } else {
+      $('#expectativa').remove(); $('#nav-expectativa').remove(); delete SECTIONS.expectativa;
+    }
+    // Numeración de secciones y nav según las visibles
+    $$('section[data-sec]').forEach((sec, i) => {
+      const n = $('.sec-n', sec); if (n) n.textContent = String(i + 1).padStart(2, '0');
+      const a = $(`#nav a[href="#${sec.id}"] .n`); if (a) a.textContent = String(i + 1);
+    });
     setupLazy();
     setupScrollspy();
     // Impresión o ?completo: dibujar todas las secciones de una vez

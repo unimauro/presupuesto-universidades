@@ -1,28 +1,23 @@
 /* Historias — Radiografía Presupuestal. Tokens: ver assets/brand/BRAND.md */
 :root{
-  --ink:#0F2233; --ink-2:#4A5A68; --paper:#F7F6F2; --card:#FFFFFF; --line:#DDE3E8;
-  --xray:#7FD6D0; --accent:#0E7C86; --amber:#C77D12; --warn:#B4462E; --ok:#2F7D4F;
-  --c-pia:#8A9AA6; --c-pim:#0E7C86; --c-dev:#C77D12; --c-hl:#B4462E;
-  --s3:#5B6EAE; --s4:#8A9AA6; --s5:#2F7D4F;
+  --ink:#1B2230; --ink-2:#5A6373; --paper:#F5F3EE; --card:#FFFFFF; --line:#E3DED4;
+  --accent:#26346F; --amber:#B0741A; --warn:#B7860B; --ok:#2C7A4B;
+  --c-pia:#8B94A6; --c-pim:#26346F; --c-dev:#B0741A; --c-hl:#8E4A68;
+  --k1:#26346F; --k2:#8791C9; --k3:#B0741A; --k4:#B8B0A0; --k5:#55753A;
+  --shadow:0 1px 2px rgba(27,34,48,.06),0 4px 14px rgba(27,34,48,.05);
+  --banner-bg:#F8EED2; --banner-ink:#5A4210;
   --font-head:"Source Serif 4",Georgia,serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --radius:10px; --shadow:0 1px 2px rgba(15,34,51,.06),0 4px 16px rgba(15,34,51,.06);
-  --banner-bg:#FFF4E0; --banner-ink:#6B4300;
+  --radius:12px;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --ink:#EAF0F4; --ink-2:#A9BAC6; --paper:#0B1824; --card:#12263A; --line:#24405A;
-    --accent:#7FD6D0; --amber:#E3A33B; --c-pim:#7FD6D0; --c-dev:#E3A33B; --c-hl:#FF8A70;
-    --s3:#9AA9E0; --s4:#6F8290; --s5:#6CC08F;
-    --shadow:none; --banner-bg:#3A2A0C; --banner-ink:#F6D9A2;
-  }
-}
+/* El tema se fija con data-theme (mismo mecanismo y clave "rp-theme" que index.html) */
 :root[data-theme="dark"]{
-  --ink:#EAF0F4; --ink-2:#A9BAC6; --paper:#0B1824; --card:#12263A; --line:#24405A;
-  --accent:#7FD6D0; --amber:#E3A33B; --c-pim:#7FD6D0; --c-dev:#E3A33B; --c-hl:#FF8A70;
-  --s3:#9AA9E0; --s4:#6F8290; --s5:#6CC08F;
-  --shadow:none; --banner-bg:#3A2A0C; --banner-ink:#F6D9A2;
+  --ink:#E9E6DF; --ink-2:#9BA3B1; --paper:#12151B; --card:#1A1F28; --line:#2B323E;
+  --accent:#9AA6F0; --amber:#E0A447; --warn:#E2B440; --ok:#5CBF83;
+  --c-pia:#6F7889; --c-pim:#8F9CF0; --c-dev:#E0A447; --c-hl:#D48AAB;
+  --k1:#8F9CF0; --k2:#C6CCF5; --k3:#E0A447; --k4:#7D7769; --k5:#93B86F;
+  --shadow:none; --banner-bg:#3A2F12; --banner-ink:#F3DC9C;
 }
 
 *{box-sizing:border-box}
@@ -34,15 +29,15 @@ img{max-width:100%;height:auto}
 .num,.figs{font-family:var(--font-num);font-variant-numeric:tabular-nums}
 
 .progress{position:fixed;inset:0 0 auto 0;height:3px;z-index:20;background:transparent}
-.progress span{display:block;height:100%;width:0;background:var(--accent)}
+.progress span{display:block;height:100%;width:0;background:var(--amber)}
 
 .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:10px 16px;background:#0F2233;color:#F2F5F7}
+  padding:10px 16px;background:var(--card);color:var(--ink);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;font:700 17px/1.2 var(--font-head)}
 .brand img{border-radius:6px}
 .top-nav{display:flex;gap:14px;font-size:14px}
-.top-nav a{color:#C9D6DF;text-decoration:none;padding:4px 0}
-.top-nav a[aria-current="page"]{color:#7FD6D0;border-bottom:2px solid #7FD6D0}
+.top-nav a{color:var(--ink-2);text-decoration:none;padding:4px 0}
+.top-nav a[aria-current="page"]{color:var(--accent);border-bottom:2px solid var(--accent)}
 @media (max-width:420px){.brand span{display:none}}
 
 main{max-width:760px;margin:0 auto;padding:0 16px}
@@ -104,6 +99,9 @@ details.caveat ul{padding-left:18px;margin:6px 0}
 .method li{margin:0 0 6px}
 .meta{font-size:12px;color:var(--ink-2)}
 
-.foot{background:#0F2233;color:#C9D6DF;padding:28px 16px;text-align:center;font-size:14px}
-.foot a{color:#7FD6D0}
+.foot{background:var(--card);color:var(--ink-2);border-top:1px solid var(--line);padding:28px 16px;text-align:center;font-size:14px}
+.foot a{color:var(--accent)}
+.foot .logo-dark{display:none}
+:root[data-theme="dark"] .foot .logo-light{display:none}
+:root[data-theme="dark"] .foot .logo-dark{display:block}
 .foot img{display:block;margin:0 auto 10px;max-width:270px}

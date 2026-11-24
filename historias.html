@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,17 @@
 <meta property="og:image:height" content="630">
 <link rel="canonical" href="https://unimauro.github.io/presupuesto-universidades/historias.html">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0F2233">
+<meta name="theme-color" content="#26346F">
+<script>
+  // Mismo tema que index.html (clave rp-theme, ?tema=oscuro|claro); por defecto claro.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('rp-theme'); } catch (e) {}
+    var m = /[?&]tema=(oscuro|claro)/.exec(location.search); if (m) t = m[1] === 'oscuro' ? 'dark' : 'light';
+    if (t !== 'dark' && t !== 'light') t = 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/brand/favicon-180.png">
@@ -71,7 +81,8 @@
 </main>
 
 <footer class="foot">
-  <img src="assets/brand/logo-dark.svg" alt="Radiografía Presupuestal de las Universidades Públicas del Perú" width="270" height="43">
+  <img class="logo-light" src="assets/brand/logo.svg" alt="Radiografía Presupuestal de las Universidades Públicas del Perú" width="270" height="43">
+  <img class="logo-dark" src="assets/brand/logo-dark.svg" alt="Radiografía Presupuestal de las Universidades Públicas del Perú" width="270" height="43">
   <p>Datos abiertos del Ministerio de Economía y Finanzas. Proyecto cívico independiente.</p>
   <p><a href="index.html">Volver al observatorio</a></p>
 </footer>
