@@ -951,6 +951,7 @@
         const us = A.universidades.filter((u) => isNum(u.delta));
         const byP = new Map(S.d.universidades.map((u) => [String(u.pliego), u]));
         const nm = (x) => { const u = byP.get(String(x.pliego)); return u ? axisLabel(u) : String(x.uni || x.pliego); };
+        const nmP = (x) => { const u = byP.get(String(x.pliego)); return u ? label(u) : String(x.uni || x.pliego); };
         const fullOf = (x) => { const u = byP.get(String(x.pliego)); return u ? label(u) + ', ' + fullName(u) : String(x.nombre || x.uni); };
         const sorted = us.slice().sort((a, b) => b.delta - a.delta);
         const top5 = sorted.slice(0, 5);
@@ -969,7 +970,6 @@
         const dep = (A.por_departamento || []).filter((d) => isNum(d.delta)).sort((a, b) => a.delta - b.delta)[0];
         const depUnis = dep ? us.filter((x) => x.departamento === dep.departamento && x.delta < 0).map(nmP) : [];
         const rdTop = div(sum(top5.map((x) => x.f_rd)), sum(top5.map((x) => x.delta)));
-        const nmP = (x) => { const u = byP.get(String(x.pliego)); return u ? label(u) : String(x.uni || x.pliego); };
         const lista = (arr) => (arr.length > 1 ? arr.slice(0, -1).join(', ') + ' y ' + arr[arr.length - 1] : arr.join(''));
         const rho = A.rho_ejecucion_vs_aumento;
         // Explicación para tu universidad: genérica y fuente que más pesan en su cambio.

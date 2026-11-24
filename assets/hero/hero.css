@@ -54,7 +54,7 @@
 @media (min-width: 1024px) {
   .hero.hero-v3 {
     --arte-w: clamp(340px, 36vw, 640px);
-    display: block;
+    display: grid; align-content: center;
     /* alto = zona de etiquetas (~320 px) + parte dibujada del arte (520/600 del ancho) + guarda */
     min-height: calc(344px + .867 * var(--arte-w));
     padding-top: 44px;
@@ -107,7 +107,7 @@
     font-family: var(--font-display); font-weight: 900; font-stretch: 62%;
     font-size: clamp(32px, 8.6cqw, 54px); line-height: .9; letter-spacing: -.01em; white-space: nowrap;
   }
-  .hero-v3 .hc > span { display: block; margin-top: 6px; font: 700 14px/1.25 var(--font-texto); max-width: 17ch; }
+  .hero-v3 .hc > span { display: block; margin-top: 6px; font: 700 14px/1.25 var(--font-texto); max-width: 16ch; }
   .hero-v3 .hc-pim { --cuerda: 26px; --giro: -3deg; left: 5%; top: 44px; z-index: 3; background: #F2B705; }
   .hero-v3 .hc-ej  { --cuerda: 50px; --giro: 3deg; right: 6%; top: 68px; z-index: 3; }
   /* la tercera cuelga por detrás de la segunda: su cuerda sube hasta el cordel y queda tapada (etiquetas encadenadas) */
@@ -124,3 +124,4 @@
     }
   }
 }
+.hero-v3 .hc[hidden] { display: none !important; }

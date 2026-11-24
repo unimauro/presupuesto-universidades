@@ -678,3 +678,10 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 .h27-arrow { font-size: clamp(48px, 14vw, 128px); }
 .h27-total { font-size: clamp(44px, 13vw, 104px); overflow-wrap: anywhere; }
 .h27-k { line-height: 1.4; }
+
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.chip.alc[aria-pressed="true"] { background: var(--tu); color: #1E1428; }
+.disp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.disp-tags .tag { font-size: 11px; padding: 1px 8px; }
+.disp-tags .tag.esp { background: var(--tu); color: #1E1428; }
+.disp-tags .tag.ok { background: var(--good-bg); color: var(--ink); }

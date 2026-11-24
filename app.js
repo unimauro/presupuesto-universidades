@@ -1622,7 +1622,7 @@
       <div class="card" style="margin-top:12px" id="ex-ley">
         <h3>¿Qué dice la ley sobre el gasto de las universidades?</h3>
         ${disp.length ? `<p class="sub">${disp.length} disposiciones${x.version && String(x.version).toLowerCase() !== 'ley' ? ' (pueden cambiar en el Congreso)' : ''}. Filtra por tema.</p>
-          <div class="chips" role="group" aria-label="Filtrar por tema" id="ex-temas"></div>
+          <div class="chips-wrap" id="ex-temas"></div>
           <div class="disp-grid" id="ex-disp" aria-live="polite"></div>` : '<p class="empty">Aún no se han extraído disposiciones del documento.</p>'}
       </div>
       <div class="grid two" style="margin-top:12px">
@@ -1632,25 +1632,37 @@
         </div>
       </div>`;
     if (disp.length) {
-      const temaDe = d => String(d.tema || 'Otras').trim() || 'Otras';
-      const temas = [...new Set(disp.map(temaDe))].sort((a, b) => a.localeCompare(b, LOC));
-      S.exp.tema = temas.includes(S.exp.tema) ? S.exp.tema : '';
+      // Chips por "grupo" (o "tema" si falta); "tema" como etiqueta; filtro por alcance
+      const grupoDe = d => String(d.grupo || d.tema || 'Otras').trim() || 'Otras';
+      const grupos = [...new Set(disp.map(grupoDe))].sort((a, b) => a.localeCompare(b, LOC));
+      const hayAlcance = disp.some(d => d.alcance);
+      S.exp.tema = grupos.includes(S.exp.tema) ? S.exp.tema : '';
+      S.exp.alc = S.exp.alc || '';
+      const nAlc = a => disp.filter(d => String(d.alcance || '').toLowerCase() === a).length;
       const drawDisp = () => {
-        $('#ex-temas', el).innerHTML = [['', `Todos (${disp.length})`]].concat(temas.map(t => [t, `${t} (${disp.filter(d => temaDe(d) === t).length})`]))
-          .map(([v, l]) => `<button type="button" class="chip" data-t="${esc(v)}" aria-pressed="${S.exp.tema === v}">${esc(l)}</button>`).join('');
-        const list = disp.filter(d => !S.exp.tema || temaDe(d) === S.exp.tema);
-        const groups = S.exp.tema ? [S.exp.tema] : temas;
-        $('#ex-disp', el).innerHTML = groups.map(t => {
-          const items = list.filter(d => temaDe(d) === t); if (!items.length) return '';
-          return `<h4 class="disp-tema">${esc(t)}</h4>` + items.map(d => `<article class="disp">
+        const byAlc = d => !S.exp.alc || String(d.alcance || '').toLowerCase() === S.exp.alc;
+        $('#ex-temas', el).innerHTML = (hayAlcance ? `<div class="chips-row" role="group" aria-label="Filtrar por alcance">${[['', 'Todas'], ['especifica', `Solo las que nombran a universidades (${nAlc('especifica')})`], ['general', `Reglas generales que también las alcanzan (${nAlc('general')})`]]
+          .map(([v, l]) => `<button type="button" class="chip alc" data-a="${esc(v)}" aria-pressed="${S.exp.alc === v}">${esc(l)}</button>`).join('')}</div>` : '') +
+          `<div class="chips-row" role="group" aria-label="Filtrar por grupo">${[['', `Todos los grupos (${disp.filter(byAlc).length})`]].concat(grupos.map(g => [g, `${g} (${disp.filter(d => byAlc(d) && grupoDe(d) === g).length})`]))
+          .map(([v, l]) => `<button type="button" class="chip" data-t="${esc(v)}" aria-pressed="${S.exp.tema === v}">${esc(l)}</button>`).join('')}</div>`;
+        const list = disp.filter(d => byAlc(d) && (!S.exp.tema || grupoDe(d) === S.exp.tema));
+        const gs = S.exp.tema ? [S.exp.tema] : grupos;
+        $('#ex-disp', el).innerHTML = gs.map(g => {
+          const items = list.filter(d => grupoDe(d) === g); if (!items.length) return '';
+          return `<h4 class="disp-tema">${esc(g)} · ${items.length}</h4>` + items.map(d => `<article class="disp">
             <header><strong>${linkOrText(d.url, d.articulo || 'Disposición')}</strong>${num(d.monto) !== null ? `<span class="disp-monto">${esc(soles(d.monto))}</span>` : ''}</header>
+            <div class="disp-tags">${d.tema && d.grupo ? `<span class="tag">${esc(d.tema)}</span>` : ''}${d.alcance ? `<span class="tag ${String(d.alcance).toLowerCase() === 'especifica' ? 'esp' : ''}">${String(d.alcance).toLowerCase() === 'especifica' ? 'Nombra a universidades' : 'Regla general'}</span>` : ''}${d.cita_verificada ? '<span class="tag ok" title="Cita contrastada con el texto">cita verificada</span>' : ''}</div>
             ${d.resumen ? `<p>${esc(d.resumen)}</p>` : ''}
-            ${d.cita ? `<blockquote>${esc(d.cita)}</blockquote>` : ''}
+            ${d.cita ? `<blockquote>“${esc(d.cita)}”</blockquote>` : ''}
           </article>`).join('');
-        }).join('');
+        }).join('') || '<p class="empty">Ninguna disposición con ese filtro.</p>';
       };
       drawDisp();
-      $('#ex-temas', el).addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; S.exp.tema = b.dataset.t; drawDisp(); });
+      $('#ex-temas', el).addEventListener('click', e => {
+        const b = e.target.closest('button'); if (!b) return;
+        if (b.dataset.a !== undefined) S.exp.alc = b.dataset.a; else if (b.dataset.t !== undefined) S.exp.tema = b.dataset.t;
+        drawDisp();
+      });
     }
     renderP2027($('#p27', el));
     exp2027TotalChart('ch-exp-tot');
