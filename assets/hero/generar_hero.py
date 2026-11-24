@@ -156,10 +156,17 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
             for k, dy in enumerate((22, 48, 78)):
                 yy = base_y - h + dy * s
                 brillo += (f'<rect x="{f(x + w + 7 * s)}" y="{f(yy)}" width="{f((10 - k * 2) * s)}" height="{f(3 * s)}" fill="{AJI}"/>')
-        if baja:   # ▼ cochinilla sobre el capitel de la columna que baja
-            ty = base_y - h - 4 * s; tw = w * .9
-            brillo += (f'<polygon fill="{COCHINILLA}" points="{f(x + w / 2 - tw / 2)},{f(ty - tw * .8)} '
-                       f'{f(x + w / 2 + tw / 2)},{f(ty - tw * .8)} {f(x + w / 2)},{f(ty)}"/>')
+        if baja:
+            pct = abs(v / serie[i - 1][1] - 1) * 100
+            if s >= .9:   # escritorio: chip cochinilla "▼ 3.7 %" alineado al borde derecho de la columna que baja
+                cw, ch = 50, 15; cx1 = x + w; cy0 = base_y - h - ch - 6
+                brillo += (f'<rect x="{f(cx1 - cw)}" y="{f(cy0)}" width="{cw}" height="{ch}" fill="{COCHINILLA}"/>'
+                           f'<text x="{f(cx1 - 4)}" y="{f(cy0 + ch - 4)}" fill="{PAPEL}" text-anchor="end" font-size="11.5" font-weight="800" '
+                           f'font-family="Archivo, \'Arial Narrow\', \'Helvetica Neue\', Arial, sans-serif">▼ {pct:.1f} %</text>')
+            else:         # móvil: el texto no se leería; solo el ▼
+                ty = base_y - h - 4 * s; tw = w * .9
+                brillo += (f'<polygon fill="{COCHINILLA}" points="{f(x + w / 2 - tw / 2)},{f(ty - tw * .8)} '
+                           f'{f(x + w / 2 + tw / 2)},{f(ty - tw * .8)} {f(x + w / 2)},{f(ty)}"/>')
         cols.append(f'<g class="col{" col-27" if ult else ""}">{brillo}{fuste}{estria if not ult else ""}{pend}{cap}</g>')
     out.append(f'<g class="cols">{"".join(cols)}</g>')
     # arquitrabe = friso de pallay
