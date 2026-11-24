@@ -85,18 +85,69 @@
   }
 
   // ---------- carga ----------
+  // Carga por capas (rápida): data/resumen.json (totales/kpi por año) + data/anio/{año}.json bajo demanda.
+  // Respaldo: data/observatorio.json completo y, al final, el sample.
+  const L = { full: false, years: new Set(), inflight: {}, fullP: null };
+  async function getJSON(url) {
+    const r = await fetch(url, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(url + ' ' + r.status);
+    return r.json();
+  }
   async function load() {
+    try {
+      const d = await getJSON('data/resumen.json');
+      if (d && Array.isArray(d.universidades)) return { d, isSample: d.ejemplo === true, full: false };
+    } catch (e) { /* siguiente */ }
     const tries = [['data/observatorio.json', false], ['data/sample/observatorio.json', true]];
     for (const [url, sample] of tries) {
       try {
-        const r = await fetch(url, { cache: 'no-cache' });
-        if (!r.ok) continue;
-        const d = await r.json();
+        const d = await getJSON(url);
         if (!d || !Array.isArray(d.universidades)) continue;
-        return { d, isSample: sample || d.ejemplo === true };
+        return { d, isSample: sample || d.ejemplo === true, full: true };
       } catch (e) { /* siguiente */ }
     }
     throw new Error('No se pudo cargar el archivo de datos.');
+  }
+  function mergeYear(y, j) {
+    const map = (j && j.universidades) || {};
+    S.d.universidades.forEach((u) => {
+      const o = map[u.pliego] || map[String(u.pliego)];
+      if (!o) return;
+      u.anios = u.anios || {};
+      u.anios[y] = Object.assign(u.anios[y] || {}, o);
+    });
+  }
+  // Si falla una capa anual, se cae al archivo completo (una sola vez).
+  function loadFull() {
+    if (L.full) return Promise.resolve();
+    if (!L.fullP) {
+      L.fullP = getJSON('data/observatorio.json').then((d) => {
+        const byP = new Map(d.universidades.map((u) => [String(u.pliego), u]));
+        S.d.universidades.forEach((u) => { const f = byP.get(String(u.pliego)); if (f && f.anios) u.anios = f.anios; });
+        L.full = true;
+      }).catch((e) => { console.error(e); L.full = true; });
+    }
+    return L.fullP;
+  }
+  function ensureYear(y) {
+    y = String(y);
+    if (L.full || L.years.has(y)) return Promise.resolve();
+    if (!L.inflight[y]) {
+      L.inflight[y] = getJSON(`data/anio/${encodeURIComponent(y)}.json`)
+        .then((j) => { mergeYear(y, j); L.years.add(y); })
+        .catch(() => loadFull())
+        .finally(() => { delete L.inflight[y]; });
+    }
+    return L.inflight[y];
+  }
+  // Qué capas necesita cada historia antes de calcularse.
+  async function prepStory(st, Y) {
+    if (st.need === 'base') return;
+    await ensureYear(Y);
+    if (st.need === 'years') {
+      const hay = S.d.universidades.some((u) => ((u.anios && u.anios[Y] && u.anios[Y].proyectos) || []).length);
+      if (hay) await Promise.all(S.closed.filter((y) => y <= Y).map(ensureYear));
+    }
   }
 
   function setupYears(d) {
@@ -210,7 +261,7 @@
   const STORIES = [
     // 1. PIA → PIM
     {
-      id: 'salto', sec: 'variacion', kicker: 'Empiezan y terminan', toc: 'El salto del PIA al PIM',
+      id: 'salto', need: 'base', sec: 'variacion', kicker: 'Empiezan y terminan', toc: 'El salto del PIA al PIM',
       build(Y) {
         const U = unisY(Y);
         const pia = sum(U.map((u) => val(u.anios[Y].total, 'pia')));
@@ -265,7 +316,7 @@
 
     // 2. Planilla
     {
-      id: 'planilla', sec: 'gasto', kicker: 'En qué se gasta', toc: '¿Cuánto de cada sol va a planilla?',
+      id: 'planilla', need: 'year', sec: 'gasto', kicker: 'En qué se gasta', toc: '¿Cuánto de cada sol va a planilla?',
       build(Y) {
         const U = unisY(Y);
         const parts = (a) => {
@@ -308,7 +359,7 @@
 
     // 3. Investigación PP 0137
     {
-      id: 'idi', sec: 'idi', kicker: 'Investigación', toc: 'La plata de investigación que no se gasta',
+      id: 'idi', need: 'year', sec: 'idi', kicker: 'Investigación', toc: 'La plata de investigación que no se gasta',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => ({ u, p: programa(u.anios[Y], '0137') })).filter((r) => r.p && isNum(val(r.p, 'pim')) && val(r.p, 'pim') > 0);
@@ -339,7 +390,7 @@
 
     // 4. Obras
     {
-      id: 'obras', sec: 'infra', kicker: 'Inversión', toc: 'Obras que no avanzan',
+      id: 'obras', need: 'years', sec: 'infra', kicker: 'Inversión', toc: 'Obras que no avanzan',
       build(Y) {
         const U = unisY(Y);
         const all = [];
@@ -385,7 +436,7 @@
 
     // 5. RDR
     {
-      id: 'rdr', sec: 'fuentes', kicker: 'De dónde sale la plata', toc: 'Quién vive de sus propios ingresos',
+      id: 'rdr', need: 'year', sec: 'fuentes', kicker: 'De dónde sale la plata', toc: 'Quién vive de sus propios ingresos',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => { const a = u.anios[Y]; return { u, r: val(fuenteRDR(a), 'dev'), t: val(a.total, 'dev'), ing: ingresoRDR(a) }; }).filter((x) => isNum(x.t) && x.t > 0 && isNum(x.r));
@@ -417,7 +468,7 @@
 
     // 6. Costo por publicación
     {
-      id: 'pubs', sec: 'idi', kicker: 'Investigación y resultados', toc: 'El costo de una publicación',
+      id: 'pubs', need: 'year', sec: 'idi', kicker: 'Investigación y resultados', toc: 'El costo de una publicación',
       build(Y) {
         const MINP = 10;
         const U = unisY(Y);
@@ -452,7 +503,7 @@
 
     // 7. Crecimiento
     {
-      id: 'crecimiento', sec: 'trayectoria', kicker: 'Evolución', toc: 'Las que más crecieron',
+      id: 'crecimiento', need: 'base', sec: 'trayectoria', kicker: 'Evolución', toc: 'Las que más crecieron',
       build(Y) {
         const Y0 = S.closed.find((y) => y < Y);
         if (!Y0) return { h2: 'Las que más crecieron', html: `<p class="empty">Se necesita al menos un año anterior a ${esc(Y)}.</p>` };
@@ -483,7 +534,7 @@
 
     // 8. Gasto por estudiante
     {
-      id: 'estudiante', sec: 'ranking', kicker: 'Por estudiante', toc: 'Cuánto se gasta por estudiante',
+      id: 'estudiante', need: 'base', sec: 'ranking', kicker: 'Por estudiante', toc: 'Cuánto se gasta por estudiante',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => { const a = u.anios[Y]; const e = isNum(a.estudiantes) && a.estudiantes > 0 ? a.estudiantes : null; return { u, e, v: e ? div(val(a.total, 'dev'), e) : null }; }).filter((r) => isNum(r.v));
@@ -515,23 +566,27 @@
   ];
 
   // ---------- render ----------
+  let io = null, gen = 0;
   function render() {
     destroyCharts();
-    const Y = S.Y;
+    gen += 1;
+    const myGen = gen;
     const host = $('#stories');
+    const prevH = {};
+    host.querySelectorAll('.story').forEach((sec) => { prevH[sec.id] = sec.offsetHeight; });
     host.innerHTML = '';
-    const partial = S.partial.includes(Y);
+    if (io) io.disconnect();
     STORIES.forEach((st, i) => {
       const sec = document.createElement('section');
-      sec.className = 'story';
+      sec.className = 'story is-loading';
       sec.id = st.id;
-      let out;
-      try { out = st.build(Y); } catch (e) { console.error(e); out = { h2: esc(st.toc), html: '<p class="empty">No se pudo calcular esta historia con los datos disponibles.</p>' }; }
-      sec.innerHTML = `<p class="kicker"><b>${String(i + 1).padStart(2, '0')}</b>${esc(st.kicker)}</p><h2>${out.h2}</h2>` +
-        (partial ? `<p class="note">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): el devengado es parcial y no es comparable con años cerrados.</p>` : '') + out.html;
-      if (st.sec) sec.insertAdjacentHTML('beforeend', `<p><a class="explore" href="index.html#${esc(st.sec)}">Explorar en el observatorio →</a></p>`);
+      sec.dataset.i = String(i);
+      sec.setAttribute('aria-busy', 'true');
+      if (prevH[st.id]) sec.style.minHeight = prevH[st.id] + 'px';
+      sec.innerHTML = `<p class="kicker"><b>${String(i + 1).padStart(2, '0')}</b>${esc(st.kicker)}</p>
+        <h2 class="sk-title">${esc(st.toc)}</h2>
+        <div class="skeleton" role="status"><span>Cargando…</span><i></i><i></i><i></i></div>`;
       host.appendChild(sec);
-      if (out.mount) { try { out.mount(sec); } catch (e) { console.error(e); } }
     });
     const fl = $('#uni-ficha'), hu = hlUni();
     if (fl) {
@@ -539,17 +594,33 @@
       fl.innerHTML = hu ? `<a href="index.html#u=${encodeURIComponent(hu.pliego)}">Ver ficha completa de ${esc(label(hu))} →</a>` : '';
     }
     $('#toc').innerHTML = STORIES.map((st) => `<li><a href="#${esc(st.id)}">${esc(st.toc)}</a></li>`).join('');
-    reveal();
     syncURL();
+    const go = (sec) => {
+      const i = Number(sec.dataset.i), st = STORIES[i];
+      prepStory(st, S.Y).then(() => { if (myGen === gen) fillStory(sec, st, i); });
+    };
+    const secs = [...host.querySelectorAll('.story')];
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver((ents) => ents.forEach((e) => {
+        if (e.isIntersecting) { io.unobserve(e.target); go(e.target); }
+      }), { rootMargin: '600px 0px' });
+      secs.forEach((sec) => io.observe(sec));
+    } else secs.forEach(go);
   }
 
-  function reveal() {
-    if (!('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { e.target.classList.remove('pending'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
-    document.querySelectorAll('.story').forEach((s) => {
-      const r = s.getBoundingClientRect();
-      if (r.top > window.innerHeight) { s.classList.add('pending'); io.observe(s); }
-    });
+  function fillStory(sec, st, i) {
+    const Y = S.Y;
+    const partial = S.partial.includes(Y);
+    let out;
+    try { out = st.build(Y); } catch (e) { console.error(e); out = { h2: esc(st.toc), html: '<p class="empty">No se pudo calcular esta historia con los datos disponibles.</p>' }; }
+    sec.innerHTML = `<p class="kicker"><b>${String(i + 1).padStart(2, '0')}</b>${esc(st.kicker)}</p><h2>${out.h2}</h2>` +
+      (partial ? `<p class="note">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): el devengado es parcial y no es comparable con años cerrados.</p>` : '') + out.html +
+      (st.sec ? `<p><a class="explore" href="index.html#${esc(st.sec)}">Explorar en el observatorio →</a></p>` : '');
+    sec.classList.remove('is-loading');
+    sec.removeAttribute('aria-busy');
+    sec.style.minHeight = '';
+    if (!reduced) sec.classList.add('enter');
+    if (out.mount) { try { out.mount(sec); } catch (e) { console.error(e); } }
   }
 
   function syncURL() {
@@ -633,8 +704,8 @@
     const syncTheme = setupTheme();
     progress();
     try {
-      const { d, isSample } = await load();
-      S.d = d; S.isSample = isSample;
+      const { d, isSample, full } = await load();
+      S.d = d; S.isSample = isSample; L.full = full;
     } catch (e) {
       $('#hero-lede').textContent = 'No se pudieron cargar los datos. Intenta recargar la página.';
       return;

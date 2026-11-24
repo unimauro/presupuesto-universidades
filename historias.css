@@ -70,9 +70,16 @@ select{font:15px var(--font-body);color:var(--ink);background:var(--card);border
 .toc a::before{content:counter(t,decimal-leading-zero);font:600 12px var(--font-num);font-variant-numeric:tabular-nums;color:var(--accent)}
 .toc a:hover{border-color:var(--accent)}
 
-.story{padding:40px 0 28px;border-top:1px solid var(--line);opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
-.js .story.pending{opacity:0;transform:translateY(16px)}
-@media (prefers-reduced-motion:reduce){.js .story.pending{opacity:1;transform:none}}
+.story{padding:40px 0 28px;border-top:1px solid var(--line)}
+.story.enter{animation:story-in .45s ease both}
+@keyframes story-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.sk-title{color:var(--ink-2)}
+.skeleton{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;min-height:320px;display:grid;align-content:start;gap:14px}
+.skeleton span{font-size:14px;color:var(--ink-2)}
+.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--line) 0%,var(--paper) 50%,var(--line) 100%);background-size:200% 100%;animation:sk 1.4s linear infinite}
+.skeleton i:nth-child(2){width:92%}.skeleton i:nth-child(3){width:70%}.skeleton i:nth-child(4){width:84%;height:160px}
+@keyframes sk{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.story.enter{animation:none}.skeleton i{animation:none}}
 .story .kicker{display:flex;gap:8px;align-items:center}
 .story .kicker b{font:500 12px var(--font-num);background:var(--accent);color:var(--card);border-radius:4px;padding:1px 6px;letter-spacing:0}
 .story h2{font:700 clamp(23px,5.6vw,32px)/1.2 var(--font-head);margin:4px 0 12px}

@@ -97,6 +97,13 @@ COMPONENTES = {
     "prioridad_idi": ("pct_idi", 0.10),          # cuánto del presupuesto va a I+D
     "autonomia_rdr": ("pct_rdr", 0.15),          # capacidad de generar recursos propios
 }
+# Etiquetas cortas legibles (no siglas oficiales) para universidades sin sigla conocida
+CORTOS = {"560": "UN Arte Diego Quispe Tito", "561": "UN Música", "564": "UNT San Juan de Lurigancho",
+          "565": "UN Fronteriza Yunguyo", "566": "UN Sechura", "567": "UN VRAEM", "568": "UN Carabaya",
+          "569": "UN Cutervo", "570": "UNA Chupaca", "571": "UN Folklore J.M. Arguedas",
+          "572": "UNA Distrito San Marcos", "573": "UNT Chincha", "574": "UN Huancabamba",
+          "575": "UN Desaguadero", "576": "UNI Aimara Ilave", "577": "UNA Bellas Artes",
+          "578": "UNA Chiclayo", "579": "UNA Olmos", "582": "UNA Parinacochas", "583": "UNA Perla del Vilcanota"}
 VENTANA = 3
 EXCLUIR = {"540"}  # Asamblea Nacional de Rectores (2012-2016): pliego del sector, no es universidad
 
@@ -131,7 +138,7 @@ def main():
         if pl in EXCLUIR:
             continue
         c = cu.get(pl, {})
-        out = {"pliego": pl, "nombre": c.get("nombre") or g.get("nombre"), "corto": c.get("corto") or c.get("sigla"),
+        out = {"pliego": pl, "nombre": c.get("nombre") or g.get("nombre"), "corto": CORTOS.get(pl) or c.get("corto") or c.get("sigla"),
                "departamento": c.get("departamento"), "ciudad": c.get("ciudad"), "lat": c.get("lat"), "lng": c.get("lng"),
                "creacion": c.get("creacion"), "licencia": c.get("licencia"), "tipo": c.get("tipo"), "anios": {}}
         for y, a in g.get("anios", {}).items():
