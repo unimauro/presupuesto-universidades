@@ -1,0 +1,6 @@
+etl/venv/
+**/__pycache__/
+*.pyc
+.DS_Store
+etl/cache/
+*.csv.gz.part
