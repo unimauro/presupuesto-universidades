@@ -2,7 +2,8 @@
 
 Fuente: MEF — "Consulta de Transferencias a los Gobiernos Nacional, Regional, Local y EPS"
 https://apps5.mineco.gob.pe/transferencias/gn/default.aspx  (pestaña Gobierno Nacional)
-Navegación (igual que un usuario): Año → Tipo de operación TODOS → agrupar por "Recursos"
+Navegación (igual que un usuario): Año → Tipo de operación (1 Recursos autorizados y
+3 Transferencia a universidades, por separado; TODOS = 1+2+3+4) → agrupar por "Recursos"
 → por cada recurso de canon/sobrecanon/regalía/FOCAM → agrupar por "Pliegos" → se guardan
 solo los pliegos universitarios (5xx). Monto = "Monto Acreditado" (soles).
 
@@ -72,9 +73,19 @@ class Nav:
         return rows(self.t)
 
 
+TIPOS = {"1": "RECURSOS AUTORIZADOS", "3": "TRANSFERENCIA A UNIVERSIDADES"}
+
+
 def anio_canon(anio):
     det = []
-    nav = Nav(anio)
+    for to in TIPOS:
+        det += anio_canon_tipo(anio, to)
+    return det
+
+
+def anio_canon_tipo(anio, to):
+    det = []
+    nav = Nav(anio, to)
     raiz = rows(nav.t)
     if not raiz:
         return det
@@ -82,7 +93,7 @@ def anio_canon(anio):
     for val, tds in recursos:
         if not tds or not RECURSO_RX.search(tds[0]):
             continue
-        n2 = Nav(anio)  # navegación nueva por recurso (estado ASP.NET lineal)
+        n2 = Nav(anio, to)  # navegación nueva por recurso (estado ASP.NET lineal)
         r0 = rows(n2.t)
         n2.drill(r0[0][0], 9)
         pl = n2.drill(val, 10)
@@ -92,9 +103,9 @@ def anio_canon(anio):
                 continue
             if not re.search(r"\bU\.?\s?N\.|UNIVERSIDAD", m.group(2).upper()):
                 continue
-            det.append({"anio": anio, "recurso": tds[0], "pliego": m.group(1), "nombre": m.group(2),
+            det.append({"anio": anio, "tipo_operacion": TIPOS[to], "recurso": tds[0], "pliego": m.group(1), "nombre": m.group(2),
                         "autorizado": num(t2[1]), "acreditado": num(t2[2])})
-        print(f"  {anio} {tds[0]}: {sum(1 for d in det if d['recurso'] == tds[0])} universidades")
+        print(f"  {anio} [{TIPOS[to][:12]}] {tds[0]}: {sum(1 for d in det if d['recurso'] == tds[0])} universidades")
     return det
 
 

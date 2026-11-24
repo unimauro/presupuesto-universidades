@@ -35,9 +35,22 @@ Fuente de verdad: `styles.css` (`:root` y `:root[data-theme="dark"]`). Si cambia
 | Bien / alerta / mal | `--good` `--warn` `--bad` | `#2C7A4B` `#B7860B` `#B23A3A` | `#5CBF83` `#E2B440` `#EC7570` |
 
 Series fijas (iguales en app.js e historias.js): **PIA** `--c-pia` `#8B94A6` / `#6F7889` · **PIM** `--c-pim` `#26346F` / `#8F9CF0` · **Devengado** `--c-dev` `#B0741A` / `#E0A447`.
-Categóricas `--k1…--k7` (UX P1-4: no repiten los tonos de PIA/PIM/Devengado).
-Claro: `#3D5A80` `#98C1D9` `#C06C3E` `#9A917F` `#55753A` `#8E4A68` `#6E5B46` · Oscuro: `#7FA3CF` `#B9DCEF` `#E08F63` `#7D7769` `#93B86F` `#D48AAB` `#B79E82`.
-Genéricas: 2.1→k1, 2.2→k2, 2.3→k5, 2.4→k7, 2.5→k4, 2.6→k6. Fuentes: RO→k1, RDR→k3, RD→k5, DyT→k6.
+Paletas categóricas (UX P1-4; definidas en styles.css y copiadas en historias.css; no repiten PIA/PIM/Devengado):
+| Token | Uso | Claro | Oscuro |
+|---|---|---|---|
+| `--g1` | 2.1 Personal | `#3D5A80` | `#8FB0D9` |
+| `--g2` | 2.2 Pensiones | `#7FA7C4` | `#B9D6EA` |
+| `--g3` | 2.3 Bienes y servicios | `#55753A` | `#93B86F` |
+| `--g4` | 2.5 Otros | `#9A917F` | `#8A8372` |
+| `--g5` | 2.6 Activos no financieros | `#8E4A68` | `#D48AAB` |
+| `--g6` | 2.4 Donaciones | `#C9A66B` | `#D9B77E` |
+| `--g7` | 2.8 Deuda | `#6E5B46` | `#B79E82` |
+| `--f1` | RO | `#3D5A80` | `#8FB0D9` |
+| `--f2` | RDR | `#C06C3E` | `#E39A6F` |
+| `--f3` | RD / canon | `#55753A` | `#93B86F` |
+| `--f4` | Donaciones y transferencias | `#8E4A68` | `#D48AAB` |
+| `--f5` | ROOC | `#7FA7C4` | `#B9D6EA` |
+`--warn` claro `#8A6508` (contraste AA).
 Texto ocre pequeño (kickers): `--ochre-text` `#8F5D12` (claro, 4.5:1+) / `#E0A447` (oscuro); `--ochre` solo para barras y bordes.
 Cifras: Plus Jakarta Sans con `tabular-nums` y formato `S/ 6,954.6 M`, igual que index.
 Resaltado de una universidad en historias: `#C2185B` (claro) / `#F07FB0` (oscuro).

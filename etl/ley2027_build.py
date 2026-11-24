@@ -400,10 +400,10 @@ def main():
 
     out = OrderedDict()
     out["generado"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    out["version"] = "proyecto"
-    out["norma"] = "Proposición Legislativa N° 00002-2026-2031-CR (Proyecto de Ley de Presupuesto del Sector Público para el Año Fiscal 2027, Oficio 242-2026-PR)"
-    out["fecha"] = "2026-08-28"
-    out["url"] = DOCS["PL_Presupuesto_SP_2027.pdf"][0]
+    out["version"] = "dictamen"
+    out["norma"] = "Dictamen de la Comisión Bicameral de Presupuesto recaído en la Proposición Legislativa N° 00002-2026-2031-CR (Ley de Presupuesto del Sector Público para el Año Fiscal 2027)"
+    out["fecha"] = "2026-11-05"
+    out["url"] = DOCS["Dictamen_PL00002_LP.pdf"][0]
     out["estado_tramite"] = OrderedDict([
         ("proyecto", {"fecha": "2026-08-28", "detalle": "Presentado por el Ejecutivo; anexos fechados 27/08/2026", "url": DOCS["Anexo_4.pdf"][0]}),
         ("dictamen", {"fecha": "2026-11-05", "detalle": "Comisión Bicameral de Presupuesto aprueba dictamen con texto sustitutorio (29 a favor, 1 en contra, 4 abstenciones); mantiene el total y la distribución por nivel de gobierno del proyecto (GN S/ 166 613 M).", "url": DOCS["Dictamen_PL00002_LP.pdf"][0]}),
@@ -412,6 +412,8 @@ def main():
     ])
     out["documentos"] = [{"titulo": t, "url": u, "tipo": k} for _, (u, t, k) in DOCS.items()] + OTROS_DOCS
     out["notas"] = [
+        "version='dictamen': el art. 1 del texto sustitutorio del dictamen (5-nov-2026) fija exactamente la misma distribución que el proyecto (GN S/ 166 613 076 848; GR S/ 58 671 738 588; GL S/ 41 221 501 299) y remite a los anexos 1–8; por eso los montos por pliego se toman de los anexos del proyecto publicados por el MEF (no hay anexos propios del dictamen publicados).",
+        "Búsqueda de la ley publicada (23-nov-2026): sin número de ley ni publicación en El Peruano; la autógrafa aprobada el 20-nov-2026 no tiene anexos por pliego públicos (congreso.gob.pe 404; MEF tras Incapsula).",
         "Montos por universidad = créditos del PROYECTO (Anexo 4, 5 y 8, MEF, 27/08/2026). La versión aprobada por el Pleno el 20-nov-2026 mantiene el total del sector público pero reasigna ~S/ 1 008 M del Gobierno Nacional a gobiernos regionales y locales; no se ha publicado aún el detalle por pliego de esa versión, por lo que el PIA 2027 final de cada universidad puede diferir.",
         "pia_2026, pim_2026, dev_2026_parcial, pim_2025 y dev_2025 provienen de data/gasto/gasto.json (Consulta Amigable MEF; 2026 parcial al 22-nov-2026). var_pct = PIA 2027 propuesto vs PIA 2026.",
         "fuente: Anexo 4 por fuente de financiamiento (RO, RDR, ROOC, D y T, RD). En el Anexo 4 'RECURSOS DETERMINADOS' agrupa canon, sobrecanon, regalías, renta de aduanas y participaciones; no se desagrega por rubro.",

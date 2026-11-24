@@ -65,9 +65,12 @@
     const c = String(u.corto || '').trim();
     if (c && c.length <= 12) return c;
     let t = (c || String(u.nombre || u.pliego)).trim();
-    t = t.replace(/^(U\.\s?N\.|UNIVERSIDAD\s+NACIONAL)\s+/i, '').replace(/^UNIVERSIDAD\s+/i, '')
+    const pref = /^(U\.\s?N\.|UNIVERSIDAD\b|UN\s)/i.test(t);
+    t = t.replace(/^(U\.\s?N\.|UNIVERSIDAD\s+NACIONAL|UN)\s+/i, '').replace(/^UNIVERSIDAD\s+/i, '')
       .replace(/^AUT[OÓ]NOMA\s+/i, '').replace(/^(DE\s+|DEL\s+)/i, '');
-    t = 'UN ' + titleCase(t);
+    // Si viene todo en MAYÚSCULAS se pasa a tipo título; si ya viene con mayúsculas y minúsculas (siglas del ETL) se respeta.
+    if (t === t.toUpperCase()) t = titleCase(t);
+    if (pref) t = 'UN ' + t;
     return t.length > 16 ? t.slice(0, 15).trimEnd() + '…' : t;
   }
 
@@ -80,7 +83,7 @@
     return {
       ink: v('--ink'), ink2: v('--ink-2'), line: v('--line'), card: v('--card'),
       pia: v('--c-pia'), pim: v('--c-pim'), dev: v('--c-dev'), hl: v('--c-hl'),
-      accent: v('--accent'), amber: v('--amber'), k1: v('--k1'), k2: v('--k2'), k3: v('--k3'), k4: v('--k4'), k5: v('--k5'), k6: v('--k6'),
+      accent: v('--accent'), amber: v('--amber'), g1: v('--g1'), g2: v('--g2'), g3: v('--g3'), g4: v('--g4'), g5: v('--g5'), f2: v('--f2'),
     };
   }
 
@@ -352,7 +355,7 @@
             const C = colors();
             hbar($('[data-fig="mix"]', el), {
               items, stacked: true, max: 1, fmt: (v) => pct(v), axis: (v) => pct(v),
-              series: [{ name: 'Personal (2.1)', color: C.k1 }, { name: 'Pensiones (2.2)', color: C.k2 }, { name: 'Bienes y servicios (2.3)', color: C.k5 }, { name: 'Activos no fin. (2.6)', color: C.k6 }, { name: 'Otros', color: C.k4 }],
+              series: [{ name: 'Personal (2.1)', color: C.g1 }, { name: 'Pensiones (2.2)', color: C.g2 }, { name: 'Bienes y servicios (2.3)', color: C.g3 }, { name: 'Activos no fin. (2.6)', color: C.g5 }, { name: 'Otros', color: C.g4 }],
               aria: 'Composición del gasto devengado por genérica y universidad',
             });
           },
@@ -464,7 +467,7 @@
             ])}${src('Ingresos: MEF — Consulta Amigable (ingresos por pliego).')}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="rdr"]', el), { items, series: [{ name: 'Financiado con RDR', color: C.k3 }], fmt: (v) => pct(v), axis: (v) => pct(v), aria: 'Porcentaje del gasto financiado con recursos directamente recaudados' });
+            hbar($('[data-fig="rdr"]', el), { items, series: [{ name: 'Financiado con RDR', color: C.f2 }], fmt: (v) => pct(v), axis: (v) => pct(v), aria: 'Porcentaje del gasto financiado con recursos directamente recaudados' });
           },
         };
       },
@@ -499,7 +502,7 @@
             ])}${srcCtx('pubs', 'Publicaciones')}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.k1 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
+            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.g1 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
           },
         };
       },

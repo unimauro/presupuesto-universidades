@@ -27,9 +27,10 @@
 <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/brand/favicon-180.png">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" href="data/observatorio.json" as="fetch" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script>
@@ -58,7 +59,7 @@
     </a>
     <div class="topbar-ctl">
       <label class="year-ctl"><span>Año</span>
-        <select id="year-global" aria-label="Año de análisis"></select>
+        <select id="year-global" aria-label="Año de análisis" disabled><option>Cargando…</option></select>
       </label>
       <button id="theme-toggle" class="icon-btn" type="button" aria-pressed="false" aria-label="Activar tema oscuro" title="Cambiar tema">
         <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20.7 14.6A8.5 8.5 0 0 1 9.4 3.3a.6.6 0 0 0-.8-.7A10 10 0 1 0 21.4 15.4a.6.6 0 0 0-.7-.8z"/></svg>
@@ -70,22 +71,23 @@
     <ol>
       <li><a href="#resumen"><span class="n">1</span>Resumen nacional</a></li>
       <li><a href="#variacion"><span class="n">2</span>¿Subió o bajó?</a></li>
-      <li><a href="#ranking"><span class="n">2</span>Ranking</a></li>
-      <li><a href="#trayectoria"><span class="n">3</span>Empezaron y terminaron</a></li>
+      <li><a href="#ranking"><span class="n">3</span>Ranking</a></li>
+      <li><a href="#trayectoria"><span class="n">4</span>Empezaron y terminaron</a></li>
       <li id="nav-expectativa" hidden><a href="#expectativa"><span class="n">4</span>Expectativa 2027</a></li>
-      <li><a href="#gasto"><span class="n">4</span>¿En qué gastan?</a></li>
-      <li><a href="#fuentes"><span class="n">5</span>¿De dónde viene?</a></li>
-      <li><a href="#infra"><span class="n">6</span>Infraestructura</a></li>
-      <li><a href="#idi"><span class="n">7</span>Investigación</a></li>
-      <li><a href="#ficha"><span class="n">8</span>Ficha y comparador</a></li>
-      <li><a href="#mapa"><span class="n">9</span>Mapa</a></li>
-      <li><a href="#metodologia"><span class="n">10</span>Metodología</a></li>
+      <li><a href="#gasto"><span class="n">5</span>¿En qué gastan?</a></li>
+      <li><a href="#fuentes"><span class="n">6</span>¿De dónde viene?</a></li>
+      <li><a href="#infra"><span class="n">7</span>Infraestructura</a></li>
+      <li><a href="#idi"><span class="n">8</span>Investigación</a></li>
+      <li><a href="#ficha"><span class="n">9</span>Ficha y comparador</a></li>
+      <li><a href="#mapa"><span class="n">10</span>Mapa</a></li>
+      <li><a href="#metodologia"><span class="n">11</span>Metodología</a></li>
       <li class="nav-ext"><a href="historias.html"><span class="n">→</span>Historias</a></li>
+      <li class="nav-ext"><a href="u/"><span class="n">→</span>Universidades (A-Z)</a></li>
     </ol>
   </nav>
 </header>
 
-<div id="data-banner" class="banner" role="status" hidden></div>
+<div id="data-banner" class="banner loading" role="status"><span class="spinner" aria-hidden="true"></span> Cargando datos del MEF…</div>
 
 <main id="main" tabindex="-1">
   <section class="hero" aria-labelledby="h-title">
@@ -118,13 +120,13 @@
   </section>
 
   <section id="ranking" class="sec" data-sec aria-labelledby="h-ranking">
-    <header class="sec-head"><span class="sec-n">02</span><h2 id="h-ranking">Ranking de universidades</h2>
+    <header class="sec-head"><span class="sec-n">03</span><h2 id="h-ranking">Ranking de universidades</h2>
       <p class="sec-lede">Busca, filtra y ordena. Toca el nombre de una universidad para abrir su ficha.</p></header>
     <div class="sec-body" id="body-ranking"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="trayectoria" class="sec" data-sec aria-labelledby="h-tray">
-    <header class="sec-head"><span class="sec-n">03</span><h2 id="h-tray">¿Cómo empezaron y cómo terminaron?</h2>
+    <header class="sec-head"><span class="sec-n">04</span><h2 id="h-tray">¿Cómo empezaron y cómo terminaron?</h2>
       <p class="sec-lede">Del presupuesto de apertura (PIA) al modificado (PIM) y a lo realmente gastado (devengado). La diferencia PIA→PIM se explica por transferencias y créditos aprobados durante el año, en muchos casos por decreto supremo.</p></header>
     <div class="sec-body" id="body-trayectoria"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
@@ -136,43 +138,43 @@
   </section>
 
   <section id="gasto" class="sec" data-sec aria-labelledby="h-gasto">
-    <header class="sec-head"><span class="sec-n">04</span><h2 id="h-gasto">¿En qué gastan?</h2>
+    <header class="sec-head"><span class="sec-n">05</span><h2 id="h-gasto">¿En qué gastan?</h2>
       <p class="sec-lede">Composición del gasto por genérica: personal, pensiones, bienes y servicios, otros gastos y adquisición de activos no financieros (infraestructura y equipamiento).</p></header>
     <div class="sec-body" id="body-gasto"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="fuentes" class="sec" data-sec aria-labelledby="h-fuentes">
-    <header class="sec-head"><span class="sec-n">05</span><h2 id="h-fuentes">¿De dónde viene el dinero?</h2>
+    <header class="sec-head"><span class="sec-n">06</span><h2 id="h-fuentes">¿De dónde viene el dinero?</h2>
       <p class="sec-lede">Recursos ordinarios (Tesoro), recursos directamente recaudados (RDR: matrículas, servicios, centros de producción), recursos determinados (canon, sobrecanon, regalías) y donaciones y transferencias.</p></header>
     <div class="sec-body" id="body-fuentes"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="infra" class="sec" data-sec aria-labelledby="h-infra">
-    <header class="sec-head"><span class="sec-n">06</span><h2 id="h-infra">Infraestructura e inversión</h2>
+    <header class="sec-head"><span class="sec-n">07</span><h2 id="h-infra">Infraestructura e inversión</h2>
       <p class="sec-lede">Proyectos de inversión y adquisición de activos. El avance mostrado es financiero (devengado / PIM del año), no avance físico de obra.</p></header>
     <div class="sec-body" id="body-infra"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="idi" class="sec" data-sec aria-labelledby="h-idi">
-    <header class="sec-head"><span class="sec-n">07</span><h2 id="h-idi">Investigación</h2>
+    <header class="sec-head"><span class="sec-n">08</span><h2 id="h-idi">Investigación</h2>
       <p class="sec-lede">Programa presupuestal 0137 (Ciencia, Tecnología e Innovación): cuánto se asignó y cuánto se ejecutó. El costo por publicación usa solo el devengado de I+D, nunca el presupuesto total.</p></header>
     <div class="sec-body" id="body-idi"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="ficha" class="sec" data-sec aria-labelledby="h-ficha">
-    <header class="sec-head"><span class="sec-n">08</span><h2 id="h-ficha">Ficha por universidad</h2>
+    <header class="sec-head"><span class="sec-n">09</span><h2 id="h-ficha">Ficha por universidad</h2>
       <p class="sec-lede">Todas las series y los indicadores de una universidad. Puedes compartir el enlace directo a cada ficha.</p></header>
     <div class="sec-body" id="body-ficha"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="mapa" class="sec" data-sec aria-labelledby="h-mapa">
-    <header class="sec-head"><span class="sec-n">09</span><h2 id="h-mapa">Mapa</h2>
+    <header class="sec-head"><span class="sec-n">10</span><h2 id="h-mapa">Mapa</h2>
       <p class="sec-lede">Tamaño del círculo según el PIM; color según el porcentaje de ejecución (devengado / PIM).</p></header>
     <div class="sec-body" id="body-mapa"><div class="skeleton" aria-hidden="true"></div></div>
   </section>
 
   <section id="metodologia" class="sec" data-sec aria-labelledby="h-met">
-    <header class="sec-head"><span class="sec-n">10</span><h2 id="h-met">Metodología y calidad de datos</h2></header>
+    <header class="sec-head"><span class="sec-n">11</span><h2 id="h-met">Metodología y calidad de datos</h2></header>
     <div class="sec-body prose">
       <h3>Fuentes</h3>
       <ul id="met-fuentes"></ul>
@@ -204,6 +206,7 @@
 </main>
 
 <footer class="foot">
+  <p><a href="u/">Todas las universidades públicas de la A a la Z</a> · <a href="historias.html">Historias</a></p>
   <p>Radiografía Presupuestal de las Universidades Públicas del Perú · Datos públicos del Ministerio de Economía y Finanzas. Montos en soles corrientes.</p>
 </footer>
 

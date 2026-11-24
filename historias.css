@@ -1,9 +1,11 @@
 /* Historias — Radiografía Presupuestal. Tokens: ver assets/brand/BRAND.md */
 :root{
   --ink:#1B2230; --ink-2:#5A6373; --paper:#F5F3EE; --card:#FFFFFF; --line:#E3DED4;
-  --accent:#26346F; --amber:#B0741A; --warn:#B7860B; --ok:#2C7A4B;
+  --accent:#26346F; --amber:#B0741A; --warn:#8A6508; --ok:#2C7A4B;
   --c-pia:#8B94A6; --c-pim:#26346F; --c-dev:#B0741A; --c-hl:#C2185B; --ochre-text:#8F5D12;
-  --k1:#3D5A80; --k2:#98C1D9; --k3:#C06C3E; --k4:#9A917F; --k5:#55753A; --k6:#8E4A68;
+  /* Paletas categóricas = styles.css (UX P1-4): genéricas --g*, fuentes --f* */
+  --g1:#3D5A80; --g2:#7FA7C4; --g3:#55753A; --g4:#9A917F; --g5:#8E4A68; --g6:#C9A66B; --g7:#6E5B46;
+  --f1:#3D5A80; --f2:#C06C3E; --f3:#55753A; --f4:#8E4A68; --f5:#7FA7C4;
   --shadow:0 1px 2px rgba(27,34,48,.06),0 4px 14px rgba(27,34,48,.05);
   --banner-bg:#F8EED2; --banner-ink:#5A4210;
   --font-head:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
@@ -16,14 +18,16 @@
   --ink:#E9E6DF; --ink-2:#9BA3B1; --paper:#12151B; --card:#1A1F28; --line:#2B323E;
   --accent:#9AA6F0; --amber:#E0A447; --warn:#E2B440; --ok:#5CBF83;
   --c-pia:#6F7889; --c-pim:#8F9CF0; --c-dev:#E0A447; --c-hl:#F07FB0; --ochre-text:#E0A447;
-  --k1:#7FA3CF; --k2:#B9DCEF; --k3:#E08F63; --k4:#7D7769; --k5:#93B86F; --k6:#D48AAB;
+  --g1:#8FB0D9; --g2:#B9D6EA; --g3:#93B86F; --g4:#8A8372; --g5:#D48AAB; --g6:#D9B77E; --g7:#B79E82;
+  --f1:#8FB0D9; --f2:#E39A6F; --f3:#93B86F; --f4:#D48AAB; --f5:#B9D6EA;
   --shadow:none; --banner-bg:#3A2F12; --banner-ink:#F3DC9C;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ink:#E9E6DF; --ink-2:#9BA3B1; --paper:#12151B; --card:#1A1F28; --line:#2B323E;
   --accent:#9AA6F0; --amber:#E0A447; --warn:#E2B440; --ok:#5CBF83;
   --c-pia:#6F7889; --c-pim:#8F9CF0; --c-dev:#E0A447; --c-hl:#F07FB0; --ochre-text:#E0A447;
-  --k1:#7FA3CF; --k2:#B9DCEF; --k3:#E08F63; --k4:#7D7769; --k5:#93B86F; --k6:#D48AAB;
+  --g1:#8FB0D9; --g2:#B9D6EA; --g3:#93B86F; --g4:#8A8372; --g5:#D48AAB; --g6:#D9B77E; --g7:#B79E82;
+  --f1:#8FB0D9; --f2:#E39A6F; --f3:#93B86F; --f4:#D48AAB; --f5:#B9D6EA;
   --shadow:none; --banner-bg:#3A2F12; --banner-ink:#F3DC9C;
 }}
 

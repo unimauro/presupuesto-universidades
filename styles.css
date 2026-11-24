@@ -36,8 +36,8 @@
   --radius: 12px;
   --top-h: 104px;
   --side-w: 236px;
-  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -83,7 +83,8 @@ body {
   font-variant-numeric: tabular-nums;
   overflow-x: hidden;
 }
-h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.2; letter-spacing: -.01em; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 800; line-height: 1.08; letter-spacing: -.02em; }
+h3 { font-weight: 700; letter-spacing: -.01em; line-height: 1.2; }
 a { color: var(--accent); }
 a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible {
   outline: 3px solid var(--ochre); outline-offset: 2px; border-radius: 4px;
@@ -383,3 +384,34 @@ details.notas ul { font-size: 13.5px; color: var(--muted); }
 /* Nombres largos (p. ej. "U.N. TECNOLÓGICA DE ...") no deben ensanchar la 1.ª columna */
 td.txt.sticky-col { white-space: normal; min-width: 110px; max-width: 220px; }
 @media (min-width: 860px) { td.txt.sticky-col { max-width: 320px; } }
+
+/* ---------- Tipografía juvenil (Bricolage Grotesque + Plus Jakarta Sans) ---------- */
+body { font-size: 15.5px; line-height: 1.6; }
+.hero h1 { font-size: clamp(32px, 8.4vw, 60px); line-height: 1.02; margin-bottom: 16px; }
+.sec { padding-top: 40px; margin-top: 32px; }
+.sec-head h2 { font-size: clamp(28px, 6.6vw, 42px); margin: 6px 0 10px; }
+.kicker, .sec-n { letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+.sec-n { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11.5px; }
+.card h3 { font-size: 18px; }
+.kpi .k-val, .big-var .bv-pct, td, th, .tlist .t-amt { font-variant-numeric: tabular-nums; }
+.kpi .k-val { font-family: var(--serif); font-weight: 800; letter-spacing: -.02em; }
+.hero-finding, .sentence { font-family: var(--font); font-weight: 500; letter-spacing: -.005em; }
+.hero-finding strong { font-weight: 800; }
+.brand-txt strong { font-weight: 800; letter-spacing: -.01em; }
+.pill, .tag, .seg button, .btn { border-radius: 999px; }
+.seg { border-radius: 999px; }
+.btn { padding-left: 16px; padding-right: 16px; }
+/* ---------- Carga ---------- */
+.banner.loading { background: var(--surface); border-color: var(--line-strong); display: flex; align-items: center; gap: 10px; }
+.spinner { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid var(--line-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton { position: relative; }
+.skeleton::after { content: "Cargando…"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 14px; font-weight: 600; }
+/* ---------- Tablas compactas en móvil ---------- */
+@media (max-width: 559px) {
+  .mt td, .mt th { padding: 7px 8px; font-size: 13px; }
+  .mt .rk-hide-m { display: none; }
+}
+.mt-count { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.split-chart h4 { margin: 12px 0 4px; font-size: 14px; }
+.split-chart .empty { margin: 6px 0; }
