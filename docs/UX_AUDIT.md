@@ -194,3 +194,13 @@ Prioridades: **P0** bloquea una tarea central o da un dato engañoso · **P1** i
 8. **P1-5 + P1-6** Contraste AA (píldora warn, kicker ocre) y objetivos táctiles de 44 px.
 9. **P1-12/13/14** Historias: mismo tema y botón, siglas en los ejes y mismo formato de cifras.
 10. **P1-8 + P1-11** Coherencia 71/65 y marcar el año parcial en todas las barras.
+
+---
+
+## Estado de los fixes
+
+**Historias (`ui-historias`), verificado el 23-nov-2026 a 375 px en claro y oscuro, con el build local:**
+- Resueltos: P1-12 (tema según el sistema + `#theme-toggle` de 44×44), P1-13 (siglas en el eje: "UN Tecnológica…" ya no se corta), P1-14 (formato `S/ 6,954.6 M` y Plex Sans; se quitó la carga de Plex Mono), P1-4 en historias (paleta categórica propia), P2-10, P2-11 (las anclas `#variacion`, `#gasto`, `#idi`, `#infra`, `#fuentes`, `#trayectoria` y `#ranking` existen en index) y P2-12 (`og-historias.png` existe). Sin errores JS y sin scroll horizontal (`scrollWidth = 375`).
+- Pendientes menores (P2): `a.brand` de 32 px de alto; enlaces de fuentes y "Volver al observatorio" del pie de 16–18 px. Siglas faltantes → ETL.
+
+**Index (`frontend`):** pendiente de verificar.

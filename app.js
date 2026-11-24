@@ -64,7 +64,7 @@
   const S = {
     data: null, sample: false, unis: [], years: [], partial: {}, lastClosed: null, year: null,
     rendered: new Set(), charts: new Map(),
-    rank: { q: '', dep: '', sort: 'pim', dir: -1, all: false },
+    rank: { q: '', dep: '', sort: 'pim', dir: -1, all: false, mcol: 'pim' },
     top: 15,
     tray: { uni: null },
     gasto: { metric: 'dev', uni: '' },
@@ -548,13 +548,15 @@
           <button type="button" class="btn" id="rk-csv">Descargar CSV</button>
         </div>
         <div id="rk-partial"></div>
-        <div class="table-wrap"><table id="rk-table"><caption id="rk-cap"></caption><thead></thead><tbody></tbody></table></div>
+        <div class="controls rk-mobile"><label class="grow">Columna a mostrar en el celular<select id="rk-metric">${RANK_COLS.filter(c => !['nombre', 'ejec'].includes(c.k)).map(c => `<option value="${esc(c.k)}"${c.k === S.rank.mcol ? ' selected' : ''}>${esc(c.lbl.replace('*', ''))}</option>`).join('')}</select></label></div>
+        <div class="table-wrap tall"><table id="rk-table"><caption id="rk-cap"></caption><thead></thead><tbody></tbody></table></div>
         <p class="count"><span id="rk-count"></span> <button type="button" class="btn" id="rk-more" hidden></button></p>
         <p class="note">* Índice de gestión presupuestal: referencial, NO oficial (ver Metodología). Semáforo de ejecución: ≥ 90 % verde, 75–90 % ámbar, &lt; 75 % rojo.</p>`;
       $('#rk-q', el).addEventListener('input', debounce(e => { S.rank.q = e.target.value; drawRankRows(); }));
       $('#rk-dep', el).addEventListener('change', e => { S.rank.dep = e.target.value; drawRankRows(); });
       $('#rk-year', el).addEventListener('change', e => setYear(e.target.value));
       $('#rk-csv', el).addEventListener('click', downloadCsv);
+      $('#rk-metric', el).addEventListener('change', e => { S.rank.mcol = e.target.value; S.rank.sort = e.target.value; S.rank.dir = -1; drawRankRows(); });
       $('#rk-more', el).addEventListener('click', () => { S.rank.all = !S.rank.all; drawRankRows(); });
       $('#rk-table thead', el).addEventListener('click', e => {
         const b = e.target.closest('button.sort'); if (!b) return;
@@ -594,18 +596,19 @@
     more.textContent = S.rank.all ? 'Mostrar solo las primeras ' + LIM : 'Ver las ' + allRows.length;
     $('#rk-partial', el).innerHTML = partialNote(y);
     $('#rk-cap', el).textContent = `Universidades públicas, año ${yearLbl(y)}. Montos en soles.`;
-    $('#rk-table thead', el).innerHTML = '<tr><th scope="col" class="sticky-col">#</th>' + RANK_COLS.map((c, i) => {
+    // En móvil solo se ven: Universidad | columna elegida | % Ejec.
+    const hideM = c => (['nombre', 'ejec', S.rank.mcol].includes(c.k) ? '' : ' rk-hide-m');
+    $('#rk-table thead', el).innerHTML = '<tr>' + RANK_COLS.map(c => {
       const sort = S.rank.sort === c.k ? (S.rank.dir > 0 ? 'ascending' : 'descending') : 'none';
-      return `<th scope="col" class="${c.txt ? 'txt' : ''}${i === 0 ? '' : ''}" aria-sort="${sort}"><button type="button" class="sort" data-k="${esc(c.k)}">${esc(c.lbl)}</button></th>`;
+      return `<th scope="col" class="${c.k === 'nombre' ? 'txt sticky-col' : ''}${hideM(c)}" aria-sort="${sort}"><button type="button" class="sort" data-k="${esc(c.k)}">${esc(c.lbl)}</button></th>`;
     }).join('') + '</tr>';
     $('#rk-table tbody', el).innerHTML = rows.length ? rows.map((u, i) => '<tr>' +
-      `<td class="sticky-col">${i + 1}</td>` +
       RANK_COLS.map(c => {
-        if (c.k === 'nombre') return `<td class="txt">${uniLink(u)}</td>`;
+        if (c.k === 'nombre') return `<td class="txt sticky-col"><span class="rk-n">${i + 1}</span>${uniLink(u)}</td>`;
         const v = c.get(u, y);
-        return `<td>${c.html ? c.html(v) : esc(c.f(v))}</td>`;
+        return `<td class="${hideM(c).trim()}">${c.html ? c.html(v) : esc(c.f(v))}</td>`;
       }).join('') + '</tr>').join('')
-      : `<tr><td colspan="${RANK_COLS.length + 1}" class="txt"><span class="muted">Sin resultados para ese filtro.</span></td></tr>`;
+      : `<tr><td colspan="${RANK_COLS.length}" class="txt"><span class="muted">Sin resultados para ese filtro.</span></td></tr>`;
     $('#rk-count', el).textContent = `Mostrando ${rows.length} de ${allRows.length} universidades con datos en ${y}.`;
   }
   function downloadCsv() {
@@ -1279,14 +1282,20 @@
       el.innerHTML = `
         <div class="controls"><label>Año<select id="mp-year">${yearOptions(y)}</select></label></div>
         <div id="mp-partial"></div>
-        <div id="map" role="region" aria-label="Mapa de universidades públicas"></div>
+        <div class="map-wrap"><div id="map" role="region" aria-label="Mapa de universidades públicas"></div>
+          <button type="button" class="btn map-activate" id="mp-act" hidden>Mover el mapa</button></div>
         <ul class="legend" id="mp-legend"></ul>
-        <p class="note">Las universidades sin coordenadas no aparecen en el mapa. Toca un círculo para ver el detalle.</p>`;
+        <p class="note map-note" id="mp-hint">Las universidades sin coordenadas no aparecen en el mapa. Toca un círculo para ver el detalle.</p>
+        <details class="deps" id="mp-deps"><summary>Universidades por departamento (lista)</summary><div class="deps-grid" id="mp-deps-grid"></div></details>`;
       $('#mp-year', el).addEventListener('change', e => setYear(e.target.value));
     } else {
       $('#mp-year', el).innerHTML = yearOptions(y);
     }
     $('#mp-partial', el).innerHTML = partialNote(y);
+    const byDep = {};
+    S.unis.filter(u => A(u, y)).forEach(u => { (byDep[u.departamento || 'Sin departamento'] = byDep[u.departamento || 'Sin departamento'] || []).push(u); });
+    $('#mp-deps-grid', el).innerHTML = Object.keys(byDep).sort((p, q) => byDep[q].length - byDep[p].length || p.localeCompare(q, LOC))
+      .map(dpt => `<div><h4>${esc(titleCase(dpt))} (${byDep[dpt].length})</h4>${byDep[dpt].sort((p, q) => (tot(q, y, 'pim') || 0) - (tot(p, y, 'pim') || 0)).map(u => `<a href="#u=${encodeURIComponent(u.pliego)}" title="${esc(u.nombre || '')}">${esc(uName(u))}</a>`).join('')}</div>`).join('');
     $('#mp-legend', el).innerHTML = [['good', 'Ejecución ≥ 90 %'], ['warn', '75–90 %'], ['bad', '< 75 %'], ['line-strong', 's/d']]
       .map(([c, l]) => `<li><i style="background:${cssVar('--' + c)};border-radius:50%"></i>${esc(l)}</li>`).join('') + '<li>Tamaño = PIM</li>';
     loadLeaflet().then(drawMap).catch(() => { $('#map', el).innerHTML = '<p class="empty">No se pudo cargar el mapa. Revisa tu conexión.</p>'; });
@@ -1295,7 +1304,18 @@
     const L = window.L; const y = S.year;
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (!S.map) {
-      S.map = L.map('map', { scrollWheelZoom: false, zoomControl: true }).setView([-9.3, -75.0], isMobile() ? 4 : 5);
+      const touch = window.matchMedia('(pointer: coarse)').matches;
+      S.map = L.map('map', { scrollWheelZoom: false, zoomControl: true, dragging: !touch, tap: false }).setView([-9.3, -75.0], isMobile() ? 4 : 5);
+      if (touch) {
+        const act = $('#mp-act'); act.hidden = false;
+        $('#mp-hint').textContent = 'El mapa no se mueve con un dedo para que puedas seguir bajando la página. Usa “Mover el mapa” o pellizca para acercar. Lima concentra muchas universidades: mira también la lista por departamento.';
+        act.addEventListener('click', () => {
+          const on = !S.map.dragging.enabled();
+          if (on) S.map.dragging.enable(); else S.map.dragging.disable();
+          act.textContent = on ? 'Fijar el mapa' : 'Mover el mapa';
+          act.setAttribute('aria-pressed', String(on));
+        });
+      }
     }
     if (!S.tiles) {
       S.tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(S.map);
@@ -1444,7 +1464,11 @@
   // ------------------------------------------------------------------ hash (#u=514)
   function handleHash() {
     const m = /^#u=([^&]+)/.exec(location.hash);
-    if (!m) return;
+    if (!m) {
+      const id = location.hash.slice(1);
+      if (id && SECTIONS[id] && document.getElementById(id)) { if (!S.rendered.has(id)) renderSection(id); pinTo(id); }
+      return;
+    }
     const p = decodeURIComponent(m[1]);
     if (!uniBy(p)) return;
     S.ficha.uni = p;

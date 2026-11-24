@@ -5,7 +5,8 @@ pliegos y fuentes de financiamiento").
 mef.gob.pe está detrás de Incapsula (bloquea curl), así que se usa:
   1) gob.pe (cdn.www.gob.pe) cuando el anexo está publicado ahí;
   2) copia de Internet Archive (web.archive.org/web/<ts>id_/<url-mef>) de la URL oficial;
-  3) intento directo a mef.gob.pe (a veces pasa).
+  NO se intenta evadir la protección anti-bot de mef.gob.pe: si no hay copia en gob.pe ni en
+  Internet Archive (ni un PDF ya presente en la caché local), el año queda con nota.
 La URL guardada en la salida es SIEMPRE la URL oficial del MEF/gob.pe (+ la de archivo usada).
 
 Salida: etl/cache/normativa/leyes.json  (lo consume normativa_build.py)
@@ -72,7 +73,7 @@ def bajar(anio, url, fuentes):
         elif src.startswith("wb:"):
             u = f"https://web.archive.org/web/{src[3:]}id_/{url}"
         else:
-            u = url
+            continue  # sin descarga directa desde mef.gob.pe
         try:
             r = S.get(u, timeout=180)
             time.sleep(2)

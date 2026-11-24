@@ -99,19 +99,20 @@ def descargar(offline):
 
 # ---------------------------------------------------------------- Anexo 4
 def parse_anexo4():
-    """Devuelve {codigo: {nombre, fuente{...}}} para pliegos del GN + totales sector 10."""
-    pliegos = OrderedDict()
+    """Filas (en orden) de pliegos del Gobierno Nacional: [(codigo, nombre, fuente{}, total)], total GN."""
+    filas, total_gn = [], None
     with pdfplumber.open(CACHE / "Anexo_4.pdf") as pdf:
         for page in pdf.pages:
-            text = page.extract_text() or ""
-            if "GOBIERNO NACIONAL" not in text:
-                continue
+            if total_gn is not None:
+                break
             words = page.extract_words()
             for line in page.extract_text_lines():
+                es_total = line["text"].startswith("TOTAL GOBIERNO NACIONAL")
                 m = re.match(r"^(\d{3}) (\D.*?)\s+\d", line["text"])
-                if not m:
+                if not (m or es_total):
                     continue
-                ws = sorted([w for w in words if abs(w["top"] - line["top"]) < 3 and w["x0"] > 380],
+                xmin = 300 if es_total else 380
+                ws = sorted([w for w in words if abs(w["top"] - line["top"]) < 3 and w["x0"] > xmin],
                             key=lambda w: w["x0"])
                 # agrupar dígitos contiguos en números
                 nums, cur, last_x1 = [], [], None
@@ -136,9 +137,13 @@ def parse_anexo4():
                 tot = vals.pop("TOTAL", None)
                 if tot is None or sum(vals.values()) != tot:
                     raise ValueError(f"Anexo 4: fila no cuadra: {line['text']} -> {vals} / {tot}")
-                cod, nombre = m.group(1), m.group(2).strip()
-                pliegos.setdefault(cod, {"nombre": nombre, "fuente": vals, "total": tot})
-    return pliegos
+                if es_total:
+                    total_gn = tot
+                    break
+                filas.append((m.group(1), m.group(2).strip(), vals, tot))
+    if sum(f[3] for f in filas) != total_gn:
+        raise ValueError(f"Anexo 4: suma de pliegos GN {sum(f[3] for f in filas)} ≠ TOTAL GN {total_gn}")
+    return filas, total_gn
 
 
 # ---------------------------------------------------------------- Anexo 5
@@ -174,7 +179,29 @@ def parse_anexo5(codigos):
             if l.startswith("TOTAL PLIEGO"):
                 d["total"] = num(l.split(":")[1])
                 continue
-            if not mm:
+            if re.fullmatch(r"\d{1,3}(?: \d{3})*", l.strip()):
+                # monto huérfano (el PDF lo imprime al pie y el proyecto sigue en la página siguiente)
+                v = num(l.strip())
+                if d.get("_pend"):
+                    tgt, code = d.pop("_pend")
+                    d[tgt][code]["monto"] += v
+                else:
+                    d["_orphan"] = v
+                continue
+            if not mm or (re.match(r"^\d{7} ", l) and not re.search(r"\d$", l)):
+                cm = re.match(r"^(\d{7}) (.*)$", l)
+                if cm:  # proyecto/actividad cuyo monto está en otra línea
+                    code, name = cm.group(1), cm.group(2).strip()
+                    tgt = {"2": "proyectos", "3": "productos"}.get(code[0], "actividades")
+                    d[tgt].setdefault(code, {"nombre": name, "monto": 0})
+                    if tgt == "proyectos":
+                        d[tgt][code].setdefault("categoria", cat)
+                        last_proj = code
+                    if "_orphan" in d:
+                        d[tgt][code]["monto"] += d.pop("_orphan")
+                    else:
+                        d["_pend"] = (tgt, code)
+                    continue
                 if last_proj and not re.match(r"^\d", l):  # continuación de nombre de proyecto
                     d["proyectos"][last_proj]["nombre"] += " " + l.strip()
                 continue
@@ -203,6 +230,8 @@ def parse_anexo5(codigos):
                 if tgt == "proyectos":
                     last_proj = code
     for cod, d in res.items():
+        if d.pop("_orphan", None) is not None or d.pop("_pend", None) is not None:
+            print(f"AVISO Anexo 5 {cod}: monto o proyecto sin emparejar")
         gen = {k: v for k, v in d["generica"].items() if not k.startswith("_")}
         d["generica"] = gen
         d["_check"] = {
@@ -289,17 +318,17 @@ def main():
     gasto = json.loads(GASTO.read_text())
     univ_gasto = gasto["universidades"]
 
-    a4 = parse_anexo4()
-    univ_a4 = {c: v for c, v in a4.items() if c.startswith("5") and ES_UNIV.match(v["nombre"])}
+    filas4, total_gn = parse_anexo4()
+    univ_a4 = {c: {"nombre": n, "fuente": f, "total": t} for c, n, f, t in filas4
+               if c.startswith("5") and ES_UNIV.match(n)}
     codigos = set(univ_a4) | set(univ_gasto)
     a5 = parse_anexo5(codigos)
     a8 = parse_anexo8(codigos)
 
     # Sector 10 (Educación) en el Anexo 4: bloque desde "010 M. DE EDUCACION" hasta "011 ..."
-    keys = list(a4)
-    i0, i1 = keys.index("010"), keys.index("011")
-    sector10 = {c: a4[c]["total"] for c in keys[i0:i1]}
-    total_gn = sum(v["total"] for v in a4.values())
+    i0 = next(i for i, f in enumerate(filas4) if f[0] == "010" and "EDUCACION" in f[1])
+    i1 = next(i for i, f in enumerate(filas4) if i > i0 and f[0] == "011")
+    sector10 = {f[0]: f[3] for f in filas4[i0:i1]}
 
     universidades = OrderedDict()
     tot27 = tot26 = tot26_comp = 0
