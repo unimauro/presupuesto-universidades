@@ -8,6 +8,7 @@
   --color-tu:#F2B705; --color-tu-borde:#1E1428; --color-tu-texto:#1E1428;
   --color-personal:#4A1F6B; --color-pensiones:#9B7BC0; --color-bys:#D9651A; --color-inversion:#0B6B4E; --color-otros:#B0A38B;
   --color-ro:#17637D; --color-rdr:#C2410C; --color-canon:#A27A00; --color-dyt:#8C7FA0;
+  --color-dyt-gasto:#6E5B46; --color-deuda:#17637D; --color-rooc:#5E5468;
   --font-display:"Archivo","Arial Narrow",system-ui,sans-serif;
   --font-cifras:"Archivo",system-ui,sans-serif;
   --font-texto:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -21,6 +22,7 @@
   --color-tu:#F7C843; --color-tu-borde:#16101D; --color-tu-texto:#1E1428;
   --color-personal:#A57BD6; --color-pensiones:#D2BDF0; --color-bys:#F59A45; --color-inversion:#3FBF8C; --color-otros:#6F6579;
   --color-ro:#4FB3D1; --color-rdr:#FF7A3D; --color-canon:#E0B341; --color-dyt:#A89BBB;
+  --color-dyt-gasto:#B79E82; --color-deuda:#4FB3D1; --color-rooc:#B3A8BD;
   color-scheme:dark;
 }
 

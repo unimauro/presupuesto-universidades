@@ -12,8 +12,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Radiografía Presupuestal de las Universidades Públicas del Perú</title>
 <meta name="description" content="Observatorio cívico del presupuesto de todas las universidades públicas del Perú: PIA, PIM, devengado, en qué gastan, de dónde viene el dinero, inversión e investigación, año por año, con datos del MEF.">
-<meta name="theme-color" content="#2B3FA8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#16101D" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#2B3FA8">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_PE">
 <meta property="og:title" content="Radiografía Presupuestal de las Universidades Públicas del Perú">
@@ -39,9 +38,7 @@
     var t = null;
     try { t = localStorage.getItem('rp-theme'); } catch (e) {}
     var m = /[?&]tema=(oscuro|claro)/.exec(location.search); if (m) t = m[1] === 'oscuro' ? 'dark' : 'light';
-    if (t !== 'dark' && t !== 'light') {
-      try { t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { t = 'light'; }
-    }
+    if (t !== 'dark' && t !== 'light') t = 'light'; // claro por defecto (pedido del usuario), oscuro solo si se elige
     document.documentElement.setAttribute('data-theme', t);
   })();
 </script>

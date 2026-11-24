@@ -556,3 +556,5 @@ th, th.sticky-col { background: var(--surface-2); }
 tbody tr:hover { background: var(--surface-2); }
 .empty { border: 2px dashed var(--line-strong); background: var(--surface-2); border-radius: 0; }
 .note.warn { background: var(--warn-bg); border-left: 6px solid var(--color-aji); color: var(--ink); }
+.seg button { border-radius: 0; }
+.kpi .k-val { font-size: clamp(26px, 7vw, 40px); }

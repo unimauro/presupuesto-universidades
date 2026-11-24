@@ -45,8 +45,8 @@ GTM = """<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-K2PJ7
 
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
-         '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800'
-         '&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">')
+         '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900'
+         '&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">')
 
 # Tema: CLARO por defecto siempre; oscuro solo si el usuario lo eligió en el sitio (localStorage rp-theme) o ?tema=oscuro.
 THEME_JS = ("<script>(function(){var t=null;try{t=localStorage.getItem('rp-theme')}catch(e){}"
@@ -334,39 +334,39 @@ def resumen(x, obs, n_rank):
     if parts:
         bits = [f"{E(lbl.lower() if lbl != 'Inversión (activos no financieros)' else 'inversión en obras y equipos (activos no financieros)')} "
                 f"<strong>{E(fp(s))}</strong>" for lbl, s in sorted(parts.items(), key=lambda t: -t[1]) if s >= 0.01][:5]
-        P.append(f"<p><strong>¿En qué gasta?</strong> Del devengado {E(y)}: {', '.join(bits)}. "
+        P.append(f"<p id=\"en-que-gasta\"><strong>¿En qué gasta?</strong> Del devengado {E(y)}: {', '.join(bits)}. "
                  f"La ejecución de su presupuesto de inversión (genérica 2.6) fue {E(fp(k.get('ejec_inversion')))} "
                  f"y la de sus proyectos de inversión, {E(fp(k.get('ejec_proyectos')))}.</p>")
     # 3. De dónde viene
     fu = fuentes_txt(a)
     if fu:
         bits = [f"{E(t)} <strong>{E(fp(s))}</strong>" for s, t, _ in fu if s >= 0.005]
-        P.append(f"<p><strong>¿De dónde viene el dinero?</strong> Por fuente de financiamiento, el devengado {E(y)} se pagó con "
+        P.append(f"<p id=\"financiamiento\"><strong>¿De dónde viene el dinero?</strong> Por fuente de financiamiento, el devengado {E(y)} se pagó con "
                  f"{', '.join(bits)}.</p>")
     # 4. Cuánto recauda
     ing = a.get("ingresos") or {}
     rs = ing.get("rdr_sin_saldos") or {}
     rec = num(rs.get("recaudado"))
     if rec == 0 and not num(rs.get("pim")):
-        P.append(f"<p><strong>¿Cuánto recauda?</strong> En {E(y)} no registra recaudación de recursos propios (RDR).</p>")
+        P.append(f"<p id=\"recauda\"><strong>¿Cuánto recauda?</strong> En {E(y)} no registra recaudación de recursos propios (RDR).</p>")
     elif rec is not None:
         rp = num(rs.get("pim"))
-        P.append(f"<p><strong>¿Cuánto recauda?</strong> En {E(y)} captó <strong>{E(fm(rec))}</strong> de recursos propios "
+        P.append(f"<p id=\"recauda\"><strong>¿Cuánto recauda?</strong> En {E(y)} captó <strong>{E(fm(rec))}</strong> de recursos propios "
                  f"(RDR: matrículas, servicios, venta de bienes, etc., sin contar saldos de balance de años anteriores)"
                  f"{f', el {E(fp(div(rec, rp), 0))} de lo previsto en su PIM de ingresos RDR ({E(fm(rp))})' if rp else ''}.</p>")
     else:
-        P.append(f"<p><strong>¿Cuánto recauda?</strong> Recursos propios (RDR) {E(y)}: {SD}.</p>")
+        P.append(f"<p id=\"recauda\"><strong>¿Cuánto recauda?</strong> Recursos propios (RDR) {E(y)}: {SD}.</p>")
     # 5. Investigación
     if num(k.get("idi_pim")):
-        P.append(f"<p><strong>Investigación.</strong> Al programa presupuestal 0137 (ciencia, tecnología e innovación) le asignó "
+        P.append(f"<p id=\"investigacion\"><strong>Investigación.</strong> Al programa presupuestal 0137 (ciencia, tecnología e innovación) le asignó "
                  f"{E(fm(k.get('idi_pim')))} de PIM ({E(fp(k.get('pct_idi')))} de su presupuesto) y devengó "
                  f"{E(fm(k.get('idi_dev')))} ({E(fp(k.get('ejec_idi')))}). Es un indicador aproximado: no incluye investigación "
                  f"financiada desde otros programas.</p>")
     elif a.get("programa"):
-        P.append(f"<p><strong>Investigación.</strong> En {E(y)} no registra presupuesto en el programa 0137 (ciencia, tecnología e "
+        P.append(f"<p id=\"investigacion\"><strong>Investigación.</strong> En {E(y)} no registra presupuesto en el programa 0137 (ciencia, tecnología e "
                  f"innovación). Puede financiar investigación desde otros programas (p. ej. con canon), que este indicador no capta.</p>")
     else:
-        P.append(f"<p><strong>Investigación.</strong> Programa 0137 en {E(y)}: {SD}.</p>")
+        P.append(f"<p id=\"investigacion\"><strong>Investigación.</strong> Programa 0137 en {E(y)}: {SD}.</p>")
     # 6. Gasto por estudiante
     est = num(a.get("estudiantes"))
     gpe = num(k.get("gasto_por_estudiante"))
@@ -407,7 +407,7 @@ def resumen(x, obs, n_rank):
         v = str(xo.get("version") or "").lower()
         vlbl = {"proyecto": "proyecto de ley", "dictamen": "dictamen", "autografa": "autógrafa", "ley": "ley publicada"}.get(v, "documento")
         vv = div((num(e.get("pia_2027")) or 0) - (num(e.get("pia_2026")) or 0), num(e.get("pia_2026"))) if num(e.get("pia_2026")) else None
-        P.append(f"<p><strong>2027 esperado.</strong> Según el {E(vlbl)} de presupuesto 2027{f' ({E(xo.get('norma'))})' if xo.get('norma') else ''}, "
+        P.append(f"<p id=\"exp-2027\"><strong>2027 esperado.</strong> Según el {E(vlbl)} de presupuesto 2027{f' ({E(xo.get('norma'))})' if xo.get('norma') else ''}, "
                  f"su PIA 2027 sería <strong>{E(fm(e.get('pia_2027')))}</strong>"
                  f"{f' frente a {E(fm(e.get('pia_2026')))} de PIA 2026 ({'+' if vv > 0 else '−' if vv < 0 else ''}{E(fp(abs(vv)))})' if vv is not None else ''}."
                  f"{'' if v == 'ley' else ' Cifras sujetas a cambio.'}</p>")
@@ -430,7 +430,7 @@ def transferencias_html(x):
         norma = f'<a href="{E(u)}" rel="noopener nofollow">{norma}</a>' if u else norma
         li.append(f'<li><span>{norma} <small>{E(t.get("fecha") or y)}</small></span><b>{E(fm(t.get("monto")))}</b>'
                   f'{f"<br><small>{E(t.get("finalidad"))}</small>" if t.get("finalidad") else ""}</li>')
-    return f'<section><h2>Transferencias y normas</h2><ul class="tlist">{"".join(li)}</ul></section>'
+    return f'<section id="transferencias"><h2>Transferencias y normas</h2><ul class="tlist">{"".join(li)}</ul></section>'
 
 
 def tabla(x, obs):
@@ -487,9 +487,25 @@ def head(title, desc, canon, og, extra=""):
 """
 
 
+# Navegación = la de index.html (mismos id de sección). Se enlaza a <R>#<id>.
+SECCIONES = [("resumen", "1", "Resumen nacional"), ("variacion", "2", "¿Subió o bajó?"), ("ranking", "3", "Ranking"),
+             ("trayectoria", "4", "Empezaron y terminaron"), ("expectativa", "4", "Expectativa 2027"),
+             ("gasto", "5", "¿En qué gastan?"), ("fuentes", "6", "¿De dónde viene?"), ("infra", "7", "Infraestructura"),
+             ("idi", "8", "Investigación"), ("ficha", "9", "Ficha y comparador"), ("mapa", "10", "Mapa"),
+             ("metodologia", "11", "Metodología")]
+HAS_EXP = [True]
+
+
 def topbar(R):
-    return (f'<header class="top"><a class="brand" href="{R}"><img src="{R}assets/brand/logo-mark.svg" alt="" width="26" height="26">'
-            f'<span>Radiografía Presupuestal</span></a><nav><a href="{R}u/">Universidades</a><a href="{R}historias.html">Historias</a></nav></header>')
+    li = "".join(f'<li><a href="{R}#{i}"><span class="n">{n}</span>{E(t)}</a></li>'
+                 for i, n, t in SECCIONES if i != "expectativa" or HAS_EXP[0])
+    li += (f'<li class="nav-ext"><a href="{R}historias.html"><span class="n">→</span>Historias</a></li>'
+           f'<li class="nav-ext"><a href="{R}u/" aria-current="true"><span class="n">→</span>Universidades (A-Z)</a></li>')
+    return (f'<a class="skip" href="#main">Saltar al contenido</a>'
+            f'<header class="topbar"><div class="topbar-row"><a class="brand" href="{R}" aria-label="Inicio: Radiografía Presupuestal">'
+            f'<img src="{R}assets/brand/logo-mark.svg" alt="" width="28" height="28"><span class="brand-txt"><strong>Radiografía Presupuestal</strong>'
+            f'<span class="brand-sub">Universidades públicas del Perú</span></span></a></div>'
+            f'<nav class="nav" aria-label="Secciones del observatorio"><ol>{li}</ol></nav></header>')
 
 
 def footer(obs, R):
@@ -503,7 +519,7 @@ def footer(obs, R):
     if ipc:
         fu.append(f'<li>{f"<a href=\"{E(iu)}\" rel=\"noopener\">" if iu else ""}BCRP · IPC Lima{"</a>" if iu else ""} '
                   f'(deflactor, base 2025)</li>')
-    return (f'<footer><h2>Fuentes y advertencias</h2><ul class="src">{"".join(fu)}</ul>'
+    return (f'<footer class="foot" id="fuentes-datos"><h2>Fuentes y advertencias</h2><ul class="src">{"".join(fu)}</ul>'
             f'<p>Montos en soles corrientes (nominales) salvo que se indique "soles de 2025". PIA = presupuesto inicial de apertura; '
             f'PIM = presupuesto modificado; devengado = gasto reconocido (ejecución). Recursos determinados incluye canon, '
             f'sobrecanon y regalías. El índice es referencial y no oficial. "{SD}" = el dato no está disponible en las fuentes; no equivale a cero.</p>'
@@ -569,23 +585,23 @@ def page_uni(x, obs, slugs, by_dep, n_rank):
     pares = [o for o in by_dep.get(x.depto, []) if o.pliego != x.pliego]
     dep_html = ""
     if pares:
-        dep_html = (f'<section><h2>Otras universidades públicas de {E(x.depto)}</h2><ul class="ulist">'
+        dep_html = (f'<section id="mismo-departamento"><h2>Otras universidades públicas de {E(x.depto)}</h2><ul class="ulist">'
                     + "".join(f'<li><a href="../{E(slugs[o.pliego])}/">{E(o.nombre)}</a></li>' for o in pares) + "</ul></section>")
     body = f"""<body>
 {topbar(R)}
-<main>
+<main id="main" tabindex="-1">
 <nav class="crumbs" aria-label="Ruta"><a href="{R}">Inicio</a> › <a href="../">Universidades</a> › <span>{E(nm)}</span></nav>
 <h1>Presupuesto de la {E(x.nombre)}{f' <span class="sig">({E(x.sigla)})</span>' if x.sigla else ''}</h1>
 <p class="meta">{meta} · Pliego {E(x.pliego)}</p>
 {kp}
 <a class="cta" href="{R}#u={E(x.pliego)}">Ver ficha interactiva →</a>
-<section class="txt"><h2>Resumen en lenguaje llano</h2>{body_res}</section>
-<section><h2>PIM y devengado por año</h2>
+<section class="txt" id="resumen-u"><h2>Resumen en lenguaje llano</h2>{body_res}</section>
+<section id="evolucion"><h2>PIM y devengado por año</h2>
 <p class="legend-i"><i class="sw f-pim"></i>PIM <i class="sw f-dev"></i>Devengado{' <i class="sw f-hp2"></i>parcial' if x.parciales else ''}</p>
 {svg_serie(x, obs)}
 </section>
-{f'<section><h2>¿En qué se gastó? Devengado {E(x.ult)}</h2>{gen}</section>' if gen else ''}
-<section><h2>Serie {E(span)}</h2>{tabla(x, obs)}</section>
+{f'<section id="gasto-u"><h2>¿En qué se gastó? Devengado {E(x.ult)}</h2>{gen}</section>' if gen else ''}
+<section id="serie"><h2>Serie {E(span)}</h2>{tabla(x, obs)}</section>
 {transferencias_html(x)}
 {dep_html}
 <section class="more"><a class="cta alt" href="{R}#u={E(x.pliego)}">Ficha interactiva</a><a class="cta alt" href="{R}historias.html">Historias</a><a class="cta alt" href="../">Todas las universidades</a></section>
@@ -624,7 +640,7 @@ def page_index(unis, obs, slugs, by_dep):
                     f'<small>({len(by_dep[d])})</small></h2><ul class="ulist idx">{"".join(li)}</ul></section>')
     body = f"""<body>
 {topbar(R)}
-<main>
+<main id="main" tabindex="-1">
 <nav class="crumbs" aria-label="Ruta"><a href="{R}">Inicio</a> › <span>Universidades</span></nav>
 <h1>Universidades públicas del Perú: presupuesto por universidad</h1>
 <p class="lead">{len(unis)} universidades públicas (pliegos del sector Educación). Para cada una: cuánto recibió (PIA, PIM), cuánto ejecutó

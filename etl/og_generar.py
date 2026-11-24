@@ -1,17 +1,32 @@
 #!/usr/bin/env python3
 """Genera las imágenes para compartir (Open Graph, 1200x630) con cifras REALES de data/observatorio.json.
 
+Sistema visual v2 ("afiche de feria con datos", ver assets/brand/BRAND.md §1-3 y §6): colores planos,
+cifra gigante en Archivo extra condensada 900, textos en Atkinson Hyperlegible Next y una guarda de
+rombos escalonados con los colores de capítulo.
+
 Salidas (SVG + PNG vía rsvg-convert):
   assets/og/og.png              -> index.html (copia de la variante elegida, ver ELEGIDA)
   assets/og/og-historias.png    -> historias.html
   assets/og/og-2027.png         -> "Lo que viene en 2027" (signo de interrogación si aún no hay datos)
-  assets/og/variantes/og-a-escalones.png, og-b-nadie.png, og-c-expectativa.png
+  assets/og/variantes/          -> variantes del OG principal y la versión clara de historias
 
 Uso:  python3 etl/og_generar.py            (solo librería estándar; requiere rsvg-convert en el PATH)
 Se ejecuta después de etl/build.py para que las cifras se actualicen con cada corrida.
-Los fondos y el logo son ilustración propia (sin plantillas de memes ni imágenes de terceros).
+
+FUENTES (rsvg-convert usa las del sistema; si faltan, cae a una de respaldo SIN error, el script avisa):
+  ~/Library/Fonts/Archivo[wdth,wght].ttf                 github.com/google/fonts ofl/archivo
+  ~/Library/Fonts/AtkinsonHyperlegibleNext[wght].ttf     github.com/google/fonts ofl/atkinsonhyperlegiblenext
+  ~/Library/Fonts/ArchivoExtraCondensed[wght].ttf        instancia wdth=62 de Archivo, porque rsvg/pango
+      no aplica el eje de ancho (font-stretch) de una fuente variable. Se crea con fontTools (venv aparte):
+      python3 -m venv ~/.venvs/fonttools && ~/.venvs/fonttools/bin/pip install fonttools
+      ~/.venvs/fonttools/bin/python etl/og_generar.py --instanciar-archivo "<ruta>/Archivo[wdth,wght].ttf"
+  Luego: fc-cache -f
+Cifras grandes con números proporcionales (por defecto en Archivo; los tabulares dejan costura en "11").
+Todo es ilustración propia (sin plantillas de memes ni imágenes de terceros).
 """
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -26,16 +41,19 @@ VAR = OUT / "variantes"
 URL = "unimauro.github.io/presupuesto-universidades"
 ELEGIDA = "og-a-escalones"   # variante copiada como og.png
 
-# Paleta (styles.css): azul tinta + ocre
-BG = "#1B2230"; GRID = "#2B323E"; INK = "#26346F"; INK_L = "#8F9CF0"; INK_XL = "#C6CCF5"
-OCHRE = "#E0A447"; OCHRE_D = "#B0741A"; PAPER = "#E9E6DF"; MUTED = "#9BA3B1"; PIA_C = "#8B94A6"
-# Tipografía de marca (BRAND.md): títulos Bricolage Grotesque 800, texto y cifras Plus Jakarta Sans.
-# rsvg-convert usa las fuentes del sistema: instalar los TTF variables de github.com/google/fonts
-# (ofl/bricolagegrotesque, ofl/plusjakartasans) en ~/Library/Fonts (macOS) o ~/.local/share/fonts + fc-cache.
-FONTS_REQ = ("Bricolage Grotesque", "Plus Jakarta Sans")
-SERIF = "'Bricolage Grotesque', sans-serif"   # nombre histórico: es la fuente de títulos
-SANS = "'Plus Jakarta Sans', sans-serif"
-NUM = SANS
+# Paleta v2 (BRAND.md §1-2)
+PAPEL = "#F4EEE2"; PAPEL2 = "#EAE1CF"; TINTA = "#1E1428"; TINTA2 = "#5E5468"
+ANIL = "#2B3FA8"; MAIZ = "#4A1F6B"; CHICHA = "#C81E64"; ROCOTO = "#C2410C"; SELVA = "#0B6B4E"
+TITICACA = "#17637D"; AJI = "#F2B705"; COBRE = "#8A3B12"; COCHINILLA = "#C4122F"
+GUARDA = [ANIL, MAIZ, CHICHA, ROCOTO, SELVA, TITICACA, AJI, COBRE, COCHINILLA]
+LILA = "#D2BDF0"          # texto secundario sobre maíz (pensiones, tema oscuro)
+# Etapas en versión clara (sobre fondo oscuro maíz): PIA adobe, PIM añil, devengado chicha
+PIA_O = "#B5A68C"; PIM_O = "#7C8EF0"; DEV_O = "#FF5C9A"
+
+FONTS_REQ = ("Archivo ExtraCondensed", "Archivo", "Atkinson Hyperlegible Next")
+DISPLAY = "'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif"   # titulares y cifras héroe (900)
+CIFRAS = "'Archivo', sans-serif"
+TEXTO = "'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif"
 
 
 # ---------- datos ----------
@@ -74,131 +92,153 @@ def share_personal(d, y):
     return per / tot if tot else None
 
 
-def mil_millones(v):
-    """6954551994 -> '7.0' (mil millones, 1 decimal, punto decimal como se usa en Perú)."""
-    return f"{v / 1e9:.1f}"
+def millones(v):
+    """6967055836 -> '6,967' (millones de soles, sin decimales, separador de miles como en index)."""
+    return f"{round(v / 1e6):,}"
 
 
 # ---------- piezas SVG ----------
-def t(x, y, s, size, fill=PAPER, fam=SANS, weight="400", anchor="start", extra=""):
+def t(x, y, s, size, fill=PAPEL, fam=TEXTO, weight="400", anchor="start", extra=""):
     return (f'<text x="{x}" y="{y}" font-family="{fam}" font-size="{size}" font-weight="{weight}" '
             f'fill="{fill}" text-anchor="{anchor}" {extra}>{escape(str(s))}</text>')
 
 
+def disp(x, y, s, size, fill=PAPEL, anchor="start", weight="900"):
+    """Titular/cifra de afiche: Archivo extra condensada 900, números proporcionales."""
+    return t(x, y, s, size, fill, DISPLAY, weight, anchor, 'letter-spacing="-0.5"')
+
+
 def logo_mark(x, y, s):
+    """Símbolo del logo (sin cambios en v2, BRAND.md §6)."""
     k = s / 64
     return (f'<g transform="translate({x} {y}) scale({k})">'
-            f'<rect width="64" height="64" rx="12" fill="{INK}"/>'
+            '<rect width="64" height="64" rx="12" fill="#26346F"/>'
             '<path d="M12 22 L32 11 L52 22 Z" fill="none" stroke="#E6E8F3" stroke-width="2.6" stroke-linejoin="round"/>'
             '<rect x="15" y="34" width="6" height="16" rx="1" fill="#E6E8F3"/>'
             '<rect x="25" y="27" width="6" height="23" rx="1" fill="#E6E8F3"/>'
             '<rect x="35" y="38" width="6" height="12" rx="1" fill="#E6E8F3" opacity=".7"/>'
-            f'<rect x="45" y="30" width="4" height="20" rx="1" fill="{OCHRE}"/>'
+            '<rect x="45" y="30" width="4" height="20" rx="1" fill="#E0A447"/>'
             '<path d="M11 53 H53" stroke="#E6E8F3" stroke-width="2.6" stroke-linecap="round"/>'
             '<path d="M8 42 H56" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2 2" opacity=".55"/></g>')
 
 
-def lienzo(cuerpo, bg=BG, grid=GRID, sample=False, fuente="Fuente: MEF – Consulta Amigable (SIAF)"):
-    aviso = t(1150, 44, "DATOS DE EJEMPLO", 22, OCHRE, weight="700", anchor="end") if sample else ""
+def rombo(cx, cy, u, n, fill):
+    """Rombo escalonado (motivo de pallay) hecho de 2n+1 barras de alto u."""
+    out = []
+    for k in range(-n, n + 1):
+        w = (2 * (n - abs(k)) + 1) * u
+        out.append(f'<rect x="{cx - w / 2:.1f}" y="{cy + k * u - u / 2:.1f}" width="{w:.1f}" height="{u}" fill="{fill}"/>')
+    return "".join(out)
+
+
+def guarda(y, h=36):
+    """Franja de guarda: 9 tramos con los colores de capítulo y rombos escalonados encima."""
+    seg = 1200 / len(GUARDA)
+    out = []
+    for i, col in enumerate(GUARDA):
+        x0 = i * seg
+        out.append(f'<rect x="{x0:.1f}" y="{y}" width="{seg + 0.5:.1f}" height="{h}" fill="{col}"/>')
+        fg = TINTA if col == AJI else PAPEL
+        for j in range(4):
+            out.append(rombo(x0 + seg * (j + 0.5) / 4, y + h / 2, 4, 3, fg))
+    return "\n".join(out)
+
+
+def lienzo(cuerpo, bg=MAIZ, claro=False, sample=False, fuente="Fuente: MEF – Consulta Amigable (SIAF)"):
+    ink = TINTA if claro else PAPEL
+    sub = TINTA2 if claro else LILA
+    url_c = CHICHA if claro else AJI
+    aviso = disp(1160, 60, "DATOS DE EJEMPLO", 30, url_c, "end", "800") if sample else ""
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0 H0 V40" fill="none" stroke="{grid}" stroke-width="1"/></pattern></defs>
-<rect width="1200" height="630" fill="{bg}"/><rect width="1200" height="630" fill="url(#g)" opacity=".7"/>
+<rect width="1200" height="630" fill="{bg}"/>
 {cuerpo}
-<rect x="0" y="560" width="1200" height="70" fill="#12151B" opacity=".92"/>
-{logo_mark(40, 573, 44)}
-{t(98, 604, "Radiografía Presupuestal", 24, PAPER, SERIF, "800")}
-{t(98, 622, fuente, 13, MUTED)}
-{t(1160, 606, URL, 26, OCHRE, weight="600", anchor="end")}
+{logo_mark(40, 527, 46)}
+{t(98, 552, "Radiografía Presupuestal", 26, ink, DISPLAY, "800")}
+{t(98, 578, fuente, 16, sub)}
+{t(1160, 562, URL, 27, url_c, TEXTO, "700", "end")}
+<rect x="0" y="590" width="1200" height="4" fill="{TINTA}"/>
+{guarda(594)}
 {aviso}
 </svg>'''
 
 
 # ---------- variantes del OG principal ----------
 def og_escalones(d, y, T, sample):
-    vals = [("Me asignaron", "PIA", T["pia"], PIA_C), ("Me ampliaron", "PIM", T["pim"], INK_L), ("Gasté", "devengado", T["dev"], OCHRE)]
+    vals = [("Me asignaron", "PIA", T["pia"], PIA_O), ("Me ampliaron", "PIM", T["pim"], PIM_O), ("Gasté", "devengado", T["dev"], DEV_O)]
     top = max(v[2] for v in vals)
-    base, hmax, w, gap, x0 = 535, 285, 300, 50, 75
-    c = [t(75, 92, f"Presupuesto universitario {y},", 50, PAPER, SERIF, "800"),
-         t(75, 150, "en 3 escalones", 50, OCHRE, SERIF, "800")]
+    base, hmax, w, gap, x0 = 505, 280, 320, 40, 60
+    c = [disp(60, 100, f"Presupuesto universitario {y},", 76),
+         disp(60, 172, "en 3 escalones", 76, AJI)]
     for i, (cap, sig, v, col) in enumerate(vals):
         h = hmax * v / top
         x = x0 + i * (w + gap)
         ytop = base - h
-        c.append(f'<rect x="{x}" y="{ytop:.1f}" width="{w}" height="{h:.1f}" rx="8" fill="{col}"/>')
-        c.append(t(x + 4, ytop - 16, cap, 36, PAPER, weight="700"))
-        c.append(t(x + w / 2, ytop + 78, f"S/ {mil_millones(v)}", 66, BG, NUM, "700", "middle"))
-        c.append(t(x + w / 2, ytop + 116, f"mil millones · {sig}", 22, BG, weight="600", anchor="middle"))
-    return lienzo("\n".join(c), sample=sample, fuente=f"{T['n']} universidades públicas · {y} · Fuente: MEF – SIAF")
+        c.append(f'<rect x="{x}" y="{ytop:.1f}" width="{w}" height="{h:.1f}" fill="{col}"/>')
+        c.append(f'<rect x="{x}" y="{ytop:.1f}" width="{w}" height="6" fill="{TINTA}" opacity=".25"/>')
+        c.append(t(x, ytop - 14, cap, 34, PAPEL, TEXTO, "700"))
+        c.append(disp(x + w / 2, ytop + 104, f"S/ {millones(v)}", 100, TINTA, "middle"))
+        c.append(t(x + w / 2, ytop + 140, f"millones · {sig}", 24, TINTA, TEXTO, "700", "middle"))
+    return lienzo("\n".join(c), sample=sample, fuente=f"{T['n']} universidades públicas · {y} · MEF – SIAF")
 
 
 def og_nadie(d, y, T, sample):
-    c = [t(80, 150, "Nadie:", 54, MUTED, SANS, "400"),
-         t(80, 250, f"Las universidades públicas en {y}:", 54, PAPER, SANS, "700"),
-         t(80, 380, f"*gastan S/ {mil_millones(T['dev'])} mil millones*", 68, OCHRE, NUM, "700"),
-         t(80, 455, f"de S/ {mil_millones(T['pim'])} mil millones disponibles", 36, INK_XL, SANS, "400"),
+    c = [t(70, 120, "Nadie:", 54, TINTA2, TEXTO, "400"),
+         disp(70, 220, f"Las universidades públicas en {y}:", 84, TINTA),
+         disp(70, 380, f"*gastan S/ {millones(T['dev'])} millones*", 124, CHICHA),
+         t(70, 460, f"de S/ {millones(T['pim'])} millones disponibles", 38, TINTA2, TEXTO, "700"),
          ]
-    return lienzo("\n".join(c), sample=sample, fuente=f"Devengado vs PIM · {T['n']} universidades · Fuente: MEF – SIAF")
+    return lienzo("\n".join(c), bg=PAPEL, claro=True, sample=sample,
+                  fuente=f"Devengado vs PIM · {T['n']} universidades · MEF – SIAF")
 
 
 def og_expectativa(d, y, T, sample):
     ej = T["dev"] / T["pim"] if T["pim"] else None
-    c = [f'<rect x="40" y="40" width="550" height="490" rx="18" fill="{INK}"/>',
-         f'<rect x="610" y="40" width="550" height="490" rx="18" fill="{OCHRE_D}"/>',
-         t(315, 120, "EXPECTATIVA", 46, INK_XL, SANS, "700", "middle", 'letter-spacing="4"'),
-         t(315, 300, f"S/ {mil_millones(T['pim'])}", 132, "#FFFFFF", NUM, "700", "middle"),
-         t(315, 360, "mil millones", 40, INK_XL, SANS, "600", "middle"),
-         t(315, 470, f"presupuesto {y} (PIM)", 32, INK_XL, SANS, "400", "middle"),
-         t(885, 120, "REALIDAD", 46, "#FFF4DF", SANS, "700", "middle", 'letter-spacing="4"'),
-         t(885, 300, f"S/ {mil_millones(T['dev'])}", 132, "#FFFFFF", NUM, "700", "middle"),
-         t(885, 360, "mil millones", 40, "#FFF4DF", SANS, "600", "middle"),
-         t(885, 470, f"gastado: {ej * 100:.0f}%" if ej else "gastado", 32, "#FFF4DF", SANS, "400", "middle"),
+    c = [f'<rect x="40" y="40" width="550" height="460" fill="{ANIL}"/>',
+         f'<rect x="610" y="40" width="550" height="460" fill="{CHICHA}"/>',
+         disp(315, 120, "EXPECTATIVA", 64, PAPEL, "middle", "800"),
+         disp(315, 330, f"S/ {millones(T['pim'])}", 190, AJI, "middle"),
+         t(315, 385, "millones", 40, PAPEL, TEXTO, "700", "middle"),
+         t(315, 460, f"presupuesto {y} (PIM)", 30, PAPEL, TEXTO, "400", "middle"),
+         disp(885, 120, "REALIDAD", 64, "#FFFFFF", "middle", "800"),
+         disp(885, 330, f"S/ {millones(T['dev'])}", 190, "#FFFFFF", "middle"),
+         t(885, 385, "millones", 40, "#FFFFFF", TEXTO, "700", "middle"),
+         t(885, 460, f"gastado: {ej * 100:.0f}%" if ej else "gastado", 30, "#FFFFFF", TEXTO, "400", "middle"),
          ]
-    return lienzo("\n".join(c), sample=sample, fuente=f"{T['n']} universidades públicas · {y} · Fuente: MEF – SIAF")
+    return lienzo("\n".join(c), sample=sample, fuente=f"{T['n']} universidades públicas · {y} · MEF – SIAF")
 
 
 # ---------- historias ----------
-def og_historias(d, y, sample):
-    sh = share_personal(d, y)
-    cents = round(sh * 100) if sh is not None else None
-    cx, cy, r = 935, 290, 200
-    import math
-    c = [t(70, 130, "POV: eres un sol", 72, PAPER, SERIF, "800"),
-         t(70, 190, "del presupuesto universitario", 40, INK_XL, SANS, "400")]
-    if cents is not None:
-        a = 2 * math.pi * sh
-        x1, y1 = cx + r * math.sin(a), cy - r * math.cos(a)
-        big = 1 if sh > 0.5 else 0
-        c += [f'<circle cx="{cx}" cy="{cy}" r="{r + 14}" fill="none" stroke="{OCHRE}" stroke-width="6"/>',
-              f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{INK}"/>',
-              f'<path d="M{cx} {cy} L{cx} {cy - r} A{r} {r} 0 {big} 1 {x1:.1f} {y1:.1f} Z" fill="{OCHRE}"/>',
-              f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#12151B" stroke-width="3"/>',
-              t(cx, cy + 26, "S/ 1", 80, "#FFFFFF", NUM, "700", "middle", 'stroke="#12151B" stroke-width="2" paint-order="stroke"'),
-              t(70, 330, f"{cents} céntimos", 80, OCHRE, NUM, "700"),
-              t(70, 385, "→ van a planilla", 44, PAPER, SANS, "700"),
-              t(70, 470, f"{100 - cents} céntimos → todo lo demás", 38, INK_XL, SANS, "400")]
-    else:
-        c.append(t(70, 330, "¿Cuántos céntimos van a planilla?", 54, OCHRE, SERIF, "800"))
-    return lienzo("\n".join(c), sample=sample, fuente=f"Personal y obligaciones sociales (genérica 2.1), devengado {y} · MEF – SIAF")
+def og_historias(d, y, T, sample, claro=False):
+    ink = TINTA if claro else PAPEL
+    cifra = CHICHA if claro else AJI
+    sub = TINTA2 if claro else LILA
+    c = [disp(60, 118, "¿A dónde se va la plata", 104, ink),
+         disp(60, 222, "de tu universidad?", 104, ink),
+         disp(54, 420, f"S/ {millones(T['dev'])} millones", 200, cifra),
+         t(62, 480, f"gastaron las {T['n']} universidades públicas en {y}. Te lo contamos en 8 historias.", 29, sub, TEXTO, "700"),
+         ]
+    return lienzo("\n".join(c), bg=PAPEL if claro else MAIZ, claro=claro, sample=sample,
+                  fuente=f"Devengado {y} · MEF – Consulta Amigable (SIAF)")
 
 
 # ---------- 2027 ----------
 def og_2027(d, sample):
     T27 = total(d, "2027")
     T26 = total(d, "2026")
-    c = [t(70, 120, "Lo que viene en", 56, PAPER, SERIF, "800"),
-         t(70, 250, "2027", 150, OCHRE, NUM, "700")]
+    c = [disp(60, 120, "Lo que viene en", 96),
+         disp(60, 300, "2027", 230, AJI)]
     if T27 and T27.get("pia"):
-        c += [t(1130, 300, f"S/ {mil_millones(T27['pia'])}", 150, INK_L, NUM, "700", "end"),
-              t(1130, 360, "mil millones de PIA", 36, INK_XL, SANS, "600", "end")]
+        c += [disp(1140, 300, f"S/ {millones(T27['pia'])}", 200, PAPEL, "end"),
+              t(1140, 350, "millones de PIA", 36, LILA, TEXTO, "700", "end")]
         if T26 and T26.get("pia"):
             var = T27["pia"] / T26["pia"] - 1
-            c.append(t(70, 470, f"{'+' if var >= 0 else ''}{var * 100:.1f}% frente al PIA 2026 (nominal)", 38, PAPER))
-        fuente = "PIA 2027 · Fuente: MEF – SIAF"
+            c.append(t(60, 470, f"{'+' if var >= 0 else ''}{var * 100:.1f}% frente al PIA 2026 (nominal)", 38, PAPEL, TEXTO, "700"))
+        fuente = "PIA 2027 · MEF – SIAF"
     else:
-        c += [t(1110, 380, "S/ ¿?", 220, INK_L, NUM, "700", "end"),
-              t(70, 440, (f"2026 arrancó con S/ {mil_millones(T26['pia'])} mil millones" if T26 and T26.get("pia") else "Aún sin datos de 2026"), 40, PAPER, SANS, "700"),
-              t(70, 500, "El PIA 2027 llega con la Ley de Presupuesto", 32, MUTED)]
-        fuente = "PIA 2026 · Fuente: MEF – SIAF · 2027 aún sin datos"
+        c += [disp(1140, 330, "S/ ¿?", 300, DEV_O, "end"),
+              t(60, 400, (f"2026 arrancó con S/ {millones(T26['pia'])} millones" if T26 and T26.get("pia") else "Aún sin datos de 2026"), 40, PAPEL, TEXTO, "700"),
+              t(60, 460, "El PIA 2027 llega con la Ley de Presupuesto", 32, LILA)]
+        fuente = "PIA 2026 · MEF – SIAF · 2027 aún sin datos"
     return lienzo("\n".join(c), sample=sample, fuente=fuente)
 
 
@@ -215,13 +255,33 @@ def fuentes_ok():
     if not shutil.which("fc-list"):
         return True
     out = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True).stdout
-    faltan = [f for f in FONTS_REQ if f not in out]
+    fams = {f.strip() for line in out.splitlines() for f in line.split(",")}
+    faltan = [f for f in FONTS_REQ if f not in fams]
     if faltan:
-        print("AVISO: faltan fuentes para rsvg-convert:", ", ".join(faltan), "(ver comentario FONTS_REQ)", file=sys.stderr)
+        print("AVISO: faltan fuentes para rsvg-convert:", ", ".join(faltan), "(ver docstring)", file=sys.stderr)
     return not faltan
 
 
+def instanciar_archivo(src):
+    """Crea ArchivoExtraCondensed[wght].ttf (wdth=62) en ~/Library/Fonts. Requiere fontTools."""
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib import instancer
+    f = instancer.instantiateVariableFont(TTFont(src), {"wdth": 62})
+    for rec in f["name"].names:
+        if rec.nameID in (1, 4, 16):
+            rec.string = "Archivo ExtraCondensed"
+        elif rec.nameID == 6:
+            rec.string = "ArchivoExtraCondensed"
+        elif rec.nameID == 3:
+            rec.string = "ArchivoExtraCondensed-wdth62"
+    dst = Path.home() / "Library" / "Fonts" / "ArchivoExtraCondensed[wght].ttf"
+    f.save(dst)
+    print("Creada", dst, "→ ejecutar: fc-cache -f")
+
+
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == "--instanciar-archivo":
+        return instanciar_archivo(sys.argv[2])
     if not shutil.which("rsvg-convert"):
         sys.exit("Falta rsvg-convert (brew install librsvg).")
     fuentes_ok()
@@ -239,7 +299,8 @@ def main():
     shutil.copyfile(VAR / f"{ELEGIDA}.svg", OUT / "og.svg")
     shutil.copyfile(VAR / f"{ELEGIDA}.png", OUT / "og.png")
     print("   assets/og/og.png <-", ELEGIDA)
-    print("  ", render(og_historias(d, y, sample), "og-historias", OUT).relative_to(ROOT))
+    print("  ", render(og_historias(d, y, T, sample), "og-historias", OUT).relative_to(ROOT))
+    print("  ", render(og_historias(d, y, T, sample, claro=True), "og-historias-clara", VAR).relative_to(ROOT))
     print("  ", render(og_2027(d, sample), "og-2027", OUT).relative_to(ROOT))
 
 
