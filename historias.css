@@ -79,7 +79,7 @@ h1{font:900 clamp(44px,13.4vw,112px)/.88 var(--font-display);font-stretch:62%;le
 .picker-list li b{font:800 17px var(--font-cifras);font-stretch:85%}
 .picker-list .op-dep{font:700 12px var(--font-cifras);border:1.5px solid currentColor;border-radius:999px;padding:1px 8px;white-space:nowrap;color:var(--color-tinta-2)}
 .picker-list .op-n{font-size:14.5px;color:var(--color-tinta-2)}
-.picker-list li mark{background:transparent;color:inherit;text-decoration:underline;text-decoration-thickness:3px;text-decoration-color:var(--color-dev);text-underline-offset:2px;padding:0}
+.picker-list li mark{background:transparent;color:inherit;text-decoration:underline;text-decoration-thickness:3px;text-decoration-color:var(--color-dev);text-decoration-skip-ink:none;text-underline-offset:2px;padding:0}
 .picker-list li[aria-selected="true"],.picker-list li:hover{background:var(--color-aji);color:#1E1428}
 .picker-list li[aria-selected="true"] .op-n,.picker-list li:hover .op-n,.picker-list li[aria-selected="true"] .op-dep,.picker-list li:hover .op-dep{color:#1E1428}
 .picker-list li[aria-selected="true"] mark,.picker-list li:hover mark{text-decoration-color:#1E1428}

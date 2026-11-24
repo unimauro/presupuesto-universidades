@@ -195,7 +195,6 @@ def hero_escritorio(serie):
     o.append(poli(fondo + [(600, H), (0, H)], TITICACA))
     o.append(nevado((78, 286), (128, 196), (186, 292), 30, PAPEL))
     o.append(nevado((418, 300), (474, 176), (528, 270), 34, PAPEL))
-        o.append(poli(escalonada(nev, 7), PAPEL, ' opacity=".92"'))
     # cerros medios (maíz) con andenes
     medio_i = escalonada([(0, 352), (70, 300), (150, 340), (215, 392)], 12)
     medio_d = escalonada([(380, 396), (450, 330), (520, 296), (600, 334)], 12)
@@ -233,7 +232,6 @@ def hero_movil(serie):
     o.append(poli(fondo + [(W, H), (0, H)], TITICACA))
     o.append(nevado((64, 84), (96, 46), (132, 92), 13, PAPEL))
     o.append(nevado((246, 98), (282, 40), (318, 86), 16, PAPEL))
-        o.append(poli(escalonada(nev, 4), PAPEL, ' opacity=".92"'))
     mi = escalonada([(0, 116), (50, 92), (100, 112), (128, 132)], 7) + [(128, H), (0, H)]
     md = escalonada([(250, 134), (300, 104), (340, 92), (375, 108)], 7) + [(375, H), (250, H)]
     o.append(f'<clipPath id="cmm">{poli(mi, "#000")}{poli(md, "#000")}</clipPath>')

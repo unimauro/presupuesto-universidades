@@ -6,7 +6,7 @@ cifra gigante en Archivo extra condensada 900, textos en Atkinson Hyperlegible N
 rombos escalonados con los colores de capítulo.
 
 Salidas (SVG + PNG vía rsvg-convert):
-  assets/og/og.png              -> index.html (copia de la variante elegida, ver ELEGIDA)
+  assets/og/og.png              -> index.html: "Presupuesto 2027 para universidades públicas" (og_principal_2027)
   assets/og/og-historias.png    -> historias.html
   assets/og/og-2027.png         -> "Lo que viene en 2027" (signo de interrogación si aún no hay datos)
   assets/og/variantes/          -> variantes del OG principal y la versión clara de historias
@@ -39,7 +39,7 @@ SAMPLE = ROOT / "data" / "sample" / "observatorio.json"
 OUT = ROOT / "assets" / "og"
 VAR = OUT / "variantes"
 URL = "unimauro.github.io/presupuesto-universidades"
-ELEGIDA = "og-a-escalones"   # variante copiada como og.png
+# og.png = portada 2027 (pedido del usuario: que 2027 sea lo primero que se vea); los escalones 2025 quedan en variantes/.
 
 # Paleta v2 (BRAND.md §1-2)
 PAPEL = "#F4EEE2"; PAPEL2 = "#EAE1CF"; TINTA = "#1E1428"; TINTA2 = "#5E5468"
@@ -301,6 +301,52 @@ def og_2027(d, sample):
     return lienzo("\n".join(c), sample=sample, fuente=fuente)
 
 
+# ---------- OG principal: presupuesto 2027 ----------
+def og_principal_2027(d, y, T, sample):
+    """Requiere expectativa_2027 (resumen.json). Suben/bajan: universidades con PIA en 2026 y 2027."""
+    e = d.get("expectativa_2027") or {}
+    tu = e.get("total_universidades") or {}
+    p27, p26 = tu.get("pia_2027"), tu.get("pia_2026")
+    if not (p27 and p26):
+        return None
+    var_abs = p27 - p26
+    var_pct = tu.get("var_pct") if tu.get("var_pct") is not None else (p27 / p26 - 1) * 100
+    suben = bajan = 0
+    for u in d["universidades"]:
+        ue = u.get("expectativa_2027") or {}
+        a, b = ue.get("pia_2027"), ue.get("pia_2026")
+        if a and b:
+            suben += a > b
+            bajan += a < b
+    signo = "+" if var_abs >= 0 else "−"
+    etapa = ETAPA_2027.get(str(e.get("version") or "").lower(), "Según el Presupuesto 2027 en trámite")
+    fecha = fecha_corta(e.get("fecha"))
+    c = [disp(60, 100, "Presupuesto 2027 para", 80),
+         disp(60, 180, "universidades públicas", 80),
+         # flecha ▲ dibujada (no depende del glifo)
+         f'<polygon points="60,330 150,330 105,252" fill="{AJI}"/>',
+         (f'<text x="170" y="330" font-family="{DISPLAY}" font-weight="900" font-size="170" fill="{AJI}" letter-spacing="-0.5">'
+          f'S/{NB}{round(p27 / 1e6):,}<tspan font-size="70" dx="18">millones</tspan></text>'),
+         disp(60, 412, f"{signo}S/{NB}{abs(var_abs) / 1e6:,.0f}{NB}M ({signo}{abs(var_pct):.1f}%) frente a 2026", 64, DEV_O),
+         t(62, 462, f"{suben} universidades suben, {bajan} bajan", 34, PAPEL, TEXTO, "700"),
+         t(62, 500, f"{etapa}{f' ({fecha})' if fecha else ''}", 24, LILA, TEXTO, "700")]
+    # Mini gráfico: PIA 2025, 2026 y 2027 (barras desde cero)
+    serie = [(y, T["pia"], PIA_O), ("2026", p26, PIA_O), ("2027", p27, AJI)]
+    top = max(v for _, v, _ in serie)
+    bx, base, bw, bg, hmax = 900, 480, 66, 24, 210
+    c.append(t(bx - 4, base - hmax - 40, "PIA, en millones", 20, LILA, TEXTO, "700"))
+    for i, (lab, v, col) in enumerate(serie):
+        h = hmax * v / top
+        x = bx + i * (bw + bg)
+        c.append(f'<rect x="{x}" y="{base - h:.1f}" width="{bw}" height="{h:.1f}" fill="{col}"/>')
+        c.append(t(x + bw / 2, base - h - 8, f"{round(v / 1e6):,}", 22, PAPEL, CIFRAS, "700", "middle"))
+        c.append(t(x + bw / 2, base + 28, lab, 22, AJI if lab == "2027" else LILA, CIFRAS, "700", "middle"))
+    c.append(f'<rect x="{bx - 8}" y="{base}" width="{3 * bw + 2 * bg + 16}" height="2" fill="{PAPEL}" opacity=".6"/>')
+    n = tu.get("n_pliegos_2027")
+    fuente = f"PIA 2027 ({e.get('version', 'proyecto')}) de {n} universidades vs PIA 2026 y {y} · MEF" if n else "PIA 2027 vs PIA 2026 · MEF"
+    return lienzo("\n".join(c), sample=sample, fuente=fuente)
+
+
 # ---------- línea base: peso de las universidades en el presupuesto del Estado ----------
 def og_linea_base(d, y, sample):
     b = ((d.get("baseline") or {}).get("anios") or {}).get(y) or {}
@@ -378,9 +424,13 @@ def main():
     variantes = {"og-a-escalones": og_escalones, "og-b-nadie": og_nadie, "og-c-expectativa": og_expectativa}
     for nombre, fn in variantes.items():
         print("  ", render(fn(d, y, T, sample), nombre, VAR).relative_to(ROOT))
-    shutil.copyfile(VAR / f"{ELEGIDA}.svg", OUT / "og.svg")
-    shutil.copyfile(VAR / f"{ELEGIDA}.png", OUT / "og.png")
-    print("   assets/og/og.png <-", ELEGIDA)
+    principal = og_principal_2027(d, y, T, sample)
+    if principal:
+        print("  ", render(principal, "og", OUT).relative_to(ROOT), "(portada 2027)")
+    else:   # sin datos 2027: la portada vuelve a ser los escalones del último año cerrado
+        shutil.copyfile(VAR / "og-a-escalones.svg", OUT / "og.svg")
+        shutil.copyfile(VAR / "og-a-escalones.png", OUT / "og.png")
+        print("   assets/og/og.png <- og-a-escalones (sin expectativa_2027)")
     print("  ", render(og_historias(d, y, T, sample), "og-historias", OUT).relative_to(ROOT))
     print("  ", render(og_historias(d, y, T, sample, claro=True), "og-historias-clara", VAR).relative_to(ROOT))
     print("  ", render(og_2027(d, sample), "og-2027", OUT).relative_to(ROOT))
