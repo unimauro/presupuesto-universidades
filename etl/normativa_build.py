@@ -84,6 +84,59 @@ def filas_pliego(texto):
     return out
 
 
+CELDA = re.compile(r"^\d{1,3}(?:[ ,.]\d{3})*(?:[.,]\d{2})?$|^\d+(?:[.,]\d{2})?$")
+
+
+def filas_pliego_pdf(pdf_path):
+    """Igual que filas_pliego pero leyendo celdas por posición (pdfplumber, keep_blank_chars):
+    evita fundir una columna de conteo ('5') con el monto ('103 556,00'). Cachea en filas/."""
+    cache = CACHE / "filas" / (pdf_path.parent.name + "__" + pdf_path.name[-80:] + ".json")
+    if cache.exists():
+        return [tuple(x) for x in json.loads(cache.read_text())]
+    import logging
+    import pdfplumber
+    logging.disable(logging.CRITICAL)
+    out = []
+    try:
+        with pdfplumber.open(str(pdf_path)) as pdf:
+            for page in pdf.pages[:80]:
+                words = page.extract_words(keep_blank_chars=True, x_tolerance=2)
+                filas = []
+                for w in sorted(words, key=lambda w: w["top"]):
+                    if filas and abs(w["top"] - filas[-1][0]) <= 3.0:
+                        filas[-1][1].append(w)
+                    else:
+                        filas.append([w["top"], [w]])
+                for _, ws in filas:
+                    ws.sort(key=lambda w: w["x0"])
+                    celdas = [w["text"].strip() for w in ws if w["text"].strip()]
+                    if not celdas:
+                        continue
+                    nums = [c for c in celdas if CELDA.match(c)]
+                    texto = " ".join(c for c in celdas if not CELDA.match(c) or len(c) <= 4)
+                    m = FILA.match(texto)
+                    if not m:
+                        # código como celda propia: "1" "510" "UNIVERSIDAD ..."
+                        m = FILA.match(" ".join(celdas))
+                    if not m or not nums:
+                        continue
+                    nombre = m.group("nombre")
+                    if not ES_UNI.search(nombre):
+                        continue
+                    ult = nums[-1]
+                    if ult == m.group(1):
+                        continue
+                    v = to_num(ult)
+                    if v is None or v < 100:
+                        continue
+                    out.append((m.group(1), re.split(r"\s+[\d\-]", nombre)[0].strip(), v))
+    except Exception as e:  # noqa
+        print("  ERR pdf", pdf_path.name, e)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps(out, ensure_ascii=False))
+    return out
+
+
 # ---------------------------------------------------------------- texto del DS
 def bloque_norma(texto, numero):
     """Recorta el texto de El Peruano al bloque del DS (el PDF trae otras normas)."""
@@ -186,7 +239,13 @@ def main():
         num = numero_ds(c["titulo"])
         cuerpo_ds = bloque_norma(cuerpo, num) if (num and cuerpo) else cuerpo
         total, via_total = monto_total(cuerpo_ds)
-        filas = filas_pliego(anexos) or filas_pliego(cuerpo_ds)
+        filas = []
+        pdfs_locales = sorted((CACHE / "pdf" / c["id"]).glob("*.pdf")) if (CACHE / "pdf" / c["id"]).exists() else []
+        for f in pdfs_locales:
+            if re.search(r"anexo", f.name, re.I):
+                filas += filas_pliego_pdf(f)
+        if not filas:
+            filas = filas_pliego(anexos) or filas_pliego(cuerpo_ds)
         por = {}
         for p, nom, v in filas:
             por[p] = por.get(p, 0) + v
@@ -201,7 +260,7 @@ def main():
         cuadra = None
         if total and por:
             cuadra = abs(suma - total) <= max(1.0, total * 0.001)
-        if not files:
+        if not files and not pdfs_locales:
             nota_t = "PDF no descargable desde gob.pe; solo metadatos."
         elif not por:
             nota_t = "El PDF no desagrega montos por universidad (o no se pudo leer la tabla); no se imputa."
