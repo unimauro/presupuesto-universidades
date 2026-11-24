@@ -27,6 +27,8 @@
     return sg + nf0.format(a);
   }
   const soles = (v) => (isNum(v) ? 'S/\u00a0' + solesN(v) : SD);
+  // Fino: para comparar montos cercanos (PIA vs devengado) en millones con un decimal: "S/ 6,954.6 M".
+  const solesF = (v) => (!isNum(v) ? SD : Math.abs(v) >= 1e9 ? 'S/\u00a0' + nf1.format(v / 1e6) + '\u00a0M' : soles(v));
   // Cifra héroe: [número, unidad]
   function heroParts(v) {
     if (!isNum(v)) return [SD, ''];
@@ -408,14 +410,14 @@
     const extra = isNum(pim) && isNum(pia) ? pim - pia : null;
     const sin = isNum(pim) && isNum(dev) ? pim - dev : null;
     return `${title ? `<p class="fig-t">${title}</p>` : ''}<div class="steps">
-      <div class="step"><div class="step-l"><span>Arrancaron con (PIA)</span><b>${esc(soles(pia))}</b></div>
+      <div class="step"><div class="step-l"><span>Arrancaron con (PIA)</span><b>${esc(solesF(pia))}</b></div>
         <div class="step-bar"><i class="grow" style="width:${w(pia)}%;background:var(--color-pia)"></i></div></div>
-      <div class="step"><div class="step-l"><span>Terminaron teniendo (PIM)</span><b>${esc(soles(pim))}</b></div>
+      <div class="step"><div class="step-l"><span>Terminaron teniendo (PIM)</span><b>${esc(solesF(pim))}</b></div>
         <div class="step-bar"><i class="grow" style="--d:.25s;width:${w(pim)}%;background:var(--color-pim)"></i></div>
-        ${isNum(extra) ? `<span class="step-note">${extra >= 0 ? `+${esc(soles(extra))} que llegaron durante el año` : `${esc(soles(-extra))} menos que al inicio`}</span>` : ''}</div>
-      <div class="step"><div class="step-l"><span>Gastaron de verdad (devengado)</span><b>${esc(soles(dev))}</b></div>
+        ${isNum(extra) ? `<span class="step-note">${extra >= 0 ? `+${esc(solesF(extra))} que llegaron durante el año` : `${esc(solesF(-extra))} menos que al inicio`}</span>` : ''}</div>
+      <div class="step"><div class="step-l"><span>Gastaron de verdad (devengado)</span><b>${esc(solesF(dev))}</b></div>
         <div class="step-bar"><i class="gap" style="width:${w(pim)}%"></i><i class="grow" style="--d:.5s;width:${w(dev)}%;background:var(--color-dev)"></i></div>
-        ${isNum(sin) ? `<span class="step-note">${esc(soles(sin))} sin gastar (rayado): el ${esc(pct(div(sin, pim)))} de lo que tenían</span>` : ''}</div>
+        ${isNum(sin) ? `<span class="step-note">${esc(solesF(sin))} sin gastar (rayado): el ${esc(pct(div(sin, pim)))} de lo que tenían</span>` : ''}</div>
     </div>`;
   }
   const CATS = [
@@ -477,14 +479,14 @@
         let tu = tuInvita(), tuFig = '';
         if (h && ht) {
           const hg = div(val(ht, 'pim'), val(ht, 'pia'));
-          tu = `<p class="tu">${EnLa(h)} arrancaron con ${esc(soles(val(ht, 'pia')))} y terminaron con ${esc(soles(val(ht, 'pim')))} (${esc(pctSigned(isNum(hg) ? hg - 1 : null))}). Gastaron el ${esc(pct(div(val(ht, 'dev'), val(ht, 'pim'))))} de lo que tenían.</p>`;
+          tu = `<p class="tu">${EnLa(h)} arrancaron con ${esc(solesF(val(ht, 'pia')))} y terminaron con ${esc(solesF(val(ht, 'pim')))} (${esc(pctSigned(isNum(hg) ? hg - 1 : null))}). Gastaron el ${esc(pct(div(val(ht, 'dev'), val(ht, 'pim'))))} de lo que tenían.</p>`;
           tuFig = `<div class="steps-tu">${stepsHTML({ pia: val(ht, 'pia'), pim: val(ht, 'pim'), dev: val(ht, 'dev') }, `Solo la <mark>${esc(label(h))}</mark>`)}</div>`;
         } else if (h) tu = tuNo(h, `no tiene datos de gasto en ${esc(Y)}.`);
         return {
           cifra: esc(pctSigned(isNum(g) ? g - 1 : null)),
-          titulo: `más plata tuvieron al final de ${esc(Y)} que al empezar. Al cierre, ${esc(soles(T.pim - T.dev))} quedaron sin gastar.`,
+          titulo: `más plata tuvieron al final de ${esc(Y)} que al empezar. Al cierre, ${esc(solesF(T.pim - T.dev))} quedaron sin gastar.`,
           html: `<p class="lead">Piensa en tu propina del ciclo: arrancas con un monto, a mitad de camino te cae plata extra (o te recortan) y al final está lo que de verdad gastaste. Con las universidades públicas pasa igual, pero en millones.</p>
-            <p>En ${esc(Y)}, las ${esc(U.length)} universidades con datos arrancaron con ${esc(soles(T.pia))}, terminaron teniendo ${esc(soles(T.pim))} y gastaron ${esc(soles(T.dev))}: el ${esc(pct(div(T.dev, T.pim)))} de lo que tenían.</p>
+            <p>En ${esc(Y)}, las ${esc(U.length)} universidades con datos arrancaron con ${esc(solesF(T.pia))}, terminaron teniendo ${esc(solesF(T.pim))} y gastaron ${esc(solesF(T.dev))}: el ${esc(pct(div(T.dev, T.pim)))} de lo que tenían.</p>
             ${tu}
             <figure class="fig anim">${stepsHTML(T, `Las ${esc(U.length)} universidades juntas, ${esc(Y)}`)}${tuFig}</figure>
             ${caveat([
