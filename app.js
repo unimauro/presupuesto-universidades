@@ -1609,6 +1609,7 @@
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
       <div id="ex-host"></div>
+      <div id="p27" style="margin-top:16px"></div>
       <div class="card" style="margin-top:12px" id="ex-ley">
         <h3>¿Qué dice la ley sobre el gasto de las universidades?</h3>
         ${disp.length ? `<p class="sub">${disp.length} disposiciones${x.version && String(x.version).toLowerCase() !== 'ley' ? ' (pueden cambiar en el Congreso)' : ''}. Filtra por tema.</p>
@@ -1642,6 +1643,7 @@
       drawDisp();
       $('#ex-temas', el).addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; S.exp.tema = b.dataset.t; drawDisp(); });
     }
+    renderP2027($('#p27', el));
     const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
     makeTable($('#ex-host', el), {
       rowClass: r => (num(r.p26) !== null && r.p26 < BASE_CHICA) ? 'row-dim' : '',
@@ -1695,6 +1697,104 @@
       </div>
       <div class="grid two">${tbl(e.generica, a26.generica, 'Por genérica de gasto')}${tbl(e.fuente, a26.fuente, 'Por fuente de financiamiento')}</div>
     </div>`;
+  }
+
+  // ================================================================== PROPUESTA 2027 A FONDO (data/p2027.json bajo demanda)
+  let p27P = null;
+  const loadP2027 = () => p27P || (p27P = fetchJson('data/p2027.json').catch(() => null));
+  S.p27 = { uni: '', obrasUni: '' };
+  // Mini gráfico de línea (SVG) PIM y devengado de un proyecto en 2021-2026
+  function sparkSvg(hist) {
+    const ys = ['2021', '2022', '2023', '2024', '2025', '2026'];
+    const pim = ys.map(y => num(((hist || {})[y] || {}).pim)), dev = ys.map(y => num(((hist || {})[y] || {}).dev));
+    const mx = Math.max(1, ...pim.concat(dev).filter(v => v !== null));
+    const pts = arr => arr.map((v, i) => v === null ? null : `${(i * 18 + 2).toFixed(0)},${(24 - (v / mx) * 20).toFixed(1)}`).filter(Boolean).join(' ');
+    return `<svg class="spark" viewBox="0 0 94 26" width="94" height="26" role="img" aria-label="PIM y devengado 2021-2026"><polyline points="${pts(pim)}" fill="none" stroke="${cssVar('--c-pim')}" stroke-width="2"/><polyline points="${pts(dev)}" fill="none" stroke="${cssVar('--c-dev')}" stroke-width="2"/></svg>`;
+  }
+  function renderP2027(host) {
+    host.innerHTML = '<p class="empty"><span class="spinner" aria-hidden="true"></span> Cargando la propuesta 2027…</p>';
+    loadP2027().then(p => {
+      if (!p) { host.innerHTML = '<p class="empty">Aún no está disponible el detalle de la propuesta 2027.</p>'; return; }
+      const ver = String(p.version || '').toLowerCase();
+      const r = p.resumen || {};
+      host.innerHTML = `
+        <div class="version" role="note"><span class="v-badge">${esc((EXP_VERSION[ver] || [p.version || 'Propuesta'])[0])}</span><div><p><strong>Propuesta ${ver === 'dictamen' ? 'del dictamen' : ver === 'ley' ? 'de la ley' : 'del proyecto'}${ver === 'ley' ? '' : '; la ley final puede cambiar montos'}.</strong></p>${p.norma ? `<p class="v-sub">${esc(p.norma)}</p>` : ''}</div></div>
+        <div class="card" style="margin-top:12px">
+          <h3>¿En qué se gastaría en 2027?</h3>
+          <p class="sub">Por genérica de gasto: propuesta 2027 frente al PIA 2026 y lo realmente gastado en 2025 (devengado). Millones de soles.</p>
+          <div class="controls" style="margin-bottom:6px"><div class="grow up-host" id="p27-uni"></div></div>
+          <ul class="legend"><li><i style="background:${cssVar('--c-dev')}"></i>Devengado 2025</li><li><i style="background:${cssVar('--c-pia')}"></i>PIA 2026</li><li><i style="background:${cssVar('--tu')};border:2px solid ${cssVar('--tu-borde')}"></i>Propuesta 2027</li></ul>
+          <div class="chart"><canvas id="ch-p27-gen"></canvas></div>
+          <div id="p27-gen-tbl"></div>
+        </div>
+        <h3 style="margin:22px 0 4px">Obras propuestas para 2027</h3>
+        <p class="sub">${esc(fmtN(r.n_proyectos))} proyectos por ${esc(soles(r.monto_proyectos))}; ${esc(fmtN(r.n_nuevos))} son <strong>nuevos</strong> (sin ejecución registrada en el SIAF 2021-2026) por ${esc(soles(r.monto_nuevos))}. La línea muestra el PIM (azul) y el devengado (magenta) de 2021 a 2026.</p>
+        <div class="controls" style="margin:6px 0"><div class="grow up-host" id="p27-obras-uni"></div></div>
+        <div id="p27-obras"></div>
+        <h3 style="margin:22px 0 4px">Actividades 2027 con más presupuesto</h3>
+        <p class="sub">Gasto corriente propuesto por actividad (docencia, gestión, servicios), ${esc(fmtN((p.actividades || []).length))} en total.</p>
+        <div id="p27-act"></div>
+        ${p.nota ? `<p class="note">${esc(p.nota)}</p>` : ''}`;
+      // (a) genéricas
+      const drawGen = () => {
+        const u = S.p27.uni ? uniBy(S.p27.uni) : null;
+        const pool = u ? [u] : S.unis;
+        const g27 = u ? ((expOf(u) || {}).generica || {}) : (p.generica_total || {});
+        const cats = GENERICAS.filter(c => pick(g27, c.frag) !== null || pool.some(x => pick((A(x, 2026) || {}).generica, c.frag)));
+        const rows = cats.map(c => ({ c, lbl: isMobile() && c.short ? c.short : c.lbl,
+          d25: sum(pool.map(x => (pick((A(x, 2025) || {}).generica, c.frag) || {}).dev)),
+          p26: sum(pool.map(x => (pick((A(x, 2026) || {}).generica, c.frag) || {}).pia)),
+          p27: num(pick(g27, c.frag)) })).filter(rw => (rw.p27 || 0) + (rw.p26 || 0) + (rw.d25 || 0) > 0);
+        sizeFor('ch-p27-gen', rows.length, isMobile() ? 62 : 52, 220);
+        mkChart('ch-p27-gen', {
+          type: 'bar',
+          data: { labels: rows.map(rw => rw.lbl), datasets: [
+            { label: 'Devengado 2025', data: rows.map(rw => mill(rw.d25)), backgroundColor: cssVar('--c-dev'), borderRadius: 0 },
+            { label: 'PIA 2026', data: rows.map(rw => mill(rw.p26)), backgroundColor: cssVar('--c-pia'), borderRadius: 0 },
+            { label: 'Propuesta 2027', data: rows.map(rw => mill(rw.p27)), backgroundColor: cssVar('--tu'), borderColor: cssVar('--tu-borde'), borderWidth: 2, borderRadius: 0,
+              valueLabel: (v, i) => { const d = pctChg(rows[i].p26, rows[i].p27); return d === null ? '' : fmtChg(d) + ' vs 2026'; } },
+          ] },
+          options: { indexAxis: 'y', layout: { padding: { right: isMobile() ? 96 : 120 } }, interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: false }, tooltip: { callbacks: { title: it => (rows[it[0].dataIndex] || {}).c.lbl, label: ctx => `${ctx.dataset.label}: ${soles(ctx.raw * 1e6)}` } } },
+            scales: { x: { beginAtZero: true, ticks: { callback: tickM, maxTicksLimit: isMobile() ? 3 : 6, maxRotation: 0 } }, y: { ticks: { font: { weight: 600 } } } } },
+        }, 'Gasto por genérica: devengado 2025, PIA 2026 y propuesta 2027');
+        const t27 = sum(rows.map(rw => rw.p27)), t26 = sum(rows.map(rw => rw.p26));
+        $('#p27-gen-tbl', host).innerHTML = `<p class="note">Total propuesto 2027: <strong>${esc(soles(t27))}</strong> (${fmtVar(pctChg(t26, t27))} frente al PIA 2026 de ${esc(soles(t26))}).</p>`;
+      };
+      const genNeeds = () => Promise.all([ensureYear('2026'), ensureYear('2025')].concat(S.p27.uni ? [ensureUni(S.p27.uni)] : []));
+      uniPicker($('#p27-uni', host), { id: 'p27-uni-in', label: 'Ver para', value: S.p27.uni || '', allLabel: 'Todas las universidades', onSelect: pl => { S.p27.uni = pl || ''; genNeeds().then(drawGen); } });
+      genNeeds().then(drawGen);
+      // (b) obras
+      const allObras = (p.proyectos || []).map(o => Object.assign({}, o, { u: uniBy(o.pliego), nuevo: !!o.nuevo || !o.historia || !Object.keys(o.historia).length }));
+      const drawObras = () => {
+        const rows = S.p27.obrasUni ? allObras.filter(o => String(o.pliego) === String(S.p27.obrasUni)) : allObras;
+        makeTable($('#p27-obras', host), {
+          id: 'p27o', caption: 'Proyectos de inversión en la propuesta 2027. Montos en soles.', rows, sort: { k: 'monto', dir: -1 }, limit: 20,
+          search: { ph: 'Proyecto, código o universidad', text: o => [o.nombre, o.codigo, o.uni, o.u && o.u.nombre, o.u && o.u.departamento].join(' ') },
+          mobilePick: ['monto', 'acum', 'hist'], mdef: 'monto',
+          filters: [depFilter(o => o.u, rows), { k: 'nv', lbl: 'Estado', opts: [['', 'Todos'], ['n', 'Solo NUEVOS'], ['v', 'Solo los que ya venían']], test: (o, v) => (v === 'n') === o.nuevo }],
+          cols: [
+            { k: 'proy', lbl: 'Proyecto', sticky: true, m: true, wrap: true, get: o => o.nombre || '', html: o => `<span class="proy-n">${esc(titleCase(o.nombre || 'Proyecto'))}</span><span class="uni-sub">${o.nuevo ? '<span class="tag new">NUEVO</span> ' : '<span class="tag">Ya venía</span> '}${esc(o.codigo || '')} · ${o.u ? `<a href="#u=${encodeURIComponent(o.u.pliego)}">${esc(uName(o.u))}</a>` : esc(o.uni || '')}</span>` },
+            { k: 'monto', lbl: 'Monto 2027', m: true, get: o => num(o.monto_2027), html: o => `<strong>${esc(soles(num(o.monto_2027)))}</strong>` },
+            { k: 'hist', lbl: 'PIM / devengado 2021-2026', nosort: true, get: () => null, html: o => o.nuevo ? '<span class="muted small">sin historia</span>' : sparkSvg(o.historia) },
+            { k: 'acum', lbl: 'Devengado acumulado', get: o => num(o.dev_acumulado), fmt: v => num(v) === null ? '—' : soles(v) },
+          ],
+        });
+      };
+      uniPicker($('#p27-obras-uni', host), { id: 'p27-ob-in', label: 'Filtrar por universidad', value: S.p27.obrasUni || '', allLabel: 'Todas las universidades', onSelect: pl => { S.p27.obrasUni = pl || ''; drawObras(); } });
+      drawObras();
+      // (c) actividades
+      const acts = (p.actividades || []).map(a => Object.assign({}, a, { u: uniBy(a.pliego) }));
+      makeTable($('#p27-act', host), {
+        id: 'p27a', caption: 'Actividades 2027 por monto propuesto. Montos en soles.', rows: acts, sort: { k: 'monto', dir: -1 }, limit: 15,
+        search: { ph: 'Actividad o universidad', text: a => [a.nombre, a.codigo, a.uni, a.u && a.u.nombre, a.u && a.u.departamento].join(' ') },
+        filters: [depFilter(a => a.u, acts)],
+        cols: [
+          { k: 'act', lbl: 'Actividad', sticky: true, m: true, wrap: true, get: a => a.nombre || '', html: a => `<span class="proy-n">${esc(titleCase(a.nombre || 'Actividad'))}</span><span class="uni-sub">${esc(a.codigo || '')} · ${a.u ? `<a href="#u=${encodeURIComponent(a.u.pliego)}">${esc(uName(a.u))}</a>` : esc(a.uni || '')}</span>` },
+          { k: 'monto', lbl: 'Monto 2027', m: true, get: a => num(a.monto_2027), fmt: soles },
+        ],
+      });
+    });
   }
 
   // ================================================================== 8. FICHA + COMPARADOR
@@ -2011,7 +2111,12 @@
         .then(j => {
           const u = uniBy(pl); if (!u || !j) return;
           Object.entries(j.anios || {}).forEach(([y, obj]) => mergeInto(u, y, obj));
-          Object.keys(j).forEach(k => { if (k !== 'anios' && u[k] === undefined) u[k] = j[k]; });
+          Object.keys(j).forEach(k => {
+            if (k === 'anios') return;
+            const a = u[k], b = j[k];
+            if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(a)) u[k] = Object.assign({}, a, b); // p.ej. expectativa_2027 con más detalle
+            else if (a === undefined) u[k] = b;
+          });
         })
         .catch(err => console.warn('capa universidad', pl, err))
         .finally(() => { pending--; uniDone.add(pl); kpiCache.clear(); }));

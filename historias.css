@@ -203,6 +203,12 @@ h1{font:900 clamp(44px,13.4vw,112px)/.88 var(--font-display);font-stretch:62%;le
 .tramite span{font-size:15px;color:var(--color-tinta-2)}
 .tu-card{background:var(--color-tu);color:#1E1428;padding:14px 16px;margin:18px 0;border:3px solid #1E1428}
 .tu-card p{margin:0}
+.flash27{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:4px 0 18px;padding:10px 14px;min-height:44px;background:#4A1F6B;color:#F4EEE2;text-decoration:none;border-left:8px solid #F2B705;font:600 15px/1.35 var(--font-cifras);grid-column:1/-1}
+.flash27 b{font:900 22px/1 var(--font-display);font-stretch:70%;color:#F2B705;white-space:nowrap}
+.flash27 b.baja{color:#FF8FB8}
+.flash27 .ir{margin-left:auto;font-weight:800;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.flash27:hover .ir{text-decoration-thickness:3px}
+.flash27 mark{background:#F2B705;color:#1E1428}
 .tres{margin:26px 0 0;border:3px solid var(--color-tinta);padding:14px 16px 6px;background:var(--color-papel)}
 .tres h2{font:800 20px/1.15 var(--font-display);font-stretch:78%;margin:0 0 8px}
 .tres dl{margin:0;display:grid;gap:0}

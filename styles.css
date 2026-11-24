@@ -649,3 +649,8 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 .seg::-webkit-scrollbar { display: none; }
 .seg button { white-space: nowrap; flex: none; }
+
+/* Propuesta 2027 */
+.spark { display: block; }
+.proy-n { display: block; font-weight: 700; line-height: 1.3; white-space: normal; }
+#p27-obras td.sticky-col, #p27-act td.sticky-col { min-width: 200px; max-width: 360px; }

@@ -219,30 +219,31 @@ def hero_escritorio(serie):
 
 
 def hero_movil(serie):
-    W, H = 375, 168
-    cx = 188; sol_y = 74
+    """Banda horizontal para móvil: sol a la izquierda, templo a la derecha."""
+    W, H = 375, 150
+    sx, sy = 92, 76
+    cx = 246
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" aria-hidden="true" focusable="false">',
          ESTILO]
-    o.append(rayos(cx, sol_y, 28, 300, MAIZ, ".55"))
-    o.append(disco_escalonado(cx, sol_y, 62, 5, AJI))
-    o.append(disco_escalonado(cx, sol_y, 46, 5, ROCOTO))
-    o.append(disco_escalonado(cx, sol_y, 37, 5, AJI))
-    fondo = [(0, 92), (34, 64), (64, 84), (96, 46), (132, 92), (160, 86), (188, 118), (216, 88), (246, 98),
-             (282, 40), (318, 86), (346, 70), (375, 82)]
+    o.append(rayos(sx, sy, 28, 420, MAIZ, ".55"))
+    o.append(disco_escalonado(sx, sy, 50, 5, AJI))
+    o.append(disco_escalonado(sx, sy, 37, 5, ROCOTO))
+    o.append(disco_escalonado(sx, sy, 30, 5, AJI))
+    fondo = [(0, 92), (30, 50), (66, 96), (92, 112), (124, 84), (150, 100), (176, 70), (210, 104),
+             (262, 96), (300, 58), (344, 30), (375, 60)]
     o.append(poli(fondo + [(W, H), (0, H)], TITICACA))
-    o.append(nevado((64, 84), (96, 46), (132, 92), 13, PAPEL))
-    o.append(nevado((246, 98), (282, 40), (318, 86), 16, PAPEL))
-    mi = escalonada([(0, 116), (50, 92), (100, 112), (128, 132)], 7) + [(128, H), (0, H)]
-    md = escalonada([(250, 134), (300, 104), (340, 92), (375, 108)], 7) + [(375, H), (250, H)]
+    o.append(nevado((0, 92), (30, 50), (66, 96), 13, PAPEL))
+    o.append(nevado((300, 58), (344, 30), (375, 60), 12, PAPEL))
+    mi = escalonada([(0, 118), (60, 100), (120, 112), (160, 134)], 6) + [(160, H), (0, H)]
+    md = escalonada([(320, 128), (350, 104), (375, 98)], 6) + [(375, H), (320, H)]
     o.append(f'<clipPath id="cmm">{poli(mi, "#000")}{poli(md, "#000")}</clipPath>')
     o.append(poli(mi, MAIZ)); o.append(poli(md, MAIZ))
     o.append('<g clip-path="url(#cmm)">' + "".join(
-        f'<rect x="0" y="{y}" width="{W}" height="2" fill="{SELVA}"/>' for y in range(98, H, 12)) + '</g>')
-    o.append(poli(escalonada([(0, 146), (36, 128), (80, 150)], 6) + [(80, H), (0, H)], SELVA))
-    o.append(poli(escalonada([(296, 152), (340, 130), (375, 140)], 6) + [(375, H), (296, H)], SELVA))
-    tsvg, _ = templo(cx, 144, 176, 76, serie, s=0.5)
+        f'<rect x="0" y="{y}" width="{W}" height="2" fill="{SELVA}"/>' for y in range(100, H, 10)) + '</g>')
+    o.append(poli(escalonada([(0, 136), (34, 122), (74, 142)], 5) + [(74, H), (0, H)], SELVA))
+    tsvg, _ = templo(cx, 126, 150, 62, serie, s=0.42)
     o.append(tsvg)
-    o.append(f'<rect x="0" y="161" width="{W}" height="{H - 161}" fill="{TINTA}"/>')
+    o.append(f'<rect x="0" y="141" width="{W}" height="{H - 141}" fill="{TINTA}"/>')
     o.append("</svg>")
     return "\n".join(o)
 
