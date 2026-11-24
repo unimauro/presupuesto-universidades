@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-24T04:35:39+00:00",
+ "generado": "2026-11-24T04:39:03+00:00",
  "version": "proyecto",
  "norma": "Proposición Legislativa N° 00002-2026-2031-CR (Proyecto de Ley de Presupuesto del Sector Público para el Año Fiscal 2027, Oficio 242-2026-PR)",
  "fecha": "2026-08-28",
@@ -76,7 +76,7 @@
   "Las universidades creadas recientemente sin pliego propio en el proyecto no tienen PIA 2027; el art. 87 prevé financiarlas desde la Reserva de Contingencia durante el año (monto no especificado en la ley).",
   "Disposiciones: numeración del texto sustitutorio del dictamen (coincide con el proyecto en los artículos revisados). La numeración de la autógrafa final podría variar.",
   "Universidades sin PIA 2027 en el Anexo 4: 578, 579, 582, 583",
-  "Chequeos con diferencias: 548: suma de proyectos (15229716) ≠ subtotal PROYECTOS (19029716)"
+  "Chequeos OK: Anexo 4 (suma de fuentes = total por fila), Anexo 5 = Anexo 4 por pliego, genéricas y proyectos cuadran."
  ],
  "total_universidades": {
   "n_pliegos_2027": 67,
@@ -100,11 +100,11 @@
   },
   "pp_0066_universidades": 4140525151,
   "pp_0137_universidades": 21550382,
-  "peso_en_sector_educacion_pct": 7531.45,
-  "sector_educacion_2027": 100269926,
+  "peso_en_sector_educacion_pct": 41.54,
+  "sector_educacion_2027": 18178686559,
   "sector_educacion_nota": "Suma de pliegos del Sector 10 en el Anexo 4 (MINEDU, Huampaní, SINEACE, SUNEDU, IPD y universidades); no incluye educación de gobiernos regionales.",
-  "gobierno_nacional_2027": 188287699388,
-  "peso_en_gobierno_nacional_pct": 4.01,
+  "gobierno_nacional_2027": 166613076848,
+  "peso_en_gobierno_nacional_pct": 4.53,
   "total_sector_publico_2027": 266506316735,
   "peso_en_total_pct": 2.834,
   "total_sector_publico_pia_2026_millones": 257562,
@@ -8192,6 +8192,11 @@
      "monto": 1200000,
      "categoria": "PROGRAMAS PRESUPUESTALES"
     },
+    "2451663": {
+     "nombre": "MEJORAMIENTO DEL SERVICIO DE GESTION DE LA INVESTIGACION E INNOVACION EN LA UNIVERSIDAD NACIONAL DE FRONTERA DISTRITO DE SULLANA - PROVINCIA DE SULLANA - DEPARTAMENTO DE PIURA",
+     "monto": 3800000,
+     "categoria": "PROGRAMAS PRESUPUESTALES"
+    },
     "2476153": {
      "nombre": "CREACION DEL SERVICIO DE LABORATORIO DE GASTRONOMIA Y HOTELERIA DE LA UNIVERIDAD NACIONAL DE FRONTERA DISTRITO DE SULLANA - PROVINCIA DE SULLANA - DEPARTAMENTO DE PIURA",
      "monto": 132150,
@@ -8238,7 +8243,7 @@
      "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS"
     }
    },
-   "n_proyectos": 16,
+   "n_proyectos": 17,
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 30249332,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 16563682

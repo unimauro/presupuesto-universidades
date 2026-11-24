@@ -414,7 +414,7 @@
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
       <div class="controls"><label class="grow">Buscar<input type="search" id="vr-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.vr.q)}"></label></div>
-      <div class="table-wrap"><table id="vr-table"><caption>${esc(METRIC_LBL[m])} ${esc(a)} vs ${esc(b)}, ${esc(modeLbl)}.</caption><thead></thead><tbody></tbody></table></div>
+      <div class="table-wrap tall"><table id="vr-table"><caption>${esc(METRIC_LBL[m])} ${esc(a)} vs ${esc(b)}, ${esc(modeLbl)}.</caption><thead></thead><tbody></tbody></table></div>
       <p class="count"><button type="button" class="btn" id="vr-share">Copiar enlace a esta comparación</button></p>`;
 
     const cols = [
@@ -1032,7 +1032,7 @@
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
       <div class="controls"><label class="grow">Buscar<input type="search" id="ex-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.exp.q)}"></label></div>
-      <div class="table-wrap"><table id="ex-table"><caption>PIA 2027 vs PIA 2026 por universidad. Montos en soles.</caption><thead></thead><tbody></tbody></table></div>
+      <div class="table-wrap tall"><table id="ex-table"><caption>PIA 2027 vs PIA 2026 por universidad. Montos en soles.</caption><thead></thead><tbody></tbody></table></div>
       <div class="grid two" style="margin-top:12px">
         <div class="card"><h3>Disposiciones relevantes para universidades</h3>
           ${disp.length ? '<ul class="tlist">' + disp.map(d => `<li><span class="t-top"><strong>${linkOrText(d.url, d.articulo || 'Disposición')}</strong></span><span class="t-fin">${esc(d.resumen || '')}</span></li>`).join('') + '</ul>' : '<p class="empty">Aún no se han extraído disposiciones del documento.</p>'}

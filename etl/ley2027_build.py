@@ -331,7 +331,7 @@ def main():
     sector10 = {f[0]: f[3] for f in filas4[i0:i1]}
 
     universidades = OrderedDict()
-    tot27 = tot26 = tot26_comp = 0
+    tot27 = tot26 = tot26_comp = tot27_comp = 0
     for cod in sorted(codigos):
         g = univ_gasto.get(cod, {})
         anios = g.get("anios", {})
@@ -339,7 +339,7 @@ def main():
         a = univ_a4.get(cod)
         rec = OrderedDict(nombre=(a or {}).get("nombre") or g.get("nombre"))
         rec["pia_2027"] = a["total"] if a else None
-        rec["pia_2026"] = y26.get("pia")
+        rec["pia_2026"] = int(y26["pia"]) if y26.get("pia") is not None else None
         rec["pim_2026"] = y26.get("pim")
         rec["dev_2026_parcial"] = y26.get("dev")
         rec["pim_2025"] = y25.get("pim")
@@ -370,6 +370,7 @@ def main():
             tot26 += rec["pia_2026"]
             if rec["pia_2027"]:
                 tot26_comp += rec["pia_2026"]
+                tot27_comp += rec["pia_2027"]
 
     # chequeos de consistencia
     checks = []
@@ -424,8 +425,11 @@ def main():
         ("n_pliegos_2027", sum(1 for r in universidades.values() if r["pia_2027"])),
         ("pia_2027", tot27),
         ("pia_2026", tot26),
-        ("pia_2026_mismos_pliegos", tot26_comp),
         ("var_pct", round(100 * (tot27 / tot26 - 1), 2) if tot26 else None),
+        ("pia_2027_mismos_pliegos", tot27_comp),
+        ("pia_2026_mismos_pliegos", tot26_comp),
+        ("var_pct_mismos_pliegos", round(100 * (tot27_comp / tot26_comp - 1), 2) if tot26_comp else None),
+        ("nota_comparacion", "var_pct compara todo lo asignado en 2027 con todo el PIA 2026 de los 71 pliegos de gasto.json; var_pct_mismos_pliegos solo usa pliegos con PIA > 0 en ambos años (excluye universidades nuevas sin PIA 2026)."),
         ("fuente", fuente_tot),
         ("generica", gen_tot),
         ("pp_0066_universidades", pp66),

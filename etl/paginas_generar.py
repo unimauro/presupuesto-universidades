@@ -45,8 +45,8 @@ GTM = """<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-K2PJ7
 
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
-         '<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:'
-         'wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">')
+         '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800'
+         '&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">')
 
 # Tema: respeta la preferencia guardada por la app principal (rp-theme) o ?tema=; si no, prefers-color-scheme.
 THEME_JS = ("<script>(function(){var t=null;try{t=localStorage.getItem('rp-theme')}catch(e){}"
@@ -649,23 +649,23 @@ def og_svg(x):
     y = x.ult or (x.parciales[-1] if x.parciales else "")
     par = " (parcial)" if y in x.parciales else ""
     pim, dev = x.t(y, "pim"), x.t(y, "dev")
-    F = "font-family=\"'IBM Plex Sans', Arial, sans-serif\""
-    S = "font-family=\"'Source Serif 4', Georgia, serif\""
+    F = "font-family=\"'Plus Jakarta Sans', Arial, sans-serif\""
+    S = "font-family=\"'Bricolage Grotesque', 'Plus Jakarta Sans', Arial, sans-serif\""
     t = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">',
          '<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0 H0 V40" fill="none" stroke="#2B323E" stroke-width="1"/></pattern></defs>',
          '<rect width="1200" height="630" fill="#1B2230"/><rect width="1200" height="630" fill="url(#g)"/>',
          f'<text x="70" y="92" {F} font-size="26" fill="#E0A447" letter-spacing="3">PRESUPUESTO {E(y)}{E(par.upper())} · DATOS MEF</text>']
     yy = 92 + fsz + 20
     for ln in lines:
-        t.append(f'<text x="70" y="{yy}" {S} font-size="{fsz}" font-weight="700" fill="#E9E6DF">{E(ln)}</text>')
+        t.append(f'<text x="70" y="{yy}" {S} font-size="{fsz}" font-weight="800" fill="#E9E6DF">{E(ln)}</text>')
         yy += int(fsz * 1.08)
     for ln in sub_lines:
         t.append(f'<text x="70" y="{yy - fsz // 2 + 30}" {F} font-size="30" fill="#C6CCF5">{E(ln)}</text>')
         yy += 38
     t.append(f'<text x="70" y="470" {F} font-size="30" fill="#9BA3B1">PIM</text>'
-             f'<text x="70" y="535" {F} font-size="64" font-weight="600" fill="#C6CCF5">{E(fm(pim))}</text>'
+             f'<text x="70" y="535" {F} font-size="64" font-weight="700" fill="#C6CCF5">{E(fm(pim))}</text>'
              f'<text x="640" y="470" {F} font-size="30" fill="#9BA3B1">Devengado ({E(fp(div(dev, pim), 0))})</text>'
-             f'<text x="640" y="535" {F} font-size="64" font-weight="600" fill="#E0A447">{E(fm(dev))}</text>'
+             f'<text x="640" y="535" {F} font-size="64" font-weight="700" fill="#E0A447">{E(fm(dev))}</text>'
              f'<text x="70" y="595" {F} font-size="24" fill="#9BA3B1">unimauro.github.io/presupuesto-universidades · Radiografía Presupuestal</text>'
              '</svg>')
     return "".join(t)

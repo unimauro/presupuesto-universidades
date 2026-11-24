@@ -140,13 +140,16 @@
     }
     return L.inflight[y];
   }
+  // Ventana de años para contar en cuántos años tuvo PIM un proyecto (limita las descargas a 6 capas).
+  const WIN = 6;
+  const winYears = (Y) => S.closed.filter((y) => y <= Y).slice(-WIN);
   // Qué capas necesita cada historia antes de calcularse.
   async function prepStory(st, Y) {
     if (st.need === 'base') return;
     await ensureYear(Y);
     if (st.need === 'years') {
       const hay = S.d.universidades.some((u) => ((u.anios && u.anios[Y] && u.anios[Y].proyectos) || []).length);
-      if (hay) await Promise.all(S.closed.filter((y) => y <= Y).map(ensureYear));
+      if (hay) await Promise.all(winYears(Y).map(ensureYear));
     }
   }
 
@@ -401,13 +404,14 @@
         const slow = big.map((r) => ({ ...r, ej: isNum(r.p.dev) ? r.p.dev / r.p.pim : 0 })).filter((r) => r.ej < 0.5)
           .sort((a, b) => (b.p.pim - (b.p.dev || 0)) - (a.p.pim - (a.p.dev || 0)));
         const gap = sum(slow.map((r) => r.p.pim - (r.p.dev || 0)));
-        const yearsWith = (u, code) => S.closed.filter((y) => y <= Y && u.anios && u.anios[y] && (u.anios[y].proyectos || []).some((q) => String(q.codigo) === String(code) && isNum(q.pim) && q.pim > 0)).length;
+        const W = winYears(Y);
+        const yearsWith = (u, code) => W.filter((y) => u.anios && u.anios[y] && (u.anios[y].proyectos || []).some((q) => String(q.codigo) === String(code) && isNum(q.pim) && q.pim > 0)).length;
         const card = (r) => {
           const ej = Math.max(0, Math.min(1, r.ej)); const n = r.p.codigo != null ? yearsWith(r.u, r.p.codigo) : null;
           return `<li class="proj${String(r.u.pliego) === S.hl ? ' hl' : ''}"><div class="u">${esc(label(r.u))}${r.p.codigo != null ? ' · CUI ' + esc(r.p.codigo) : ''}</div>
             <div class="n">${esc(r.p.nombre || SD)}</div>
             <div class="bar" role="img" aria-label="Devengado ${esc(pct(ej))} del PIM"><span style="width:${(ej * 100).toFixed(1)}%"></span></div>
-            <div class="f"><span>PIM ${esc(soles(r.p.pim))}</span><span>Dev. ${esc(soles(r.p.dev))} (${esc(pct(r.ej))})</span>${n ? `<span>Con PIM en ${esc(n)} año${n > 1 ? 's' : ''} desde ${esc(S.closed[0])}</span>` : ''}</div></li>`;
+            <div class="f"><span>PIM ${esc(soles(r.p.pim))}</span><span>Dev. ${esc(soles(r.p.dev))} (${esc(pct(r.ej))})</span>${n ? `<span>Con PIM en ${esc(n)} de los últimos ${esc(W.length)} años (${esc(W[0])}–${esc(Y)})</span>` : ''}</div></li>`;
         };
         const LIM = 8;
         return {
