@@ -263,53 +263,25 @@ def parse_anexo8(codigos):
 
 
 # ---------------------------------------------------------------- Disposiciones
-DISPOSICIONES = [
-    ("Art. 8, literales d) y f)",
-     "Exceptúa de la prohibición de ingreso de personal el nombramiento y la contratación en plaza "
-     "presupuestada de docentes universitarios en universidades públicas."),
-    ("Art. 13 (transferencias financieras, literal iv del MINCETUR)",
-     "Permite al MINCETUR transferir hasta S/ 2 000 000 a la UN Toribio Rodríguez de Mendoza, UN de San Martín, "
-     "UN del Altiplano, UN de San Agustín y CENFOTUR Cusco para capacitar intérpretes de turismo comunitario."),
-    ("Art. 60",
-     "Autoriza a universidades públicas (y gobiernos subnacionales) a transferir recursos (RO, canon/sobrecanon, "
-     "regalías, RDR) al IGP, SENAMHI, INAIGEM, INGEMMET, CENEPRED y otros para estudios de riesgo de desastres "
-     "en el PP 0068; aprobación por resolución del titular."),
-    ("Art. 64",
-     "Universidades públicas, como entidades del SINACTI, pueden pagar pasajes, alimentación y hospedaje a "
-     "científicos externos para apoyo técnico, evaluaciones y jurados de CTI, sin recursos adicionales."),
-    ("Art. 66.3",
-     "Universidades beneficiarias de fondos concursables pueden otorgar incentivos económicos a docentes que "
-     "ejecutan proyectos de investigación, con cargo a Donaciones y Transferencias y conformidad del "
-     "Vicerrectorado de Investigación, sin afectar horas lectivas."),
-    ("Art. 78",
-     "Autoriza a universidades públicas, con cargo a su presupuesto por toda fuente, a otorgar subvenciones a "
-     "graduados y estudiantes de pregrado (movilidad, congresos, concursos de investigación, titulación); "
-     "MINEDU aprueba lineamientos en 30 días."),
-    ("Art. 79",
-     "Autoriza al MINEDU a transferir hasta S/ 26 521 910 a universidades públicas para la implementación "
-     "progresiva de la bonificación especial del docente investigador (art. 86 Ley 30220), mediante decreto "
-     "supremo."),
-    ("Art. 82",
-     "Autoriza excepcionalmente a universidades públicas a usar canon, sobrecanon, regalías, FOCAM y renta de "
-     "aduanas (y sus saldos): hasta 50 % en inversiones, 5 % en preinversión, 20 % en gasto corriente de "
-     "investigación y mantenimiento, 10 % en software, licencias, patentes y CBC; prohíbe usarlos en "
-     "remuneraciones. Regla análoga (82.2) para saldos de canon transferidos por gobiernos regionales en "
-     "Donaciones y Transferencias. Fue uno de los 5 puntos sin consenso MEF–Congreso en el predictamen (RPP)."),
-    ("Art. 87.1–87.3",
-     "Autoriza al MEF a financiar con la Reserva de Contingencia (RO) la implementación inicial de 26 "
-     "universidades públicas creadas por ley; las que inician en el 2.º semestre de 2026 registran puestos "
-     "CAS sin tope del Anexo I. El dictamen cambia la lista de leyes respecto del proyecto (retira 32549 y "
-     "32554; agrega 32674 y 32546)."),
-    ("Art. 87.4",
-     "Moratoria en 2027 para crear y autorizar el funcionamiento de nuevas universidades públicas, salvo "
-     "universidades con licencia denegada y las comprendidas en la Ley 30597 (Música, Daniel Alomía Robles, "
-     "Diego Quispe Tito) solo con su oferta actual."),
-    ("Art. 7 / Capítulo II (reglas generales)",
-     "Los docentes universitarios de la Ley 30220 están comprendidos en las reglas generales de aguinaldos y "
-     "escolaridad, y en la prohibición general de reajustes remunerativos salvo excepciones de la propia ley."),
-    ("Uso de vehículos (medidas de austeridad)",
-     "En universidades públicas el vehículo asignado es de uso oficial exclusivo del rector."),
-]
+def disposiciones():
+    """Lista de disposiciones con validación de la cita textual contra el dictamen."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from ley2027_disposiciones import D
+    raw = "\n".join((p.extract_text() or "") for p in pypdf.PdfReader(CACHE / "Dictamen_PL00002_LP.pdf").pages)
+    norm = lambda x: re.sub(r"\s+", " ", x).strip()
+    texto = norm(raw)
+    url = DOCS["Dictamen_PL00002_LP.pdf"][0]
+    out = []
+    for art, tema, alcance, resumen, cita, monto in D:
+        ok = norm(cita) in texto
+        if not ok:
+            print(f"AVISO: cita no encontrada literalmente ({art}): {cita[:60]}...")
+        if len(cita.split()) > 40:
+            print(f"AVISO: cita > 40 palabras ({art})")
+        out.append(OrderedDict(articulo=art, tema=tema, alcance=alcance, resumen=resumen, cita=cita,
+                               cita_verificada=ok, monto=monto, url=url,
+                               fuente_texto="texto sustitutorio del dictamen (5-nov-2026)"))
+    return out
 
 
 def main():
@@ -419,7 +391,7 @@ def main():
         "fuente: Anexo 4 por fuente de financiamiento (RO, RDR, ROOC, D y T, RD). En el Anexo 4 'RECURSOS DETERMINADOS' agrupa canon, sobrecanon, regalías, renta de aduanas y participaciones; no se desagrega por rubro.",
         "generica, categoria_presupuestal, productos, actividades y proyectos: Anexo 5. programas_presupuestales: Anexo 8 (solo PP en que aparece la universidad).",
         "Las universidades creadas recientemente sin pliego propio en el proyecto no tienen PIA 2027; el art. 87 prevé financiarlas desde la Reserva de Contingencia durante el año (monto no especificado en la ley).",
-        "Disposiciones: numeración del texto sustitutorio del dictamen (coincide con el proyecto en los artículos revisados). La numeración de la autógrafa final podría variar.",
+        "Disposiciones: lista de las que afectan el gasto de las universidades (alcance='especifica' si las nombra; 'general' si rige para entidades del Gobierno nacional y alcanza a universidades por el art. 3). Numeración y citas del texto sustitutorio del dictamen (coincide con el proyecto en los artículos revisados); la autógrafa/ley final podría renumerar. El Anexo I (tope de CAS por pliego) no se pudo descargar.",
     ] + ([f"Universidades sin PIA 2027 en el Anexo 4: {', '.join(sin_2027)}"] if sin_2027 else []) \
       + ([f"Pliegos universitarios en el proyecto 2027 que no están en gasto.json: {', '.join(nuevas)}"] if nuevas else []) \
       + ([f"Chequeos con diferencias: {'; '.join(checks)}"] if checks else ["Chequeos OK: Anexo 4 (suma de fuentes = total por fila), Anexo 5 = Anexo 4 por pliego, genéricas y proyectos cuadran."])
@@ -447,9 +419,7 @@ def main():
         ("referencias_em", "Exposición de motivos: PP 0066 S/ 4 222 M en total (incluye MINEDU y 1 GR); S/ 3 511 M remuneraciones de 67 universidades; S/ 260 M pensiones de 54; S/ 1 201 M gastos operativos de 67; S/ 1 967 M inversiones y otros activos."),
     ])
     out["universidades"] = universidades
-    out["disposiciones"] = [{"articulo": a, "resumen": r, "url": DOCS["Dictamen_PL00002_LP.pdf"][0],
-                             "fuente_texto": "texto sustitutorio del dictamen (5-nov-2026); mismo número en el proyecto"}
-                            for a, r in DISPOSICIONES]
+    out["disposiciones"] = disposiciones()
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1))
     print(f"OK {OUT} — {len(universidades)} universidades; total 2027 {tot27:,} vs 2026 {tot26:,}")

@@ -57,9 +57,18 @@ TEXTO = "'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif"
 
 
 # ---------- datos ----------
+RESUMEN = ROOT / "data" / "resumen.json"
+
+
 def cargar():
     src = DATA if DATA.exists() else SAMPLE
     d = json.loads(src.read_text(encoding="utf-8"))
+    # Claves que el integrador publica en la capa resumen (expectativa_2027, baseline): se agregan si faltan.
+    if src == DATA and RESUMEN.exists():
+        r = json.loads(RESUMEN.read_text(encoding="utf-8"))
+        for k in ("expectativa_2027", "baseline"):
+            if k not in d and k in r:
+                d[k] = r[k]
     return d, src == SAMPLE or d.get("ejemplo") is True
 
 
@@ -236,31 +245,71 @@ def og_historias(d, y, T, sample, claro=False):
          disp(60, 222, "de tu universidad?", 104, ink),
          (f'<text x="54" y="420" font-family="{DISPLAY}" font-weight="900" font-size="230" fill="{col}" letter-spacing="-0.5">'
           f'{escape(cifra(T["dev"])[0])}<tspan font-size="120" dx="28">{escape(cifra(T["dev"])[1])}</tspan></text>'),
-         t(62, 480, f"gastaron las {T['n']} universidades públicas en {y}. Te lo contamos en 8 historias.", 29, sub, TEXTO, "700"),
+         t(62, 480, f"gastaron las {T['n']} universidades públicas en {y}. Te lo contamos capítulo por capítulo.", 29, sub, TEXTO, "700"),
          ]
     return lienzo("\n".join(c), bg=PAPEL if claro else MAIZ, claro=claro, sample=sample,
                   fuente=f"Devengado {y} · MEF – Consulta Amigable (SIAF)")
 
 
 # ---------- 2027 ----------
+ETAPA_2027 = {   # cómo nombrar la cifra según el trámite (nunca presentar un dictamen como ley publicada)
+    "proyecto": "Según el proyecto de Presupuesto 2027 (Ejecutivo)",
+    "dictamen": "Según el dictamen del Presupuesto 2027",
+    "autografa": "Según la autógrafa del Presupuesto 2027 (aprobada por el Pleno)",
+    "ley": "Ley de Presupuesto 2027",
+}
+
+
 def og_2027(d, sample):
-    T27 = total(d, "2027")
-    T26 = total(d, "2026")
+    e = d.get("expectativa_2027") or {}
+    tu = e.get("total_universidades") or {}
+    p27, p26 = tu.get("pia_2027"), tu.get("pia_2026")
     c = [disp(60, 120, "Lo que viene en", 96),
          disp(60, 300, "2027", 230, AJI)]
-    if T27 and T27.get("pia"):
-        c += [disp(1140, 300, cifra(T27['pia'])[0], 200, PAPEL, "end"),
-              t(1140, 350, f"{cifra(T27['pia'])[1]} de PIA", 36, LILA, TEXTO, "700", "end")]
-        if T26 and T26.get("pia"):
-            var = T27["pia"] / T26["pia"] - 1
-            c.append(t(60, 470, f"{'+' if var >= 0 else '−'}{abs(var) * 100:.1f}% frente al PIA 2026 (nominal)", 38, PAPEL, TEXTO, "700"))
-        fuente = "PIA 2027 · MEF – SIAF"
+    if p27:
+        num, uni = cifra(p27)
+        var = tu.get("var_pct")
+        if var is None and p26:
+            var = (p27 / p26 - 1) * 100
+        etapa = ETAPA_2027.get(str(e.get("version") or "").lower(), "Según el Presupuesto 2027 en trámite")
+        fecha = e.get("fecha") or ""
+        c += [disp(1140, 300, num, 230, AJI, "end"),
+              t(1140, 352, f"{uni} para universidades", 34, PAPEL, TEXTO, "700", "end")]
+        if var is not None:
+            c.append(disp(60, 430, f"{'+' if var >= 0 else '−'}{abs(var):.1f}% frente al PIA 2026", 76, DEV_O))
+        c.append(t(60, 482, f"{etapa}{f' ({fecha})' if fecha else ''}. Monto nominal.", 27, LILA, TEXTO, "700"))
+        n = tu.get("n_pliegos_2027")
+        fuente = f"PIA 2027 de {n} universidades · {e.get('version', 'proyecto')} · vs PIA 2026 (MEF – SIAF)" if n else "PIA 2027 · vs PIA 2026 (MEF – SIAF)"
     else:
+        T26 = total(d, "2026")
         c += [disp(1140, 330, "S/ ¿?", 300, DEV_O, "end"),
               t(60, 400, (f"2026 arrancó con {cifra_txt(T26['pia'])}" if T26 and T26.get("pia") else "Aún sin datos de 2026"), 40, PAPEL, TEXTO, "700"),
               t(60, 460, "El PIA 2027 llega con la Ley de Presupuesto", 32, LILA)]
         fuente = "PIA 2026 · MEF – SIAF · 2027 aún sin datos"
     return lienzo("\n".join(c), sample=sample, fuente=fuente)
+
+
+# ---------- línea base: peso de las universidades en el presupuesto del Estado ----------
+def og_linea_base(d, y, sample):
+    b = ((d.get("baseline") or {}).get("anios") or {}).get(y) or {}
+    pct = b.get("pct_unis_en_total_pim")
+    if pct is None:
+        return None
+    soles = pct * 100     # soles de cada S/ 100
+    c = [disp(60, 110, "De cada S/ 100 del Estado,", 84),
+         disp(54, 330, f"S/{NB}{soles:.1f}", 250, AJI),
+         disp(60, 420, "van a universidades públicas", 76),
+         t(62, 475, f"Presupuesto {y} (PIM) de los 3 niveles de gobierno", 27, LILA, TEXTO, "700")]
+    # Waffle 10×10: cada cuadro = S/ 1; los primeros se pintan en ají (parcial el último)
+    x0, y0, u, g = 820, 150, 30, 6
+    for i in range(100):
+        cx, cy = x0 + (i % 10) * (u + g), y0 + (i // 10) * (u + g)
+        c.append(f'<rect x="{cx}" y="{cy}" width="{u}" height="{u}" fill="{PAPEL}" opacity=".18"/>')
+        frac = max(0.0, min(1.0, soles - i))
+        if frac > 0:
+            c.append(f'<rect x="{cx}" y="{cy}" width="{u * frac:.1f}" height="{u}" fill="{AJI}"/>')
+    c.append(t(820 + 5 * (u + g) - g / 2, y0 + 10 * (u + g) + 26, "cada cuadro = S/ 1", 22, LILA, TEXTO, "700", "middle"))
+    return lienzo("\n".join(c), sample=sample, fuente=f"Universidades / total del sector público, PIM {y} · MEF – Consulta Amigable")
 
 
 def render(svg, nombre, carpeta):
@@ -323,6 +372,9 @@ def main():
     print("  ", render(og_historias(d, y, T, sample), "og-historias", OUT).relative_to(ROOT))
     print("  ", render(og_historias(d, y, T, sample, claro=True), "og-historias-clara", VAR).relative_to(ROOT))
     print("  ", render(og_2027(d, sample), "og-2027", OUT).relative_to(ROOT))
+    lb = og_linea_base(d, y, sample)
+    if lb:
+        print("  ", render(lb, "og-d-linea-base", VAR).relative_to(ROOT))
 
 
 if __name__ == "__main__":
