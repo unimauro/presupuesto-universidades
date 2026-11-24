@@ -65,20 +65,20 @@
 
   // ------------------------------------------------------------------ catálogos
   const GENERICAS = [
-    { frag: '2.1', lbl: 'Personal y obligaciones sociales', c: '--g1' },
-    { frag: '2.2', lbl: 'Pensiones y prestaciones', c: '--g2' },
-    { frag: '2.3', lbl: 'Bienes y servicios', c: '--g3' },
-    { frag: '2.4', lbl: 'Donaciones y transferencias', c: '--g6' },
-    { frag: '2.5', lbl: 'Otros gastos', c: '--g4' },
-    { frag: '2.6', lbl: 'Activos no financieros (inversión)', c: '--g5' },
-    { frag: '2.8', lbl: 'Servicio de la deuda', c: '--g7' },
+    { frag: '2.1', lbl: 'Personal y obligaciones sociales', short: 'Personal', c: '--g1' },
+    { frag: '2.2', lbl: 'Pensiones y prestaciones', short: 'Pensiones', c: '--g2' },
+    { frag: '2.3', lbl: 'Bienes y servicios', short: 'Bienes y serv.', c: '--g3' },
+    { frag: '2.4', lbl: 'Donaciones y transferencias', short: 'Donac. y transf.', c: '--g6' },
+    { frag: '2.5', lbl: 'Otros gastos', short: 'Otros gastos', c: '--g4' },
+    { frag: '2.6', lbl: 'Activos no financieros (inversión)', short: 'Inversión (2.6)', c: '--g5' },
+    { frag: '2.8', lbl: 'Servicio de la deuda', short: 'Deuda', c: '--g7' },
   ];
   const FUENTES = [
-    { frag: 'ORDINARIOS', lbl: 'Recursos ordinarios (RO)', c: '--f1' },
-    { frag: 'DIRECTAMENTE', lbl: 'Recursos directamente recaudados (RDR)', c: '--f2' },
-    { frag: 'DETERMINADOS', lbl: 'Recursos determinados (canon, regalías)', c: '--f3' },
-    { frag: 'DONACIONES', lbl: 'Donaciones y transferencias', c: '--f4' },
-    { frag: 'OPERACIONES OFICIALES', lbl: 'Operaciones oficiales de crédito', c: '--f5' },
+    { frag: 'ORDINARIOS', lbl: 'Recursos ordinarios (RO)', short: 'RO', c: '--f1' },
+    { frag: 'DIRECTAMENTE', lbl: 'Recursos directamente recaudados (RDR)', short: 'RDR', c: '--f2' },
+    { frag: 'DETERMINADOS', lbl: 'Recursos determinados (canon, regalías)', short: 'Canon (RD)', c: '--f3' },
+    { frag: 'DONACIONES', lbl: 'Donaciones y transferencias', short: 'Donac. y transf.', c: '--f4' },
+    { frag: 'OPERACIONES OFICIALES', lbl: 'Operaciones oficiales de crédito', short: 'Crédito', c: '--f5' },
   ];
 
   // ------------------------------------------------------------------ estado
@@ -1123,6 +1123,137 @@
     }, `Trayectoria anual de ${uName(tUni)}`);
   }
 
+  // ================================================================== ¿CUÁNTO SE EJECUTÓ? (PIM vs devengado por componente)
+  S.ej = { uni: '', dim: 'generica' };
+  const EJ_DIMS = [['generica', 'En qué se gasta'], ['fuente', 'Fuente'], ['programa', 'Programa'], ['proyectos', 'Proyectos']];
+  const PROG_COL = ['--g1', '--g3', '--g5', '--f1', '--f2', '--g2', '--g4'];
+  const shortTxt = (t, n) => { t = String(t || ''); return t.length > n ? t.slice(0, n - 1) + '…' : t; };
+  // Filas {lbl, full, c, pim, dev, saldo, ej} sumando sobre un conjunto de universidades
+  function execRows(pool, y, dim) {
+    const mk = (lbl, c, pim, dev, full) => ({ lbl, full: full || lbl, c, pim, dev, saldo: (num(pim) !== null && num(dev) !== null) ? pim - dev : null, ej: div(dev, pim) });
+    if (dim === 'generica' || dim === 'fuente') {
+      const cats = dim === 'generica' ? GENERICAS : FUENTES;
+      return cats.map(c => mk(isMobile() && c.short ? c.short : c.lbl, c.c, sum(pool.map(u => (pick((A(u, y) || {})[dim], c.frag) || {}).pim)), sum(pool.map(u => (pick((A(u, y) || {})[dim], c.frag) || {}).dev))))
+        .filter(r => num(r.pim) !== null && r.pim > 0);
+    }
+    if (dim === 'programa') {
+      const acc = {};
+      pool.forEach(u => Object.entries((A(u, y) || {}).programa || {}).forEach(([k, v]) => {
+        const o = acc[k] || (acc[k] = { pim: 0, dev: 0 }); o.pim += num(v && v.pim) || 0; o.dev += num(v && v.dev) || 0;
+      }));
+      const keys = Object.keys(acc).sort((a, b) => acc[b].pim - acc[a].pim);
+      const top = keys.slice(0, 6), rest = keys.slice(6);
+      const rows = top.map((k, i) => mk(titleCase(k.replace(/^\d+:\s*/, '')), PROG_COL[i % PROG_COL.length], acc[k].pim, acc[k].dev, k));
+      if (rest.length) rows.push(mk(`Otros ${rest.length} programas`, '--g4', sum(rest.map(k => acc[k].pim)), sum(rest.map(k => acc[k].dev))));
+      return rows.filter(r => r.pim > 0);
+    }
+    // proyectos: los de mayor saldo sin ejecutar
+    const ps = [];
+    pool.forEach(u => ((A(u, y) || {}).proyectos || []).forEach(p => { if (num(p.pim) > 0) ps.push({ u, p }); }));
+    return ps.map(({ u, p }) => mk(`${shortTxt(titleCase(p.nombre || p.codigo || 'Proyecto'), 34)}${pool.length > 1 ? ' · ' + uName(u) : ''}`, '--g5', num(p.pim), num(p.dev) || 0, `${p.nombre || ''} (${p.codigo || 's/c'}, ${uName(u)})`))
+      .sort((a, b) => (b.saldo || 0) - (a.saldo || 0)).slice(0, isMobile() ? 8 : 12);
+  }
+  // Barras: PIM claro con contorno y devengado sólido superpuesto; etiqueta "% · quedan S/ X"
+  function execChart(id, rows, title) {
+    sizeFor(id, rows.length, isMobile() ? 46 : 40, 180);
+    mkChart(id, {
+      type: 'bar',
+      data: { labels: rows.map(r => isMobile() ? shortTxt(r.lbl, 16) : shortTxt(r.lbl, 44)), datasets: [
+        { label: 'PIM (presupuestado)', data: rows.map(r => mill(r.pim)), backgroundColor: rows.map(r => cssVar(r.c) + '33'), borderColor: rows.map(r => cssVar(r.c)), borderWidth: 2, borderRadius: 0, grouped: false, barPercentage: .92, categoryPercentage: .9, order: 2,
+          valueLabel: (v, i) => { const r = rows[i]; return `${fmtP(r.ej, 0)}${num(r.saldo) >= 1e5 ? (isMobile() ? ' · ' : ' · quedan ') + soles(r.saldo) : ''}`; } },
+        { label: 'Devengado (ejecutado)', data: rows.map(r => mill(r.dev)), backgroundColor: rows.map(r => cssVar(r.c)), borderRadius: 0, grouped: false, barPercentage: .5, categoryPercentage: .9, order: 1 },
+      ] },
+      options: {
+        indexAxis: 'y', layout: { padding: { right: isMobile() ? 104 : 170 } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: it => (rows[it[0].dataIndex] || {}).full,
+          label: ctx => `${ctx.dataset.label}: ${soles(ctx.raw * 1e6)}`,
+          afterBody: it => { const r = rows[it[0].dataIndex]; return [`Ejecutado: ${fmtP(r.ej)}`, `Sin gastar: ${soles(r.saldo)}`]; },
+        } } },
+        scales: { x: { beginAtZero: true, ticks: { callback: tickM, maxTicksLimit: isMobile() ? 3 : 6, maxRotation: 0 } }, y: { ticks: { autoSkip: false, font: { weight: 600 } } } },
+      },
+    }, title);
+  }
+  const execLegend = '<ul class="legend"><li><i style="background:transparent;border:2px solid currentColor"></i>Barra clara = presupuestado (PIM)</li><li><i style="background:currentColor"></i>Barra sólida = ejecutado (devengado)</li></ul>';
+  function renderEjecucion() {
+    const el = $('#body-ejecucion'); const y = S.year; const st = S.ej;
+    const u = st.uni ? uniBy(st.uni) : null;
+    const pool = u ? [u] : S.unis.filter(x => A(x, y));
+    const pim = sum(pool.map(x => tot(x, y, 'pim'))), dev = sum(pool.map(x => tot(x, y, 'dev')));
+    const saldo = (num(pim) !== null && num(dev) !== null) ? pim - dev : null;
+    const rows = execRows(pool, y, st.dim);
+    const worst = execRows(pool, y, 'generica').filter(r => r.pim > 0.02 * (pim || 1)).sort((a, b) => (a.ej ?? 1) - (b.ej ?? 1))[0];
+    const who = u ? uName(u) : 'las universidades públicas';
+    el.innerHTML = `
+      ${partialNote(y)}
+      <div class="controls">
+        <label>Año<select id="ej-year">${yearOptions(y)}</select></label>
+        <div class="grow up-host" id="ej-uni"></div>
+      </div>
+      <div class="ej-hero">
+        <p class="big-fig">${esc(soles(saldo))}<span> sin gastar en ${esc(y)}</span></p>
+        <p class="sentence">De ${esc(soles(pim))} presupuestados (PIM), ${esc(who)} ejecutaron ${esc(soles(dev))}: el <strong>${esc(fmtP(div(dev, pim)))}</strong>. Quedaron <strong>${esc(soles(saldo))}</strong> sin gastar.${worst ? ` Lo que peor se ejecuta: <strong>${esc(worst.lbl.toLowerCase())}</strong> (${esc(fmtP(worst.ej))}).` : ''}</p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="controls" style="margin-bottom:6px">${seg('Componente', EJ_DIMS, st.dim)}</div>
+        <h3>Presupuestado vs ejecutado por ${esc((EJ_DIMS.find(d => d[0] === st.dim) || [])[1] || '').toLowerCase()}, ${esc(yearLbl(y))}</h3>
+        <p class="sub">${st.dim === 'proyectos' ? 'Proyectos con mayor saldo sin ejecutar. ' : ''}Millones de soles. ${u ? esc(titleCase(u.nombre || '')) : 'Todas las universidades'}.</p>
+        ${execLegend}
+        <div class="chart"><canvas id="ch-ej"></canvas></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>% de ejecución por año: ¿en qué se ejecuta peor?</h3>
+        <p class="sub">Devengado / PIM de cada genérica de gasto, ${esc(S.years[0])}–${esc(S.years[S.years.length - 1])}. ${u ? esc(uName(u)) : 'Todas las universidades'}.</p>
+        <div class="chart"><canvas id="ch-ej-evo"></canvas></div>
+      </div>
+      <h3 style="margin:20px 0 8px">Universidades por dinero sin gastar, ${esc(yearLbl(y))}</h3>
+      <div id="ej-host"></div>`;
+    $('#ej-year', el).addEventListener('change', e => setYear(e.target.value));
+    uniPicker($('#ej-uni', el), { id: 'ej-uni-in', label: 'Universidad', value: st.uni || '', allLabel: 'Todas las universidades', onSelect: p => { st.uni = p || ''; safeRender('ejecucion'); } });
+    bindSeg(el, v => { st.dim = v; renderEjecucion(); });
+    if (rows.length) execChart('ch-ej', rows, 'Presupuestado frente a ejecutado por componente');
+    else $('#ch-ej', el).parentElement.innerHTML = `<p class="empty">${st.dim === 'proyectos' ? 'Sin detalle de proyectos para esta selección.' : 'Sin datos para esta selección.'}</p>`;
+    // serie anual del % ejecutado por genérica
+    const yrs = S.years.filter(yy => !isPartial(yy));
+    const cats = GENERICAS.filter(c => pool.some(x => yrs.some(yy => pick((A(x, yy) || {}).generica, c.frag))));
+    mkChart('ch-ej-evo', {
+      type: 'line',
+      data: { labels: yrs.map(String), datasets: cats.map(c => {
+        const ser = yrs.map(yy => { const p0 = sum(pool.map(x => (pick((A(x, yy) || {}).generica, c.frag) || {}).pim)), d0 = sum(pool.map(x => (pick((A(x, yy) || {}).generica, c.frag) || {}).dev)); const e = div(d0, p0); return e === null || !(p0 > 0) ? null : +(e * 100).toFixed(1); });
+        return { label: c.lbl, data: ser, borderColor: cssVar(c.c), backgroundColor: cssVar(c.c), borderWidth: c.frag === '2.6' ? 4 : 2, tension: 0, spanGaps: true, pointRadius: 0 };
+      }) },
+      options: { interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: ttP } } }, scales: { y: { min: 0, max: 100, ticks: { callback: tickP } } } },
+    }, 'Porcentaje de ejecución anual por genérica de gasto');
+    // ranking por saldo
+    const rk = S.unis.filter(x => A(x, y)).map(x => {
+      const p = tot(x, y, 'pim'), d = tot(x, y, 'dev'); const g = pick((A(x, y) || {}).generica, '2.6') || {};
+      return { u: x, pim: p, dev: d, saldo: (num(p) !== null && num(d) !== null) ? p - d : null, ej: div(d, p), sinv: (num(g.pim) !== null && num(g.dev) !== null) ? g.pim - g.dev : null, ejinv: div(g.dev, g.pim) };
+    });
+    makeTable($('#ej-host', el), {
+      id: 'ejt', caption: `PIM, devengado y saldo no ejecutado, ${yearLbl(y)}.`, rows: rk, sort: { k: 'saldo', dir: -1 }, limit: 20,
+      mobilePick: ['pim', 'dev', 'saldo', 'sinv', 'ejinv'], mdef: 'saldo',
+      filters: [depFilter(r => r.u, rk), { k: 'ej', lbl: '% de ejecución', opts: [['', 'Todas'], ['bad', 'Menos de 75 %'], ['warn', '75 % a 90 %'], ['good', 'Más de 90 %']], test: (r, v) => semaforo(r.ej) === v }],
+      cols: [
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u) },
+        { k: 'pim', lbl: 'PIM', get: r => r.pim, fmt: fmtM },
+        { k: 'dev', lbl: 'Devengado', get: r => r.dev, fmt: fmtM },
+        { k: 'saldo', lbl: 'Sin gastar', get: r => r.saldo, html: r => `<strong>${esc(fmtM(r.saldo))}</strong>` },
+        { k: 'ej', lbl: '% Ejec.', m: true, get: r => r.ej, html: r => pill(r.ej) },
+        { k: 'sinv', lbl: 'Sin gastar en inversión', get: r => r.sinv, fmt: fmtM },
+        { k: 'ejinv', lbl: '% Ejec. inversión', get: r => r.ejinv, html: r => pill(r.ejinv) },
+      ],
+    });
+  }
+  // Bloque para la ficha
+  function fichaEjHtml(u, y) {
+    const pim = tot(u, y, 'pim'), dev = tot(u, y, 'dev');
+    const saldo = (num(pim) !== null && num(dev) !== null) ? pim - dev : null;
+    return `<div class="card" style="margin-top:12px"><h3>¿Cuánto de lo presupuestado se ejecutó? ${esc(y)}</h3>
+      <p class="sub">PIM ${esc(soles(pim))} · devengado ${esc(soles(dev))} · <strong>quedaron ${esc(soles(saldo))} sin gastar</strong> (${esc(fmtP(div(dev, pim)))} ejecutado). <a href="#ejecucion">Ver más</a></p>
+      ${execLegend}<div class="chart"><canvas id="ch-fi-ej"></canvas></div></div>`;
+  }
+
   // ================================================================== 4/5. Composición (genéricas / fuentes)
   function compBlock(cfg) {
     // cfg: {key, el, cats, field ('generica'|'fuente'), state, title, evoTitle}
@@ -1636,6 +1767,7 @@
         ${!Array.isArray(a.proyectos) ? `<p class="empty">Aún no tenemos el detalle de proyectos de esta universidad. La inversión total (genérica 2.6) sí está: PIM ${esc(fmtM(num((pick(a.generica, '2.6') || {}).pim)))}, devengado ${esc(fmtM(num((pick(a.generica, '2.6') || {}).dev)))}.</p>` : proys.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Avance</th></tr></thead><tbody>${proys.slice().sort((p, q) => (num(q.pim) || 0) - (num(p.pim) || 0)).map(p => `<tr><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pia)))}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td>${pill(div(p.dev, p.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin proyectos de inversión registrados este año.</p>'}
       </div>
 
+      ${fichaEjHtml(u, y)}
       ${fichaVrHtml(u)}
       ${fichaExpHtml(u)}
 
@@ -1696,6 +1828,7 @@
     mkChart('ch-fi-fue', { type: 'bar', data: { labels: yrs.map(yTick), datasets: stackSer('fuente', FUENTES.filter(c => yrs.some(yy => pick((A(u, yy) || {}).fuente, c.frag))), 'pim') }, options: stackOpts }, `Fuentes de financiamiento de ${uName(u)}`);
 
     fichaVrChart(u);
+    { const r = execRows([u], y, 'generica'); if (r.length) execChart('ch-fi-ej', r, `Presupuestado frente a ejecutado de ${uName(u)}`); }
     const pal = ['--c-pim', '--c-dev', '--g3'];
     mkChart('ch-radar', {
       type: 'radar',
@@ -1890,6 +2023,7 @@
     resumen: () => ({ years: [S.lastClosed], soft: true }),
     variacion: () => ({ years: [S.vr.a || vrDefaults().a, S.vr.b || vrDefaults().b], soft: true }),
     trayectoria: () => ({ years: [S.year], soft: true }),
+    ejecucion: () => (S.ej.uni ? { years: [S.year], unis: [S.ej.uni], soft: true } : { years: [S.year].concat(S.years), soft: true }),
     gasto: () => ({ years: [S.year].concat(S.years), soft: true }),
     fuentes: () => ({ years: [S.year].concat(S.years), soft: true }),
     infra: () => ({ years: [S.year] }),
@@ -1906,11 +2040,11 @@
 
   // ================================================================== registro / lazy render
   const SECTIONS = {
-    resumen: renderResumen, variacion: renderVariacion, lineabase: renderLineabase, ranking: renderRanking, trayectoria: renderTrayectoria, expectativa: renderExpectativa, gasto: renderGasto,
+    resumen: renderResumen, variacion: renderVariacion, lineabase: renderLineabase, ranking: renderRanking, trayectoria: renderTrayectoria, ejecucion: renderEjecucion, expectativa: renderExpectativa, gasto: renderGasto,
     fuentes: renderFuentes, infra: renderInfra, idi: renderIdi, ficha: renderFicha, mapa: renderMapa,
     metodologia: renderMetodologia,
   };
-  const YEAR_DEPENDENT = ['ranking', 'trayectoria', 'gasto', 'fuentes', 'infra', 'idi', 'ficha', 'mapa'];
+  const YEAR_DEPENDENT = ['ranking', 'trayectoria', 'ejecucion', 'gasto', 'fuentes', 'infra', 'idi', 'ficha', 'mapa'];
 
   function safeRender(id) {
     const n = layered() && NEEDS[id] ? NEEDS[id]() : {};

@@ -164,6 +164,7 @@
   const WIN = 6;
   const winYears = (Y) => S.closed.filter((y) => y <= Y).slice(-WIN);
   async function prepStory(st, Y) {
+    if (st.need === 'p2027') { if (S.p27 === undefined) S.p27 = await getJSON('data/p2027.json').catch(() => null); return; }
     if (st.need === 'base') return;
     await ensureYear(Y);
     if (st.need === 'years') {
@@ -868,7 +869,7 @@
 
     // 11. Lo que viene en 2027
     {
-      id: 'en-2027', need: 'base', col: 'maiz', sec: 'ley2027', toc: 'Lo que viene en 2027', sk: 'propone el presupuesto 2027',
+      id: 'en-2027', need: 'p2027', col: 'maiz', sec: 'ley2027', toc: 'Lo que viene en 2027', sk: 'propone el presupuesto 2027',
       build() {
         const E = S.d.expectativa_2027;
         if (!E || !E.total_universidades) return { cifra: SD, titulo: 'lo que viene en 2027', html: '<p class="empty">Aún no hay datos del presupuesto 2027.</p>' };
@@ -889,6 +890,26 @@
             return `<li class="${s.fecha ? '' : 'pend'}"><b>${esc(n)}</b><span>${esc(fd)}${s.url && safeUrl(s.url) ? ' / ' + linkTo(s.url, 'ver documento') : ''}</span></li>`;
           }).join('');
         const docs = (E.documentos || []).filter((d) => /proyecto|anexo/.test(d.tipo || '')).slice(0, 3).map((d) => linkTo(d.url, d.titulo)).join('; ');
+        // Obras propuestas para 2027 (data/p2027.json): cuánto es de proyectos nuevos.
+        const obras27 = () => {
+          const P = S.p27; if (!P || !P.resumen || !Array.isArray(P.proyectos)) return '';
+          const R = P.resumen, tot = R.monto_proyectos, nue = R.monto_nuevos;
+          const yrsCon = (pr) => Object.values(pr.historia || {}).filter((x) => x && isNum(x.pim) && x.pim > 0).length;
+          const desde = (pr) => Object.keys(pr.historia || {}).filter((y) => isNum(pr.historia[y].pim) && pr.historia[y].pim > 0).sort()[0];
+          const mine = h ? P.proyectos.filter((pr) => String(pr.pliego) === String(h.pliego)) : [];
+          const top = (mine.length ? mine : P.proyectos).slice().sort((a, b) => b.monto_2027 - a.monto_2027).slice(0, 4);
+          const w = isNum(tot) && tot > 0 ? Math.max(0.4, (nue / tot) * 100) : 0;
+          const card = (pr) => { const n = yrsCon(pr), d0 = desde(pr);
+            return `<li class="obra${h && String(pr.pliego) === String(h.pliego) ? ' es-tu' : ''}"><div class="u">${esc(pr.uni)}${pr.codigo ? ' / CUI ' + esc(pr.codigo) : ''}</div><div class="n">${esc(sentence(pr.nombre))}</div>
+              <div class="f"><span>Propuesto 2027: <strong>${esc(soles(pr.monto_2027))}</strong></span><span>${pr.nuevo ? 'Proyecto nuevo' : `Con presupuesto en ${esc(n)} año${n === 1 ? '' : 's'} desde ${esc(d0 || '')}; gastado hasta hoy ${esc(soles(pr.dev_acumulado))}`}</span></div></li>`; };
+          const mineN = mine.filter((pr) => pr.nuevo);
+          return `<figure class="fig anim"><p class="fig-t">De ${esc(solesF(tot))} en obras propuestas para 2027, solo ${esc(soles(nue))} son proyectos nuevos</p>
+            <p class="fig-s">${esc(R.n_nuevos)} de ${esc(R.n_proyectos)} proyectos de inversión son nuevos; el resto ya venía con presupuesto en años anteriores.</p>
+            <div class="stack" role="img" aria-label="${esc(`Obras propuestas 2027: ${soles(nue)} nuevas y ${solesF(tot - nue)} que ya venían`)}"><i class="pop" style="width:${w.toFixed(2)}%;background:var(--color-dev)"></i><i class="pop" style="--d:.15s;width:${(100 - w).toFixed(2)}%;background:var(--color-pim)"></i></div>
+            <ul class="stack-l"><li><i class="sw" style="background:var(--color-dev)"></i><b>${esc(soles(nue))}</b>nuevas (${esc(R.n_nuevos)})</li><li><i class="sw" style="background:var(--color-pim)"></i><b>${esc(solesF(tot - nue))}</b>ya venían (${esc(R.n_proyectos - R.n_nuevos)})</li></ul>
+            ${h ? (mine.length ? `<p class="tu">Para la <mark>${esc(label(h))}</mark> se proponen ${esc(mine.length)} obra${mine.length > 1 ? 's' : ''} por ${esc(soles(sum(mine.map((pr) => pr.monto_2027))))}; ${mineN.length ? `${esc(mineN.length)} nueva${mineN.length > 1 ? 's' : ''}` : 'ninguna es nueva'}. Las más grandes:</p>` : tuNo(h, 'no tiene obras en el proyecto 2027.')) : '<p class="fig-s">Las obras con más plata propuesta:</p>'}
+            ${top.length ? `<ul class="obras">${top.map(card).join('')}</ul>` : ''}</figure>`;
+        };
         const vpTxt = (v) => (isNum(v) ? pctSigned(v / 100, Math.abs(v) >= 100 ? 0 : 1) : SD);
         return {
           cifra: esc(isNum(vp) ? vpTxt(T.var_pct) : SD),
@@ -898,11 +919,13 @@
             ${he && isNum(he.pia_2027) ? `<div class="tu-card"><p>Para la <mark>${esc(label(h))}</mark>, el proyecto propone</p><p class="big">${esc(soles(he.pia_2027))}</p><p>frente a ${esc(soles(he.pia_2026))} con que arrancó 2026 (${esc(vpTxt(he.var_pct))}).</p></div>` : (h ? tuNo(h, 'no tiene un monto propio en el proyecto 2027; las universidades nuevas se financian desde la reserva de contingencia durante el año.') : '')}
             <figure class="fig anim"><p class="fig-t">¿Cuántas universidades suben o bajan en 2027?</p><p class="fig-s">Presupuesto de apertura 2027 propuesto frente al de 2026, ${esc(items.length)} universidades.</p><div data-fig="hist"></div>
               ${tableHTML(['Universidad', 'PIA 2026', 'PIA 2027 propuesto', 'Variación'], items.slice().sort((a, b) => b.v - a.v).map((i) => ({ key: i.key, cells: [i.ax, soles(i.e.pia_2026), soles(i.e.pia_2027), vpTxt(i.e.var_pct)] })), S.hl)}</figure>
+            ${obras27()}
             <figure class="fig"><p class="fig-t">En qué va el trámite</p><ol class="tramite">${steps}</ol></figure>
             ${caveat([
               'Es el presupuesto de apertura (PIA) propuesto. Durante 2027 cambiará con transferencias y saldos, como cada año (capítulo 1).',
               'Las subidas muy grandes suelen ser de universidades nuevas o con una obra puntual; no implican más plata para el funcionamiento diario.',
               'La versión aprobada por el Pleno mantiene el total del sector público pero movió plata del Gobierno Nacional a regiones y municipios; el monto final de cada universidad puede diferir.',
+              'Una obra «nueva» es la que no registra ejecución en el SIAF entre 2021 y 2026; que una obra ya venga de antes no es malo por sí mismo: muchas duran varios años.',
             ])}<p class="src">Fuente: ${docs || esc(E.norma || 'Proyecto de Ley de Presupuesto 2027')}. Comparación con el PIA 2026 del MEF.</p>`,
           mount(el) { const C = colors(); return [[$('[data-fig="hist"]', el), (b, C = colors()) => histo(b, { bins, color: C.pia, colorNeg: C.ink2, aria: 'Número de universidades por rango de variación del presupuesto 2027 propuesto' })]]; },
         };
@@ -1065,21 +1088,34 @@
     const idx = unis.map((u) => ({ u, s: norm([u.corto, u.nombre, u.ciudad, u.departamento].join(' ')) }));
     let cur = -1, res = [];
     const close = () => { list.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); cur = -1; };
+    // Resalta (sin importar tildes ni mayúsculas) cada término buscado dentro del texto, ya escapado.
+    let terms = [];
+    const hl = (text) => {
+      const t = String(text || ''), n = norm(t);
+      if (!terms.length || n.length !== t.length) return esc(t);
+      const on = new Array(t.length).fill(false);
+      terms.forEach((q) => { let i = n.indexOf(q); while (q && i >= 0) { for (let k = i; k < i + q.length; k++) on[k] = true; i = n.indexOf(q, i + q.length); } });
+      let out = '', open = false;
+      for (let k = 0; k < t.length; k++) { if (on[k] !== open) { out += on[k] ? '<mark>' : '</mark>'; open = on[k]; } out += esc(t[k]); }
+      return out + (open ? '</mark>' : '');
+    };
+    const status = $('#uni-status');
     const paint = () => {
-      list.innerHTML = res.length ? res.map((u, k) => `<li id="opt-${esc(u.pliego)}" role="option" data-p="${esc(u.pliego)}" aria-selected="${k === cur}"><b>${esc(label(u))}</b>${esc(fullName(u))}<small>${esc(titleCase(String(u.ciudad || u.departamento || '')))}</small></li>`).join('')
-        : '<li class="vacio" role="option" aria-disabled="true">No encontramos esa universidad. Prueba con la sigla o la ciudad.</li>';
+      list.innerHTML = res.length ? res.map((u, k) => `<li id="opt-${esc(u.pliego)}" role="option" data-p="${esc(u.pliego)}" aria-selected="${k === cur}"><span class="op-t"><b>${hl(label(u))}</b><span class="op-dep">${hl(titleCase(String(u.departamento || u.ciudad || '')))}</span></span><span class="op-n">${hl(fullName(u))}</span></li>`).join('')
+        : '<li class="vacio" role="option" aria-disabled="true">No encontramos esa universidad. Prueba con la sigla, el nombre o la ciudad.</li>';
       list.hidden = false; inp.setAttribute('aria-expanded', 'true');
-      if (cur >= 0 && res[cur]) inp.setAttribute('aria-activedescendant', 'opt-' + res[cur].pliego);
+      if (cur >= 0 && res[cur]) { inp.setAttribute('aria-activedescendant', 'opt-' + res[cur].pliego); const li = document.getElementById('opt-' + res[cur].pliego); if (li) li.scrollIntoView({ block: 'nearest' }); }
+      if (status) status.textContent = res.length ? `${res.length} universidad${res.length > 1 ? 'es' : ''}. Usa las flechas y Enter para elegir.` : 'Sin resultados.';
     };
     const search = () => {
       const q = norm(inp.value.trim());
       const cur0 = hlUni();
-      if (!q || (cur0 && q === norm(label(cur0)))) res = unis.slice(0, 8);
+      if (!q || (cur0 && q === norm(label(cur0)))) { terms = []; res = unis.slice(); }
       else {
-        const terms = q.split(/\s+/);
+        terms = q.split(/\s+/).filter(Boolean);
         // Orden: sigla que empieza igual, luego nombre que contiene la búsqueda, luego las más grandes (gasto del año).
         const score = (r) => (norm(r.u.corto).startsWith(q) ? 2e12 : 0) + (norm(r.u.nombre).includes(q) ? 1e12 : 0) + (val(r.u.anios && r.u.anios[S.Y] && r.u.anios[S.Y].total, 'dev') || 0);
-        res = idx.filter((r) => terms.every((t) => r.s.includes(t))).sort((a, b) => score(b) - score(a)).slice(0, 8).map((r) => r.u);
+        res = idx.filter((r) => terms.every((t) => r.s.includes(t))).sort((a, b) => score(b) - score(a)).slice(0, 12).map((r) => r.u);
       }
       cur = res.length ? 0 : -1; paint();
     };
@@ -1089,7 +1125,8 @@
       if (e.key === 'ArrowDown') { e.preventDefault(); if (list.hidden) search(); else { cur = Math.min(res.length - 1, cur + 1); paint(); } }
       else if (e.key === 'ArrowUp') { e.preventDefault(); cur = Math.max(0, cur - 1); paint(); }
       else if (e.key === 'Enter') { if (!list.hidden && res[cur]) { e.preventDefault(); selectUni(res[cur].pliego); close(); inp.blur(); } }
-      else if (e.key === 'Escape') close();
+      else if (e.key === 'Escape') { if (list.hidden) { const u = hlUni(); inp.value = u ? label(u) : ''; } close(); }
+      else if (e.key === 'Tab') close();
     });
     list.addEventListener('pointerdown', (e) => { const li = e.target.closest('li[data-p]'); if (!li) return; e.preventDefault(); selectUni(li.dataset.p); close(); inp.blur(); });
     document.addEventListener('pointerdown', (e) => { if (!e.target.closest('#picker')) close(); });
