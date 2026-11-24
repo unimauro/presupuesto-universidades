@@ -742,10 +742,13 @@
     const idx = (k, y) => { const b0 = blVal(k, base, m, real), v = blVal(k, y, m, real); return (num(b0) && num(v) !== null) ? +(v / b0 * 100).toFixed(1) : null; };
     const series = BL_SERIES.filter(sr => !(real && sr.nominalOnly)).filter(sr => yrs.some(y => num(blVal(sr.k, y, m, real)) !== null));
     const chg = k => { const a0 = blVal(k, base, m, real), a1 = blVal(k, yEnd, m, real); return pctChg(a0, a1); };
-    const cu = chg('uni'), ct = chg('total');
+    if (S.lb.m === 'pia') S.lb.m = 'dev';
+    const cu = chg('uni'), ct = chg('total'), ce = chg('edu');
+    const nBase = S.unis.filter(u => num(tot(u, base, m)) !== null).length, nEnd = S.unis.filter(u => num(tot(u, yEnd, m)) !== null).length;
+    const pctOrX = v => v === null ? SD : fmtChg(v).replace(/^\+/, '').replace(/^×(.*)$/, '$1 veces');
     const modo = real ? 'en términos reales' : 'en soles corrientes';
     const frase = (cu === null || ct === null) ? '' :
-      `Entre ${base} y ${yEnd} el presupuesto de las universidades ${cu >= 0 ? 'creció' : 'cayó'} ${fmtChg(Math.abs(cu)).replace(/^[+−]/, '')} ${modo}; el presupuesto público total, ${fmtChg(Math.abs(ct)).replace(/^[+−]/, '')}${ct < 0 ? ' (caída)' : ''}. ` +
+      `Entre ${base} y ${yEnd}, con el ${METRIC_LBL[m].toLowerCase()} ${modo}, el presupuesto de las universidades ${cu >= 0 ? 'creció' : 'cayó'} ${pctOrX(Math.abs(cu))}; el presupuesto público total, ${pctOrX(Math.abs(ct))}${ct < 0 ? ' (caída)' : ''}${ce !== null ? `, y la función Educación, ${pctOrX(Math.abs(ce))}${ce < 0 ? ' (caída)' : ''}` : ''}. ` +
       (Math.abs(cu - ct) < 0.02 ? 'Crecieron a un ritmo similar.' : cu > ct ? 'Las universidades crecieron más que el conjunto del Estado.' : 'Las universidades crecieron menos que el conjunto del Estado.');
     const share = yrs.map(y => div(blVal('uni', y, m, false), blVal('total', y, m, false)));
     const shPbi = yrs.map(y => div(blVal('uni', y, m, false), blVal('pbi', y, m, false)));
@@ -754,7 +757,7 @@
     el.innerHTML = `
       <div class="controls">
         <label>Año base (= 100)<select id="lb-base">${yOpts}</select></label>
-        ${seg('Métrica', [['dev', 'Devengado'], ['pim', 'PIM'], ['pia', 'PIA']], m)}
+        ${seg('Métrica', [['dev', 'Devengado'], ['pim', 'PIM']], m)}
         ${hasIpc() ? `<div class="seg" role="group" aria-label="Moneda"><button type="button" data-v="1" aria-pressed="${real}">Real</button><button type="button" data-v="0" aria-pressed="${!real}">Nominal</button></div>` : ''}
       </div>
       <p class="note">${real ? `<strong>Real</strong>: descontando la inflación (soles de ${esc(ipcBase())}).` : '<strong>Nominal</strong>: soles de cada año; la línea de precios (IPC) muestra cuánto subió el costo de vida.'}</p>
@@ -776,7 +779,13 @@
           <div class="chart"><canvas id="ch-lb-pbi"></canvas></div>
         </div>
       </div>
-      ${bl.fuente || bl.nota ? `<p class="note">${esc([bl.fuente, bl.nota].filter(Boolean).join(' · '))}</p>` : ''}`;
+      <ul class="note lb-notas">
+        ${nEnd !== nBase ? `<li>Entre ${esc(base)} y ${esc(yEnd)} ${nEnd > nBase ? 'se sumaron' : 'salieron'} ${esc(Math.abs(nEnd - nBase))} universidades con presupuesto propio (${esc(nBase)} → ${esc(nEnd)}): parte del crecimiento se explica por universidades nuevas.</li>` : ''}
+        <li>El presupuesto público total suma todos los niveles de gobierno y puede contar dos veces las transferencias entre niveles.</li>
+        <li>El resultado depende del año base y de la métrica: prueba otros años y PIM / devengado.</li>
+        ${(Array.isArray(bl.notas) ? bl.notas : []).map(n => `<li>${esc(n)}</li>`).join('')}
+        ${bl.fuente ? `<li>Fuente: ${esc(bl.fuente)}</li>` : ''}
+      </ul>`;
     $('#lb-base', el).addEventListener('change', e => { S.lb.base = e.target.value; renderLineabase(); });
     bindSeg(el, (v, g) => { const l = g.getAttribute('aria-label'); if (l === 'Métrica') S.lb.m = v; else if (l === 'Moneda') S.lb.real = v === '1'; renderLineabase(); });
     // El devengado del año en curso es parcial: la línea termina en el último año cerrado
@@ -1361,7 +1370,7 @@
         </div>
       </div>`;
     if (disp.length) {
-      const temaDe = d => String(d.tema || 'General').trim() || 'General';
+      const temaDe = d => String(d.tema || 'Otras').trim() || 'Otras';
       const temas = [...new Set(disp.map(temaDe))].sort((a, b) => a.localeCompare(b, LOC));
       S.exp.tema = temas.includes(S.exp.tema) ? S.exp.tema : '';
       const drawDisp = () => {

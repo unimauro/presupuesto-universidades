@@ -634,7 +634,7 @@ def page_index(unis, obs, slugs, by_dep):
     h = head(title, desc, canon, BASE + "assets/og/og.png",
              f'<script type="application/ld+json">{jsonld(ld)}</script>\n').replace("{R}", R).replace("{U}", U)
     secs = []
-    deps = sorted(by_dep, key=lambda d: (d is None, d or ""))
+    deps = sorted(by_dep, key=lambda d: (d is None, slugify(d or "")))
     toc = " · ".join(f'<a href="#{E(slugify(d or "sin-departamento"))}">{E(d or "Sin departamento")}</a>' for d in deps)
     for d in deps:
         li = []

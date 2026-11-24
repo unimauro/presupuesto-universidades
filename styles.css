@@ -584,3 +584,19 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 /* Semáforo para gráficos (barras, mapa): el ámbar usa ají para distinguirse del PIA */
 :root { --sem-good: #0B6B4E; --sem-warn: #F2B705; --sem-bad: #C4122F; }
 :root[data-theme="dark"] { --sem-good: #3FBF8C; --sem-warn: #F7C843; --sem-bad: #FF6B7A; }
+
+/* BRAND v2 §5c — valores finales de historias-v2 */
+:root {
+  --line-strong: #1E1428; --accent-soft: #DCE0F4; --ochre: #F2B705; --ochre-text: #8A3B12;
+  --warn: #A27A00; --good-bg: #D7EBDF; --warn-bg: #F6E9C2; --bad-bg: #F6D6DA;
+  --g6: #6E5B46; --g7: #17637D; --f5: #5E5468;
+}
+:root[data-theme="dark"] {
+  --line-strong: #F2EBDF; --accent-soft: #262A4A; --ochre: #F7C843; --ochre-text: #F7C843;
+  --warn: #E0B341; --good-bg: #163326; --warn-bg: #3A2F12; --bad-bg: #3E1820;
+  --g6: #B79E82; --g7: #4FB3D1; --f5: #B3A8BD;
+}
+/* Contraste AA del texto de la píldora ámbar (el #A27A00 de marca queda en 3.3:1 sobre su fondo) */
+:root:not([data-theme="dark"]) .pill.warn { color: #6B5100; }
+.lb-notas { padding-left: 18px; }
+.lb-notas li { margin: 3px 0; }
