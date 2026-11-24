@@ -106,13 +106,14 @@ def rows(soup):
         if len(parts) < 8:
             continue
         try:
-            pia, pim, comp, _aten, dev, gir, cert = [float(x) for x in parts[-7:]]
+            pia, pim, comp, _aten, dev, gir, cert = [float(x) if x.strip() else 0.0 for x in parts[-7:]]
         except ValueError:
-            continue
+            raise RuntimeError(f"radio no numérico en {lab}: {r.get('value')}")
         # chequeo cruzado PIM radio vs celda (redondeada)
-        nums = [c.replace(",", "") for c in tds if re.match(r"^[\d,]+$", c)]
-        if len(nums) >= 2 and abs(float(nums[1]) - pim) > 1.0:
-            raise RuntimeError(f"PIM radio/celda no cuadra en {lab}: {pim} vs {nums[1]}")
+        i = tds.index(lab)
+        cel = tds[i + 2].replace(",", "") if len(tds) > i + 2 else ""
+        if re.match(r"^\d+(\.\d+)?$", cel) and abs(float(cel) - pim) > 1.0:
+            raise RuntimeError(f"PIM radio/celda no cuadra en {lab}: {pim} vs {cel}")
         out[code.strip()] = {"radio": r.get("value"), "nombre": name.strip(),
                              "pia": pia, "pim": pim, "cert": cert, "comp": comp,
                              "dev": dev, "gir": gir}

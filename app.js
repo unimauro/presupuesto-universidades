@@ -47,8 +47,10 @@
     { frag: '2.1', lbl: 'Personal y obligaciones sociales', c: '--k1' },
     { frag: '2.2', lbl: 'Pensiones y prestaciones', c: '--k2' },
     { frag: '2.3', lbl: 'Bienes y servicios', c: '--k3' },
+    { frag: '2.4', lbl: 'Donaciones y transferencias', c: '--k6' },
     { frag: '2.5', lbl: 'Otros gastos', c: '--k4' },
     { frag: '2.6', lbl: 'Activos no financieros (inversión)', c: '--k5' },
+    { frag: '2.8', lbl: 'Servicio de la deuda', c: '--k7' },
   ];
   const FUENTES = [
     { frag: 'ORDINARIOS', lbl: 'Recursos ordinarios (RO)', c: '--k1' },
@@ -62,7 +64,7 @@
   const S = {
     data: null, sample: false, unis: [], years: [], partial: {}, lastClosed: null, year: null,
     rendered: new Set(), charts: new Map(),
-    rank: { q: '', dep: '', sort: 'pim', dir: -1 },
+    rank: { q: '', dep: '', sort: 'pim', dir: -1, all: false },
     tray: { top: 15, uni: null },
     gasto: { metric: 'dev', uni: '' },
     fuentes: { metric: 'pim', uni: '' },
@@ -85,7 +87,7 @@
     const t = a.total || {};
     const k = Object.assign({}, a.kpi || {});
     const g = f => pick(a.generica, f) || {};
-    const p0137 = pick(a.programa, '0137') || {};
+    const p0137 = idiOf(a);
     const rdr = pick(a.fuente, 'DIRECTAMENTE') || {};
     const ingRdr = pick(a.ingresos && a.ingresos.fuente, 'DIRECTAMENTE') || {};
     const fill = (n, v) => { if (num(k[n]) === null) k[n] = num(v); };
@@ -103,6 +105,13 @@
     fill('idi_por_pub', div(p0137.dev, a.pubs));
     kpiCache.set(key, k);
     return k;
+  }
+  // I+D: PP 0137 si existe en "programa"; si no, kpi.idi_pim / kpi.idi_dev
+  function idiOf(a) {
+    const p = pick(a && a.programa, '0137');
+    if (p) return p;
+    const k = (a && a.kpi) || {};
+    return { pim: num(k.idi_pim), dev: num(k.idi_dev) };
   }
   const tot = (u, y, f) => num(((A(u, y) || {}).total || {})[f]);
 
@@ -188,7 +197,7 @@
     const el = $('#body-resumen');
     const y = S.lastClosed;
     const n = nacional(y);
-    const idiDev = sum(S.unis.map(u => (pick((A(u, y) || {}).programa, '0137') || {}).dev));
+    const idiDev = sum(S.unis.map(u => idiOf(A(u, y)).dev));
     const inv = sum(S.unis.map(u => (pick((A(u, y) || {}).generica, '2.6') || {}).dev));
     const yPrev = S.years[S.years.indexOf(y) - 1];
     const nPrev = yPrev ? nacional(yPrev) : null;
@@ -280,12 +289,13 @@
         </div>
         <div id="rk-partial"></div>
         <div class="table-wrap"><table id="rk-table"><caption id="rk-cap"></caption><thead></thead><tbody></tbody></table></div>
-        <p class="count" id="rk-count"></p>
+        <p class="count"><span id="rk-count"></span> <button type="button" class="btn" id="rk-more" hidden></button></p>
         <p class="note">* Índice de gestión presupuestal: referencial, NO oficial (ver Metodología). Semáforo de ejecución: ≥ 90 % verde, 75–90 % ámbar, &lt; 75 % rojo.</p>`;
       $('#rk-q', el).addEventListener('input', debounce(e => { S.rank.q = e.target.value; drawRankRows(); }));
       $('#rk-dep', el).addEventListener('change', e => { S.rank.dep = e.target.value; drawRankRows(); });
       $('#rk-year', el).addEventListener('change', e => setYear(e.target.value));
       $('#rk-csv', el).addEventListener('click', downloadCsv);
+      $('#rk-more', el).addEventListener('click', () => { S.rank.all = !S.rank.all; drawRankRows(); });
       $('#rk-table thead', el).addEventListener('click', e => {
         const b = e.target.closest('button.sort'); if (!b) return;
         const k = b.dataset.k;
@@ -316,7 +326,12 @@
   }
   function drawRankRows() {
     const el = $('#body-ranking'); const y = S.year;
-    const rows = rankRows();
+    const allRows = rankRows();
+    const LIM = 20;
+    const rows = S.rank.all ? allRows : allRows.slice(0, LIM);
+    const more = $('#rk-more', el);
+    more.hidden = allRows.length <= LIM;
+    more.textContent = S.rank.all ? 'Mostrar solo las primeras ' + LIM : 'Ver las ' + allRows.length;
     $('#rk-partial', el).innerHTML = partialNote(y);
     $('#rk-cap', el).textContent = `Universidades públicas, año ${yearLbl(y)}. Montos en soles.`;
     $('#rk-table thead', el).innerHTML = '<tr><th scope="col" class="sticky-col">#</th>' + RANK_COLS.map((c, i) => {
@@ -331,7 +346,7 @@
         return `<td>${c.html ? c.html(v) : esc(c.f(v))}</td>`;
       }).join('') + '</tr>').join('')
       : `<tr><td colspan="${RANK_COLS.length + 1}" class="txt"><span class="muted">Sin resultados para ese filtro.</span></td></tr>`;
-    $('#rk-count', el).textContent = `${rows.length} de ${S.unis.length} universidades.`;
+    $('#rk-count', el).textContent = `Mostrando ${rows.length} de ${allRows.length} universidades con datos en ${y}.`;
   }
   function downloadCsv() {
     const y = S.year; const rows = rankRows();
@@ -596,7 +611,7 @@
   function renderIdi() {
     const el = $('#body-idi'); const y = S.year;
     const all = unisByPim(y);
-    const pp = (u, yy = y) => pick((A(u, yy) || {}).programa, '0137') || {};
+    const pp = (u, yy = y) => idiOf(A(u, yy));
     const pimT = sum(all.map(u => pp(u).pim)), devT = sum(all.map(u => pp(u).dev));
     const pubsT = sum(all.map(u => (A(u, y) || {}).pubs));
     const devConPubs = sum(all.filter(u => num((A(u, y) || {}).pubs)).map(u => pp(u).dev));
@@ -659,10 +674,13 @@
   }
 
   // ================================================================== 8. FICHA + COMPARADOR
-  const IDX_COMP = [
-    ['ejecucion', 'Ejecución'], ['inversion', 'Inversión'], ['investigacion', 'Investigación'],
-    ['autonomia_rdr', 'Autonomía (RDR)'], ['eficiencia', 'Eficiencia I+D'],
-  ];
+  const IDX_LBL = { ejecucion: 'Ejecución', inversion: 'Inversión', investigacion: 'Investigación', prioridad_idi: 'Prioridad I+D', autonomia_rdr: 'Autonomía (RDR)', eficiencia: 'Eficiencia I+D' };
+  const idxComp = () => {
+    const m = S.data && S.data.indice_metodo;
+    const keys = m && typeof m === 'object' && Object.keys(m).length ? Object.keys(m)
+      : [...new Set(S.unis.flatMap(u => Object.keys((u.indice && u.indice.componentes) || {})))];
+    return (keys.length ? keys : Object.keys(IDX_LBL)).map(k => [k, IDX_LBL[k] || k.replace(/_/g, ' ')]);
+  };
   function renderFicha() {
     const el = $('#body-ficha'); const y = S.year;
     if (!S.ficha.uni || !uniBy(S.ficha.uni)) S.ficha.uni = (unisByPim(S.lastClosed)[0] || S.unis[0] || {}).pliego;
@@ -732,7 +750,7 @@
         <label>Universidad C<select id="fi-c2">${uniOptions(S.ficha.cmp[1] || '', '— ninguna —')}</select></label>
       </div>
       <div class="grid two">
-        <div class="card"><h3>Componentes del índice (0–100)</h3><p class="sub">Referencial, no oficial. Más alto = mejor posición relativa.</p><div class="chart sq"><canvas id="ch-radar"></canvas></div></div>
+        <div class="card"><h3>Componentes del índice (0–100)</h3><p class="sub">Referencial, no oficial. Más alto = mejor posición relativa. Componentes sin dato no se dibujan.${Array.isArray(idx.ventana) && idx.ventana.length ? ` Ventana: ${esc(idx.ventana.join(', '))}.` : ''}${num(idx.cobertura_pesos) !== null ? ` Cobertura de pesos (${esc(uName(u))}): ${esc(fmtP(idx.cobertura_pesos, 0))}.` : ''}</p><div class="chart sq"><canvas id="ch-radar"></canvas></div></div>
         <div class="card"><h3>Indicadores ${esc(yearLbl(y))}</h3>
           <div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Indicador</th>${cmpList.map(x => `<th scope="col">${esc(uName(x))}</th>`).join('')}</tr></thead><tbody>
           ${[['PIM', x => fmtM(tot(x, y, 'pim'))], ['Devengado', x => fmtM(tot(x, y, 'dev'))], ['% Ejecución', x => fmtP(kpi(x, y).ejec)], ['% Personal', x => fmtP(kpi(x, y).pct_personal)], ['% Inversión', x => fmtP(kpi(x, y).pct_inversion)], ['Ejec. inversión', x => fmtP(kpi(x, y).ejec_inversion)], ['% I+D', x => fmtP(kpi(x, y).pct_idi, 2)], ['% RDR', x => fmtP(kpi(x, y).pct_rdr)], ['S/ por estudiante', x => fmtS(kpi(x, y).gasto_por_estudiante)], ['S/ por publicación', x => fmtS(kpi(x, y).idi_por_pub)], ['Índice', x => fmtScore(num(x.indice && x.indice.score))]]
@@ -781,9 +799,9 @@
     const pal = ['--c-pim', '--c-dev', '--k5'];
     mkChart('ch-radar', {
       type: 'radar',
-      data: { labels: IDX_COMP.map(c => c[1]), datasets: cmpList.map((x, i) => {
+      data: { labels: idxComp().map(c => c[1]), datasets: cmpList.map((x, i) => {
         const col = cssVar(pal[i]);
-        return { label: uName(x), data: IDX_COMP.map(c => num(((x.indice || {}).componentes || {})[c[0]])), borderColor: col, backgroundColor: col + '33', pointBackgroundColor: col, borderWidth: 2, spanGaps: true };
+        return { label: uName(x), data: idxComp().map(c => num(((x.indice || {}).componentes || {})[c[0]])), borderColor: col, backgroundColor: col + '33', pointBackgroundColor: col, borderWidth: 2, spanGaps: true };
       }) },
       options: {
         plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${num(ctx.raw) === null ? SD : fmtScore(ctx.raw)}` } } },
@@ -869,12 +887,18 @@
       { nombre: 'MEF — Consulta Amigable (Transparencia Económica)', url: 'https://apps5.mineco.gob.pe/transparencia/Navegador/default.aspx' },
       { nombre: 'MEF — Plataforma de Datos Abiertos', url: 'https://datosabiertos.mef.gob.pe/' },
     ];
-    $('#met-fuentes').innerHTML = fu.map(f => { const u = safeUrl(f.url); return `<li>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(f.nombre || u)}</a>` : esc(f.nombre)}${f.nota ? ` — <span class="muted">${esc(f.nota)}</span>` : ''}</li>`; }).join('');
+    $('#met-fuentes').innerHTML = fu.map(f => { const u = safeUrl(f.url); return `<li>${f.tema ? `<span class="pill na">${esc(f.tema)}</span> ` : ''}${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(f.nombre || u)}</a>` : esc(f.nombre)}${f.nota ? ` — <span class="muted">${esc(f.nota)}</span>` : ''}</li>`; }).join('');
+    const im = d.indice_metodo;
+    if (im && typeof im === 'object' && Object.keys(im).length) {
+      $('#met-indice').innerHTML = `<div class="table-wrap"><table><caption>Componentes y pesos del índice referencial</caption><thead><tr><th class="txt" scope="col">Componente</th><th class="txt" scope="col">Indicador base</th><th scope="col">Peso</th></tr></thead><tbody>${Object.entries(im).map(([k, v]) => `<tr><td class="txt">${esc(IDX_LBL[k] || k)}</td><td class="txt"><code>${esc((v && v.kpi) || '')}</code></td><td>${esc(fmtP(num(v && v.peso), 0))}</td></tr>`).join('')}</tbody></table></div><p class="note">Cada componente se expresa en escala 0–100 según la posición relativa entre universidades. Si un componente no tiene dato, el puntaje se calcula con los pesos disponibles (ver “cobertura” en la ficha).</p>`;
+    }
     if (Array.isArray(d.notas) && d.notas.length) {
       $('#met-notas').insertAdjacentHTML('afterbegin', d.notas.map(n => `<li><strong>${esc(n)}</strong></li>`).join(''));
     }
     // Normativa: data.normativa + transferencias con norma
-    const norm = Array.isArray(d.normativa) ? d.normativa.slice() : [];
+    const norm = [].concat(Array.isArray(d.leyes) ? d.leyes : [], Array.isArray(d.normativa) ? d.normativa : [], Array.isArray(d.documentos) ? d.documentos : [])
+      .filter(n => n && typeof n === 'object')
+      .map(n => Object.assign({}, n, { norma: n.norma || n.nombre || n.numero, titulo: n.titulo || n.sumilla, resumen: n.resumen || n.descripcion || n.nota }));
     const tr = [];
     S.unis.forEach(u => S.years.forEach(y => ((A(u, y) || {}).transferencias || []).forEach(t => tr.push(Object.assign({ u, y }, t)))));
     tr.sort((a, b) => String(b.fecha || b.y).localeCompare(String(a.fecha || a.y)));

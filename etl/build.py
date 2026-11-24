@@ -142,8 +142,15 @@ def main():
             na = nu.get(pl, {}).get("anios", {}).get(y)
             if na:
                 a["ingresos"] = na
-            for k, src in (("estudiantes", "estudiantes"), ("docentes", "docentes"), ("pubs", "pubs")):
-                a[k] = (c.get(src) or {}).get(y)
+            for k in ("estudiantes", "docentes", "pubs"):
+                serie = c.get(k) or {}
+                a[k] = serie.get(y)
+                if a[k] is None and k != "pubs":
+                    # matrícula/docentes (SIRIES) llegan hasta 2023: usar el último año ≤ y con rezago máx. 2
+                    prev = [int(x) for x in serie if serie[x] is not None and int(y) - 2 <= int(x) < int(y)]
+                    if prev:
+                        a[k] = serie[str(max(prev))]
+                        a[f"{k}_anio"] = max(prev)
             if trans.get(pl, {}).get(y):
                 a["transferencias"] = trans[pl][y]
             if canon.get(pl, {}).get(y) is not None:
