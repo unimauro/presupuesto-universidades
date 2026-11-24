@@ -191,13 +191,13 @@ ESTILO = """<style>
 
 def hero_escritorio(serie):
     W, H = 600, 664
-    CIELO = 1000         # cielo extra arriba: el arte se recorta con object-fit: cover desde abajo
+    CIELO = 600          # cielo extra arriba: el arte se recorta con object-fit: cover desde abajo
     cx = 300
     sol_y = 232
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {-CIELO} {W} {H + CIELO}" width="{W}" height="{H + CIELO}" '
          f'preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">', ESTILO]
     # rayos del sol
-    o.append(rayos(cx, sol_y, 48, 1400, MAIZ, ".55"))
+    o.append(rayos(cx, sol_y, 48, 1100, MAIZ, ".55"))
     # sol Inti escalonado
     o.append(disco_escalonado(cx, sol_y, 112, 8, AJI))
     o.append(disco_escalonado(cx, sol_y, 84, 8, ROCOTO))
@@ -227,6 +227,11 @@ def hero_escritorio(serie):
     o.append(tsvg)
     # suelo tinta bajo la escalinata
     o.append(f'<rect x="0" y="622" width="{W}" height="{H - 622}" fill="{TINTA}"/>')
+    # años al pie de la primera y la última columna (texto del sistema: en <img> no cargan fuentes web)
+    cs = CENTROS[1.0]
+    fam = "font-family=\"Archivo, 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif\" font-weight=\"800\" font-size=\"17\" text-anchor=\"middle\""
+    o.append(f'<text x="{f(cs[0][1])}" y="651" fill="{PAPEL}" {fam}>{cs[0][0]}</text>')
+    o.append(f'<text x="{f(cs[-1][1])}" y="651" fill="{AJI}" {fam}>{cs[-1][0]}</text>')
     o.append("</svg>")
     return "\n".join(o)
 

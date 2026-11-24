@@ -13,7 +13,7 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  padding-top: 26px;
+  padding-top: 18px;
   padding-bottom: calc(var(--guarda-h) + 4px);   /* sitio para la guarda */
   overflow: hidden;
 }
@@ -21,7 +21,7 @@
 .hero-v3 .hero-txt { max-width: 720px; padding-bottom: 18px; min-width: 0; }
 
 /* ---------- Protagonista: presupuesto 2027 ---------- */
-.hero-v3 .h27 { position: relative; margin: 4px 0 30px; max-width: 640px; }
+.hero-v3 .h27 { position: relative; margin: 4px 0 26px; max-width: 640px; }
 /* Sello "dictamen, pendiente de publicación" (lo rellena app.js según la versión) */
 .hero-v3 .h27-sello {
   position: absolute; bottom: -16px; right: 14px; z-index: 1;   /* abajo a la derecha, junto al botón */
@@ -37,7 +37,8 @@
 /* móvil: bloque 2027 más compacto para que el buscador entre en la primera pantalla */
 .hero-v3 .h27 { padding: 14px 14px 16px; }
 .hero-v3 .h27-k { letter-spacing: .12em; }
-.hero-v3 .h27-count { margin-top: 8px; font-size: 15px; }
+.hero-v3 .h27-count { margin-top: 8px; font-size: 14.5px; }
+.hero-v3 .h27-btn { min-height: 40px; }
 .hero-v3 .h27-fine { font-size: 12.5px; line-height: 1.4; margin: 6px 0 12px; }
 
 /* ---------- Título del sitio: secundario ---------- */
@@ -74,14 +75,13 @@
   user-select: none;
 }
 .hero-v3 .hero-arte img { display: block; width: 100%; height: auto; aspect-ratio: 375 / 150; }
-.hero-v3 .ha-y { display: none; }
 
 @media (min-width: 1024px) {
   .hero.hero-v3 {
     --arte-w: clamp(340px, 36vw, 640px);
     display: grid; align-content: center;
     /* alto mínimo = cielo (~240 px) + parte dibujada del arte (520/600 del ancho) + guarda */
-    min-height: calc(264px + .907 * var(--arte-w));
+    min-height: calc(264px + .907 * var(--arte-w));   /* con paneles muy altos el SVG pasa a ajustarse por alto y recorta los lados */
     padding-top: 40px;
     padding-right: calc(var(--arte-w) + clamp(24px, 3vw, 48px));
   }
@@ -103,13 +103,4 @@
   .hero-v3 .hero-arte picture, .hero-v3 .hero-arte img { display: block; width: 100%; height: 100%; }
   .hero-v3 .hero-arte img { aspect-ratio: auto; object-fit: cover; object-position: 50% 100%; }
 
-  /* Años al pie de las columnas, sobre el suelo de tinta del SVG (viewBox 600 de ancho: 1 unidad = 1/6 cqw).
-     Centros de columna: 2012 x=148, 2027 x=452 (ver salida de generar_hero.py). */
-  .hero-v3 .ha-y {
-    display: block; position: absolute; bottom: 1.2cqw; transform: translateX(-50%);
-    font: 800 clamp(11px, 2.6cqw, 15px)/1 var(--font-cifras); font-variant-numeric: tabular-nums;
-    color: #F4EEE2; white-space: nowrap;
-  }
-  .hero-v3 .ha-y-ini { left: calc(148 / 6 * 1cqw); }
-  .hero-v3 .ha-y-fin { left: calc(452 / 6 * 1cqw); color: #F2B705; }
 }

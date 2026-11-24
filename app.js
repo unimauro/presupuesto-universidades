@@ -1854,6 +1854,8 @@
     box.hidden = false;
     const upDown = st.d > 0 ? 'up' : st.d < 0 ? 'down' : '';
     box.className = 'h27 ' + upDown;
+    const sello = $('#h27-sello', box), ver = String(st.x.version || '').toLowerCase();
+    if (sello) { sello.textContent = ver === 'ley' ? '' : `${(EXP_VERSION[ver] || [st.x.version || 'Proyecto'])[0]} · pendiente de publicación`; sello.hidden = ver === 'ley'; }
     $('.h27-arrow', box).textContent = st.d > 0 ? '▲' : st.d < 0 ? '▼' : '＝';
     $('#h27-total').textContent = soles(st.p27);
     $('#h27-delta').textContent = `${st.d >= 0 ? '+' : '−'}${soles(Math.abs(st.d))} (${fmtChg(st.v)}) frente al PIA 2026`;
@@ -2481,11 +2483,6 @@
     const nU = S.unis.filter(u => num(tot(u, y, 'pim')) !== null).length;
     if (num(n.pim) === null) return;
     $('#hero-finding').innerHTML = `En ${esc(y)}, las ${esc(nU)} universidades públicas con presupuesto propio tuvieron <strong>${esc(fmtM(n.pim))}</strong> (PIM); gastaron el <strong>${esc(fmtP(ej))}</strong>${per !== null ? `, y <strong>${esc(Math.round(per * 100))} céntimos</strong> de cada sol gastado fueron a planilla de personal` : ''}.`;
-    // Hero v3: cifras colgadas del arte (assets/hero/)
-    const hc = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-    hc('hc-anio', y); hc('hc-pim', fmtM(n.pim)); hc('hc-ej', fmtP(ej));
-    if (per !== null) hc('hc-per', `${Math.round(per * 100)} céntimos`);
-    const tPer = document.querySelector('.hc-per'); if (tPer) tPer.hidden = per === null;
   }
   function setupHeroSearch() {
     const f = $('#hero-search');
