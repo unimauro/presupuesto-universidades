@@ -752,3 +752,6 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 
 .h27-matiz .mz-short { display: none; }
 @media (max-width: 639px) { .h27-matiz .mz-long { display: none; } .h27-matiz .mz-short { display: inline; } }
+
+/* Móvil: la fuente y el matiz largo quedan en la sección 2027; el sello indica la versión */
+@media (max-width: 639px) { .hero .h27-fine { display: none; } }

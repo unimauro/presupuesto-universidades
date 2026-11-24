@@ -1,7 +1,7 @@
 {
  "patron": "u/<slug>/  (slug = nombre oficial sin tildes, minúsculas, guiones; estable)",
  "base": "https://unimauro.github.io/presupuesto-universidades/",
- "generado": "2026-11-24T00:19:30",
+ "generado": "2026-11-24T03:41:38",
  "slugs": {
   "510": "universidad-nacional-mayor-de-san-marcos",
   "511": "universidad-nacional-de-san-antonio-abad-del-cusco",

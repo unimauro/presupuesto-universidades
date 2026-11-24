@@ -212,7 +212,8 @@
     const w = cw(text, 7.9) + 12;
     const [tx, anchor] = placeLabel(x, w, W);
     const rx = anchor === 'start' ? tx : anchor === 'end' ? tx - w : tx - w / 2;
-    return `<rect class="tu-bg" x="${rx.toFixed(1)}" y="${y - 15}" width="${w.toFixed(1)}" height="21" rx="2"/><text class="t-tu" x="${(rx + w / 2).toFixed(1)}" y="${y}" text-anchor="middle">${esc(text)}</text>`;
+    const C = colors();
+    return `<rect class="tu-bg" fill="${C.tu}" x="${rx.toFixed(1)}" y="${y - 15}" width="${w.toFixed(1)}" height="21" rx="2"/><text class="t-tu" fill="#1E1428" stroke="none" x="${(rx + w / 2).toFixed(1)}" y="${y}" text-anchor="middle">${esc(text)}</text>`;
   }
   const tableHTML = (head, rows, tuKey) => `<details class="datos"><summary>Ver los datos en tabla</summary><div class="tabla"><table><thead><tr>${head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr${r.key && r.key === tuKey ? ' class="es-tu"' : ''}>${r.cells.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
 
@@ -288,7 +289,7 @@
     const items = o.items;
     const n = items.length; if (!n) { box.innerHTML = '<p class="empty">Sin datos suficientes.</p>'; return; }
     const C = colors();
-    const labH = 50, plotH = W < 520 ? 190 : 260, base = labH + plotH, H = base + 30;
+    const labH = 50, plotH = S.cardH ? Math.max(100, Math.min(300, S.cardH - 100)) : (W < 520 ? 190 : 260), base = labH + plotH, H = base + 30;
     const max = Math.max(...items.map((i) => i.v));
     const bw = W / n, gap = bw > 6 ? 2 : 1;
     let g = '';
@@ -334,7 +335,7 @@
       const y = k * rowH + 4;
       if (r.sep) { g += `<line class="grid" x1="${labW}" x2="${W}" y1="${y + rowH / 2}" y2="${y + rowH / 2}" stroke-dasharray="2 4"/><text x="0" y="${y + 21}">⋯</text>`; return; }
       const isTu = !!S.hl && r.key === S.hl, xv = x(r.v), bx = Math.min(x0, xv), bwid = Math.max(1, Math.abs(xv - x0));
-      if (isTu) g += `<rect class="tu-bg" x="0" y="${y + 4}" width="${Math.min(labW - 6, cw(r.ax, 7.9) + 10)}" height="${rowH - 8}" rx="2"/>`;
+      if (isTu) g += `<rect class="tu-bg" fill="${C.tu}" x="0" y="${y + 4}" width="${Math.min(labW - 6, cw(r.ax, 7.9) + 10)}" height="${rowH - 8}" rx="2"/>`;
       g += `<text ${isTu ? 'class="t-tu" ' : r.key && r.key === o.hiKey ? 'class="t-ink" ' : ''}x="${isTu ? 5 : 0}" y="${y + 21}">${esc(r.ax)}</text>`;
       g += `<rect class="growx" style="--d:${(k * 0.04).toFixed(2)}s;${r.v < 0 ? 'transform-origin:right center' : ''}" x="${bx.toFixed(1)}" y="${y + 6}" width="${bwid.toFixed(1)}" height="${rowH - 12}" fill="${isTu ? C.tu : r.color ? r.color : r.key && r.key === o.hiKey ? o.hiColor : (r.v < 0 ? o.colorNeg || o.color : o.color)}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''} data-tip="${esc(r.full + ': ' + o.fmt(r.v))}"/>`;
       g += r.v < 0 ? `<text class="t-ink" x="${xv - 5}" y="${y + 21}" text-anchor="end">${esc(o.fmt(r.v))}</text>` : `<text class="t-ink" x="${xv + 5}" y="${y + 21}">${esc(o.fmt(r.v))}</text>`;
@@ -348,7 +349,7 @@
     const W = Math.max(280, Math.round(box.clientWidth || 340));
     const C = colors();
     const small = W < 520;
-    const H = small ? 280 : 340, mT = 48, mB = 48, mL = 6, mR = 8;
+    const H = S.cardH ? Math.max(200, Math.min(360, S.cardH - 40)) : (small ? 280 : 340), mT = 48, mB = 48, mL = 6, mR = 8;
     const yrs = o.years; const all = o.series.flatMap((s) => s.vals).filter(isNum);
     const ymax = Math.max(...all) * 1.08;
     const x = (i) => mL + (i / ((yrs.length - 1) || 1)) * (W - mL - mR);
@@ -1020,7 +1021,7 @@
   ];
 
   // ---------- render ----------
-  let io = null, animIO = null, gen = 0;
+  let io = null, animIO = null, gen = 0, spy = null;
   const portada = (i, inner) => `<header class="portada"><div class="portada-in"><p class="cap-n">Capítulo ${i + 1}</p>${inner}</div></header>`;
   function render() {
     gen += 1;
@@ -1045,6 +1046,8 @@
         '<div class="cuerpo"><div class="skel" role="status" aria-label="Cargando"></div></div>';
       host.appendChild(sec);
     });
+    const sc = $('#side-caps');
+    if (sc) sc.innerHTML = STORIES.map((st, i) => { const [c, on] = PAL[st.col]; return `<li><a href="#${esc(st.id)}" style="--c:${c};--on:${on}"><i>${i + 1}</i><span>${esc(st.toc)}</span></a></li>`; }).join('');
     $('#toc').innerHTML = STORIES.map((st, i) => { const [c, on] = PAL[st.col]; return `<li><a href="#${esc(st.id)}" style="--c:${c};--on:${on}"><b>${i + 1}</b><span>${esc(st.toc)}</span></a></li>`; }).join('');
     syncURL();
     heroText();
@@ -1058,6 +1061,16 @@
       return sec._p;
     };
     const secs = [...host.querySelectorAll('.cap')];
+    // Scrollspy: resalta en la barra lateral el capítulo que se está leyendo.
+    if (spy) spy.disconnect();
+    if ('IntersectionObserver' in window && sc) {
+      spy = new IntersectionObserver((ents) => ents.forEach((e) => {
+        if (!e.isIntersecting) return;
+        sc.querySelectorAll('a').forEach((a) => { if (a.getAttribute('href') === '#' + e.target.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+      }), { rootMargin: '-35% 0px -60% 0px' });
+      secs.forEach((x) => spy.observe(x));
+    }
+    S.loadAll = () => Promise.all(secs.map(go));
     // Saltar a un capítulo (índice, franja 2027, #hash): se cargan antes todos los capítulos previos
     // para que el alto de la página no cambie durante el salto y se llegue al lugar correcto.
     S.goTo = (id) => {
@@ -1084,9 +1097,10 @@
     const partialNote = isPartial() && !['real', 'vs-estado', 'en-2027'].includes(st.id)
       ? `<p class="parcial">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): lo gastado aún es parcial y no se compara con años cerrados.</p>` : '';
     sec.innerHTML = portada(i, `<h2 id="h-${esc(st.id)}"><span class="cifra">${out.cifra}</span><span class="cap-t">${out.titulo}</span></h2>`) +
-      `<div class="cuerpo">${partialNote}${out.html}${st.sec ? `<p class="ver"><a href="index.html#${esc(st.sec)}">Verlo a fondo en el observatorio</a></p>` : ''}</div>`;
+      `<div class="cuerpo">${partialNote}${out.html}${dlHTML(st)}${st.sec ? `<p class="ver"><a href="index.html#${esc(st.sec)}">Verlo a fondo en el observatorio</a></p>` : ''}</div>`;
     sec.classList.remove('is-loading');
     sec.removeAttribute('aria-busy');
+    setupDl(sec, st, i, out);
     sec.style.minHeight = '';
     if (out.mount) {
       try {
@@ -1095,6 +1109,154 @@
       } catch (e) { console.error(e); }
     }
     sec.querySelectorAll('.anim').forEach((f) => { if (reduced || !animIO) f.classList.add('in'); else animIO.observe(f); });
+  }
+
+  // ---------- descargar imagen / PDF de un capítulo ----------
+  const canShareFiles = () => { try { return !!(navigator.canShare && navigator.share && navigator.canShare({ files: [new File(['x'], 'x.png', { type: 'image/png' })] })); } catch (e) { return false; } };
+  function dlHTML(st) {
+    const n = 'dl-' + st.id;
+    return `<details class="dl"><summary>Descargar o compartir este capítulo</summary><div class="dl-body">
+      <fieldset><legend>Formato de la imagen</legend><label><input type="radio" name="${n}-f" value="v" checked> Vertical 1080×1350</label><label><input type="radio" name="${n}-f" value="c"> Cuadrada 1080×1080</label></fieldset>
+      <div class="dl-btns"><button type="button" data-dl="png">Descargar PNG</button><button type="button" class="sec" data-dl="jpg">Descargar JPG</button>${canShareFiles() ? '<button type="button" class="sec" data-dl="share">Compartir imagen</button>' : ''}<button type="button" class="sec" data-dl="pdf">PDF de este capítulo</button></div>
+      <p class="dl-msg" role="status" aria-live="polite"></p></div></details>`;
+  }
+  let libP = null;
+  function loadLib() {
+    if (window.htmlToImage) return Promise.resolve(window.htmlToImage);
+    if (!libP) libP = new Promise((res, rej) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js';
+      sc.async = true; sc.crossOrigin = 'anonymous';
+      sc.onload = () => (window.htmlToImage ? res(window.htmlToImage) : rej(new Error('lib')));
+      sc.onerror = () => { libP = null; rej(new Error('No se pudo cargar el generador de imágenes.')); };
+      document.head.appendChild(sc);
+    });
+    return libP;
+  }
+  // Fuentes para la imagen: html-to-image no puede leer la hoja de Google Fonts (otro origen), así que se arma aquí
+  // el CSS con las fuentes latinas incrustadas (una sola vez por visita).
+  let fontCssP = null;
+  function fontCSS() {
+    if (fontCssP) return fontCssP;
+    const toData = (url) => fetch(url).then((r) => r.blob()).then((b) => new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(b); }));
+    const link = document.querySelector('link[href*="fonts.googleapis.com/css2"]');
+    fontCssP = (link ? fetch(link.href).then((r) => r.text()) : Promise.resolve(''))
+      .then(async (css) => {
+        const blocks = (css.match(/@font-face\s*{[^}]*}/g) || []).filter((b) => /U\+0000-00FF/.test(b));
+        blocks.push('@font-face{font-family:"Cifras Texto";src:url(https://fonts.gstatic.com/s/archivo/v25/k3kQo8UDI-1M0wlSfdnoLmvDIaI.woff2) format("woff2");font-weight:100 900;font-stretch:62% 125%;unicode-range:U+0030-0039}');
+        const out = await Promise.all(blocks.map(async (b) => {
+          const m = /url\((https:[^)]+)\)/.exec(b); if (!m || !safeUrl(m[1])) return '';
+          try { return b.replace(m[1], await toData(m[1])); } catch (e) { return ''; }
+        }));
+        return out.join('\n');
+      }).catch(() => '');
+    return fontCssP;
+  }
+  // Arma la tarjeta 540×675 (vertical) o 540×540 (cuadrada); se exporta a 2x → 1080×1350 / 1080×1080.
+  function buildCard(sec, st, i, fmt) {
+    const [c, on] = PAL[st.col];
+    const card = document.createElement('div');
+    card.className = 'card-sh';
+    card.style.setProperty('--c', c); card.style.setProperty('--on', on);
+    card.style.height = (fmt === 'c' ? 540 : 675) + 'px';
+    const cifra = sec.querySelector('.portada .cifra'), tit = sec.querySelector('.portada .cap-t');
+    const tuEl = sec.querySelector('.cuerpo .tu, .cuerpo .tu-card');
+    const srcEl = sec.querySelector('.cuerpo .src');
+    const tuTxt = tuEl ? tuEl.textContent.replace(/\s+/g, ' ').trim() : '';
+    const short = (t, n) => (t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : t);
+    card.innerHTML = `<div class="cs-top"><p class="cs-n">Capítulo ${i + 1}</p><p class="cs-cifra">${cifra ? cifra.innerHTML : ''}</p><p class="cs-t">${tit ? esc(tit.textContent) : ''}</p></div>
+      <div class="cs-mid">${tuTxt ? `<p class="cs-tu"><mark>${esc(short(tuTxt, fmt === 'c' ? 120 : 190))}</mark></p>` : ''}<div class="cs-viz"><div class="cs-in"></div></div>
+      ${srcEl ? `<p class="cs-src">${esc(short(srcEl.textContent.replace(/\s+/g, ' ').trim(), 150))}</p>` : ''}</div>
+      <div class="cs-foot"><img src="assets/brand/logo-mark.svg" alt=""><div><b>Radiografía Presupuestal</b><span>unimauro.github.io/presupuesto-universidades/historias.html${S.hl ? '?u=' + encodeURIComponent(S.hl) : ''}</span></div></div>`;
+    document.body.appendChild(card);
+    const inner = card.querySelector('.cs-in');
+    inner.style.width = (540 - 48) + 'px';
+    // Visual principal: el primer gráfico SVG del capítulo (se vuelve a dibujar a este ancho); si no hay, se clona la primera figura.
+    S.cardH = card.querySelector('.cs-viz').clientHeight;
+    const m = S.mounts.find((x) => sec.contains(x.box));
+    if (m) {
+      const fig = m.box.closest('.fig');
+      const t = fig && fig.querySelector('.fig-t');
+      if (t) { const pt = document.createElement('p'); pt.className = 'fig-t cs-figt'; pt.textContent = t.textContent; inner.appendChild(pt); }
+      const wrap = document.createElement('div'); wrap.className = 'fig'; inner.appendChild(wrap);
+      const box = document.createElement('div'); wrap.appendChild(box);
+      try { m.fn(box); } catch (e) { console.error(e); }
+    } else {
+      const fig = sec.querySelector('.cuerpo .fig');
+      if (fig) { const cl = fig.cloneNode(true); cl.classList.add('in'); const st2 = cl.querySelector('.steps-tu'); if (st2) { [...cl.children].forEach((ch) => { if (ch !== st2) ch.remove(); }); st2.classList.remove('steps-tu'); } cl.querySelectorAll('[hidden]').forEach((x) => x.remove()); const ob = cl.querySelectorAll('.obra'); ob.forEach((x, k) => { if (k >= 3) x.remove(); }); inner.appendChild(cl); }
+    }
+    inner.classList.add('anim', 'in');
+    // Encaja el visual en el espacio libre.
+    // Encaja el visual: se ensancha el lienzo (y se redibuja el SVG a ese ancho) y se reduce con scale(),
+    // hasta un mínimo legible; si aún no cabe, se corta con un degradado y una nota.
+    const viz = card.querySelector('.cs-viz');
+    const avail = viz.clientHeight, W0 = 540 - 48, MIN = 0.55;
+    let k = 1;
+    for (let it = 0; it < 5; it++) {
+      inner.style.width = (W0 / k) + 'px';
+      if (m) { const box = inner.querySelector('.fig > div'); if (box) { try { m.fn(box); } catch (e) { /* */ } } }
+      const need = inner.scrollHeight;
+      if (need * k <= avail + 1 || k <= MIN) break;
+      k = Math.max(MIN, Math.min(k * 0.97, (avail / need) * 0.99));
+    }
+    S.cardH = 0;
+    if (k < 1) inner.style.transform = `scale(${k})`;
+    if (inner.scrollHeight * k > avail + 2) {
+      const fade = document.createElement('div'); fade.className = 'cs-fade'; fade.textContent = 'Gráfico completo en el sitio';
+      viz.appendChild(fade);
+    }
+    return card;
+  }
+  function saveBlob(blob, name) {
+    const a = document.createElement('a'); const url = URL.createObjectURL(blob);
+    a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+  }
+  async function exportCard(sec, st, i, fmt, kind) {
+    const [lib, fcss] = await Promise.all([loadLib(), fontCSS()]);
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const card = buildCard(sec, st, i, fmt);
+    try {
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-papel').trim() || '#F4EEE2';
+      const opts = { pixelRatio: 2, backgroundColor: bg, cacheBust: false, fontEmbedCSS: fcss || ' ', width: 540, height: card.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
+      const type = kind === 'jpg' ? 'image/jpeg' : 'image/png';
+      const blob = kind === 'jpg'
+        ? await (await fetch(await lib.toJpeg(card, { ...opts, quality: 0.92 }))).blob()
+        : await lib.toBlob(card, opts);
+      const name = `radiografia-presupuestal-cap${i + 1}-${st.id}${S.hl ? '-' + (hlUni() ? axisLabel(hlUni(), 20).replace(/[^A-Za-z0-9-]+/g, '') : S.hl) : ''}-${fmt === 'c' ? '1080x1080' : '1080x1350'}.${kind === 'jpg' ? 'jpg' : 'png'}`;
+      return { blob: new Blob([blob], { type }), name };
+    } finally { card.remove(); }
+  }
+  function printNow(sec) {
+    const opened = [...document.querySelectorAll('details.nodice:not([open])')];
+    opened.forEach((d) => { d.open = true; });
+    if (sec) { document.body.classList.add('print-solo'); sec.classList.add('print-this'); }
+    document.querySelectorAll('.anim').forEach((f) => f.classList.add('in'));
+    const done = () => { opened.forEach((d) => { d.open = false; }); document.body.classList.remove('print-solo'); if (sec) sec.classList.remove('print-this'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    setTimeout(() => window.print(), 60);
+  }
+  function setupDl(sec, st, i) {
+    const box = sec.querySelector('.dl'); if (!box) return;
+    const msg = box.querySelector('.dl-msg');
+    box.querySelectorAll('[data-dl]').forEach((b) => b.addEventListener('click', async () => {
+      const kind = b.dataset.dl;
+      if (kind === 'pdf') { printNow(sec); return; }
+      const fmt = (box.querySelector('input[type=radio]:checked') || {}).value || 'v';
+      const all = box.querySelectorAll('[data-dl]'); all.forEach((x) => { x.disabled = true; });
+      msg.textContent = 'Generando la imagen…';
+      try {
+        const { blob, name } = await exportCard(sec, st, i, fmt, kind === 'jpg' ? 'jpg' : 'png');
+        if (kind === 'share') {
+          const file = new File([blob], name, { type: blob.type });
+          await navigator.share({ files: [file], title: document.title, text: shareText() + ' ' + shareURL() });
+          msg.textContent = 'Listo.';
+        } else { saveBlob(blob, name); msg.textContent = `Imagen descargada: ${name}`; }
+      } catch (e) {
+        if (e && e.name === 'AbortError') msg.textContent = '';
+        else { console.error(e); msg.textContent = 'No se pudo generar la imagen. Prueba de nuevo o usa «PDF de este capítulo».'; }
+      } finally { all.forEach((x) => { x.disabled = false; }); }
+    }));
   }
 
   // ---------- hero, buscador y compartir ----------
@@ -1243,6 +1405,8 @@
       const url = shareURL();
       try { await navigator.clipboard.writeText(url); ok.textContent = 'Link copiado. Pégalo en tu grupo.'; } catch (e) { ok.textContent = url; }
     });
+    const pb = $('#sh-pdf');
+    if (pb) pb.addEventListener('click', () => { pb.disabled = true; ok.textContent = 'Preparando los 12 capítulos para el PDF…'; (S.loadAll ? S.loadAll() : Promise.resolve()).then(() => { pb.disabled = false; ok.textContent = 'En la ventana de impresión elige «Guardar como PDF».'; printNow(null); }); });
     const nb = $('#sh-native');
     if (navigator.share) {
       nb.hidden = false;

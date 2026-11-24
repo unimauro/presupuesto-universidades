@@ -234,7 +234,7 @@ def main():
     if l27:
         obs["expectativa_2027"] = {k: l27.get(k) for k in
                                    ("version", "norma", "fecha", "url", "estado_tramite", "documentos", "notas",
-                                    "total_universidades", "disposiciones")}
+                                    "total_universidades", "disposiciones", "en_otros_pliegos")}
     if l27.get("universidades"):
         p2027(l27, unis)
     bl = load("baseline", "baseline.json")

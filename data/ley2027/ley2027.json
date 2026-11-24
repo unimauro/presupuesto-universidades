@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-24T05:53:44+00:00",
+ "generado": "2026-11-24T05:57:48+00:00",
  "version": "dictamen",
  "norma": "Dictamen de la Comisión Bicameral de Presupuesto recaído en la Proposición Legislativa N° 00002-2026-2031-CR (Ley de Presupuesto del Sector Público para el Año Fiscal 2027)",
  "fecha": "2026-11-05",
@@ -78,7 +78,8 @@
   "Las universidades creadas recientemente sin pliego propio en el proyecto no tienen PIA 2027; el art. 87 prevé financiarlas desde la Reserva de Contingencia durante el año (monto no especificado en la ley).",
   "Disposiciones: lista de las que afectan el gasto de las universidades (alcance='especifica' si las nombra; 'general' si rige para entidades del Gobierno nacional y alcanza a universidades por el art. 3). Numeración y citas del texto sustitutorio del dictamen (coincide con el proyecto en los artículos revisados); la autógrafa/ley final podría renumerar. El Anexo I (tope de CAS por pliego) no se pudo descargar.",
   "Universidades sin PIA 2027 en el Anexo 4: 578, 579, 582, 583",
-  "Chequeos OK: Anexo 4 (suma de fuentes = total por fila), Anexo 5 = Anexo 4 por pliego, genéricas y proyectos cuadran."
+  "Chequeos OK: Anexo 4 (suma de fuentes = total por fila), Anexo 5 = Anexo 4 por pliego, genéricas y proyectos cuadran.",
+  "en_otros_pliegos: proyectos/actividades del Anexo 5 en pliegos no universitarios (MINEDU, CONCYTEC, etc.) cuyo nombre o CUI apunta a una universidad (match: nombre, sigla, cui; 'dudoso' sin beneficiario único). NO forman parte del PIA de la universidad (los ejecuta otro pliego); se reportan aparte en monto_en_otros_pliegos. Solo Gobierno Nacional: no incluye proyectos de gobiernos regionales/locales (Anexos 6–7)."
  ],
  "total_universidades": {
   "n_pliegos_2027": 67,
@@ -113,7 +114,10 @@
   "total_sector_publico_2027": 266506316735,
   "peso_en_total_pct": 2.834,
   "total_sector_publico_pia_2026_millones": 257562,
-  "referencias_em": "Exposición de motivos: PP 0066 S/ 4 222 M en total (incluye MINEDU y 1 GR); S/ 3 511 M remuneraciones de 67 universidades; S/ 260 M pensiones de 54; S/ 1 201 M gastos operativos de 67; S/ 1 967 M inversiones y otros activos."
+  "referencias_em": "Exposición de motivos: PP 0066 S/ 4 222 M en total (incluye MINEDU y 1 GR); S/ 3 511 M remuneraciones de 67 universidades; S/ 260 M pensiones de 54; S/ 1 201 M gastos operativos de 67; S/ 1 967 M inversiones y otros activos.",
+  "en_otros_pliegos_asignado": 143977046,
+  "en_otros_pliegos_dudoso": 20399032,
+  "pia_2027_mas_otros_pliegos": 7695755680
  },
  "universidades": {
   "510": {
@@ -367,7 +371,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 405464491
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 2340481
   },
   "511": {
    "nombre": "U.N. DE SAN ANTONIO ABAD DEL CUSCO",
@@ -611,7 +616,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 188411144
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "512": {
    "nombre": "U.N. DE TRUJILLO",
@@ -768,7 +774,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 190850613
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 40931698
   },
   "513": {
    "nombre": "U.N. DE SAN AGUSTIN",
@@ -1061,7 +1068,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 198940900
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "514": {
    "nombre": "U.N. DE INGENIERIA",
@@ -1348,7 +1356,8 @@
     "0068 REDUCCION DE VULNERABILIDAD Y ATENCION DE EMERGENCIAS POR DESASTRES": 1340606,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 332400
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 12716162
   },
   "515": {
    "nombre": "U.N. SAN LUIS GONZAGA DE ICA",
@@ -1561,7 +1570,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 144999775
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "516": {
    "nombre": "U.N. SAN CRISTOBAL DE HUAMANGA",
@@ -1768,7 +1778,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 86532259,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 10000
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 1096155
   },
   "517": {
    "nombre": "U.N. DEL CENTRO DEL PERU",
@@ -1928,7 +1939,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 101572855
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "518": {
    "nombre": "U.N. AGRARIA LA MOLINA",
@@ -2131,7 +2143,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 102806339,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 1152170
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 14789360
   },
   "519": {
    "nombre": "U.N. DE LA AMAZONIA PERUANA",
@@ -2311,7 +2324,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 106899076
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "520": {
    "nombre": "U.N. DEL ALTIPLANO",
@@ -2555,7 +2569,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 192328744
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 36191419
   },
   "521": {
    "nombre": "U.N. DE PIURA",
@@ -2739,7 +2754,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 143987065
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 2717479
   },
   "522": {
    "nombre": "U.N. DE CAJAMARCA",
@@ -2910,7 +2926,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 81271395,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 110430
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 2905797
   },
   "523": {
    "nombre": "U.N. PEDRO RUIZ GALLO",
@@ -3160,7 +3177,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 136941618
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "524": {
    "nombre": "U.N. FEDERICO VILLARREAL",
@@ -3333,7 +3351,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 161703216
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "525": {
    "nombre": "U.N. HERMILIO VALDIZAN",
@@ -3535,7 +3554,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 85282760
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "526": {
    "nombre": "U.N. AGRARIA DE LA SELVA",
@@ -3758,7 +3778,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 101472948
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "527": {
    "nombre": "U.N. DANIEL ALCIDES CARRION",
@@ -3940,7 +3961,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 6374900
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "528": {
    "nombre": "U.N. DE EDUCACION ENRIQUE GUZMAN Y VALLE",
@@ -4150,7 +4172,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 117877894
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "529": {
    "nombre": "U.N. DEL CALLAO",
@@ -4349,7 +4372,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 90805413
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "530": {
    "nombre": "U.N. JOSE FAUSTINO SANCHEZ CARRION",
@@ -4520,7 +4544,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 92134897
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "531": {
    "nombre": "U.N. JORGE BASADRE GROHMANN",
@@ -4839,7 +4864,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 104868913
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "532": {
    "nombre": "U.N. SANTIAGO ANTUNEZ DE MAYOLO",
@@ -5079,7 +5105,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 132367869
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "533": {
    "nombre": "U.N. DE SAN MARTIN",
@@ -5266,7 +5293,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 43349748,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 1990554
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "534": {
    "nombre": "U.N. DE UCAYALI",
@@ -5465,7 +5493,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 34543571,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 430590
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "535": {
    "nombre": "U.N. DE TUMBES",
@@ -5624,7 +5653,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 89820124
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "536": {
    "nombre": "U.N. DEL SANTA",
@@ -5859,7 +5889,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 52731047,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 433556
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "537": {
    "nombre": "U.N. DE HUANCAVELICA",
@@ -6062,7 +6093,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 68956116
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "538": {
    "nombre": "U.N. AMAZONICA DE MADRE DE DIOS",
@@ -6260,7 +6292,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 39247931
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "539": {
    "nombre": "U.N. MICAELA BASTIDAS DE APURIMAC",
@@ -6466,7 +6499,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 53450224,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 107000
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "541": {
    "nombre": "U.N. TORIBIO RODRIGUEZ DE MENDOZA DE AMAZONAS",
@@ -6932,7 +6966,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 114934574
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 30288495
   },
   "542": {
    "nombre": "U.N. INTERCULTURAL DE LA AMAZONIA",
@@ -7078,7 +7113,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 22353087
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "543": {
    "nombre": "U.N. TECNOLOGICA DE LIMA SUR",
@@ -7263,7 +7299,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 20203302,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 150000
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "544": {
    "nombre": "U.N. JOSE MARIA ARGUEDAS",
@@ -7494,7 +7531,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 37914166,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 20000
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "545": {
    "nombre": "U.N. DE MOQUEGUA",
@@ -7687,7 +7725,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 32700257
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "546": {
    "nombre": "U.N. DE JAEN",
@@ -7863,7 +7902,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 62811712,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 250000
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "547": {
    "nombre": "U.N. DE CAÑETE",
@@ -8007,7 +8047,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 22130893
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "548": {
    "nombre": "U.N. DE FRONTERA",
@@ -8253,7 +8294,8 @@
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 30249332,
     "0137 DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA": 16563682
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "549": {
    "nombre": "U.N. DE BARRANCA",
@@ -8425,7 +8467,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 22332341
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "550": {
    "nombre": "U.N. AUTÓNOMA DE CHOTA",
@@ -8585,7 +8628,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 26217238
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "551": {
    "nombre": "U.N. INTERCULTURAL DE LA SELVA CENTRAL JUAN SANTOS ATAHUALPA",
@@ -8779,7 +8823,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 27530102
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "552": {
    "nombre": "U.N. DE JULIACA",
@@ -8956,7 +9001,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 37617477
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "553": {
    "nombre": "U.N. AUTÓNOMA ALTOANDINA DE TARMA",
@@ -9112,7 +9158,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 18800947
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "554": {
    "nombre": "U.N. AUTÓNOMA DE HUANTA",
@@ -9294,7 +9341,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 22059025
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "555": {
    "nombre": "U.N. INTERCULTURAL FABIOLA SALAZAR LEGUIA DE BAGUA",
@@ -9457,7 +9505,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 26799287
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "556": {
    "nombre": "U.N. INTERCULTURAL DE QUILLABAMBA",
@@ -9696,7 +9745,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 38301164
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "557": {
    "nombre": "U.N. AUTÓNOMA DE ALTO AMAZONAS",
@@ -9840,7 +9890,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 13701005
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "558": {
    "nombre": "U.N. AUTÓNOMA DE TAYACAJA DANIEL HERNÁNDEZ MORILLO",
@@ -10039,7 +10090,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 35973258
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "559": {
    "nombre": "U.N. CIRO ALEGRÍA",
@@ -10187,7 +10239,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 4069647
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "560": {
    "nombre": "U.N. DE ARTE DIEGO QUISPE TITO DEL CUSCO",
@@ -10316,7 +10369,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 3241221
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "561": {
    "nombre": "U.N. DE MÚSICA",
@@ -10497,7 +10551,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 2580729
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "562": {
    "nombre": "U.N. DANIEL ALOMIA ROBLES",
@@ -10656,7 +10711,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 4361043
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "563": {
    "nombre": "U.N. TECNOLÓGICA DE FRONTERA SAN IGNACIO DE LOYOLA",
@@ -10752,7 +10808,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 19904533
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "564": {
    "nombre": "U.N. TECNOLÓGICA DE SAN JUAN DE LURIGANCHO",
@@ -10800,7 +10857,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 420747
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "565": {
    "nombre": "U.N. FRONTERIZA AUTÓNOMA DE YUNGUYO",
@@ -10855,7 +10913,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "566": {
    "nombre": "U.N. DE SECHURA",
@@ -10924,7 +10983,8 @@
    "programas_presupuestales": {
     "0066 FORMACION UNIVERSITARIA DE PREGRADO": 10000
    },
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "567": {
    "nombre": "U.N. DEL VRAEM",
@@ -10983,7 +11043,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "568": {
    "nombre": "U.N. DE CARABAYA",
@@ -11038,7 +11099,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "569": {
    "nombre": "U.N. AUTÓNOMA DE CUTERVO",
@@ -11093,7 +11155,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "570": {
    "nombre": "U.N. AUTÓNOMA DE CHUPACA",
@@ -11148,7 +11211,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "571": {
    "nombre": "U.N. DE FOLKLORE JOSÉ MARÍA ARGUEDAS",
@@ -11213,7 +11277,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "572": {
    "nombre": "U.N. AUTÓNOMA DEL DISTRITO DE SAN MARCOS",
@@ -11267,7 +11332,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "573": {
    "nombre": "U.N. TECNOLÓGICA DE CHINCHA",
@@ -11313,7 +11379,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "574": {
    "nombre": "U.N. DE HUANCABAMBA",
@@ -11351,7 +11418,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "575": {
    "nombre": "U.N. DE DESAGUADERO",
@@ -11410,7 +11478,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "576": {
    "nombre": "U.N. INTERCULTURAL AIMARA DE ILAVE",
@@ -11453,7 +11522,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "577": {
    "nombre": "U.N. AUTÓNOMA DE BELLAS ARTES DEL PERÚ",
@@ -11514,7 +11584,8 @@
    },
    "proyectos": {},
    "n_proyectos": 0,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "578": {
    "nombre": "U.N. AUTÓNOMA DE CHICLAYO",
@@ -11527,7 +11598,8 @@
    "var_pct": null,
    "var_abs": null,
    "var_pct_vs_pim_2026": null,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "579": {
    "nombre": "U.N. AUTÓNOMA DE OLMOS",
@@ -11540,7 +11612,8 @@
    "var_pct": null,
    "var_abs": null,
    "var_pct_vs_pim_2026": null,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "582": {
    "nombre": "U.N. AUTÓNOMA BICENTENARIO DEL PERÚ PARINACOCHAS CORACORA",
@@ -11553,7 +11626,8 @@
    "var_pct": null,
    "var_abs": null,
    "var_pct_vs_pim_2026": null,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   },
   "583": {
    "nombre": "U.N. AUTÓNOMA PERLA DEL VILCANOTA",
@@ -11566,9 +11640,172 @@
    "var_pct": null,
    "var_abs": null,
    "var_pct_vs_pim_2026": null,
-   "en_gasto_json": true
+   "en_gasto_json": true,
+   "monto_en_otros_pliegos": 0
   }
  },
+ "en_otros_pliegos": [
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "512",
+   "beneficiario_nombre": "U.N. DE TRUJILLO",
+   "codigo": "2517831",
+   "nombre": "MEJORAMIENTO DEL SERVICIO ACADEMICO Y DE INVESTIGACION EN LAS ESCUELAS DE INGENIERIA DE SISTEMAS E INGENIERIA MECATRONICA DE LA UNIVERSIDAD NACIONAL DE TRUJILLO DEL DISTRITO DE TRUJILLO - PROVINCIA DE TRUJILLO - DEPARTAMENTO DE LA LIBERTAD",
+   "monto": 40931698,
+   "tipo": "proyecto",
+   "categoria": "PROGRAMAS PRESUPUESTALES",
+   "match": "nombre",
+   "cui_en_siaf_de": [
+    "512"
+   ]
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "520",
+   "beneficiario_nombre": "U.N. DEL ALTIPLANO",
+   "codigo": "2353850",
+   "nombre": "CREACION DEL SERVICIO DE LABORATORIOS EN BIOTECNOLOGIAS PARA CAMELIDOS SUDAMERICANOS EN EL CIP LA RAYA DE LA UNIVERSIDAD NACIONAL DEL ALTIPLANO - PUNO DISTRITO DE SANTA ROSA - PROVINCIA DE MELGAR - DEPARTAMENTO DE PUNO",
+   "monto": 36191419,
+   "tipo": "proyecto",
+   "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "541",
+   "beneficiario_nombre": "U.N. TORIBIO RODRIGUEZ DE MENDOZA DE AMAZONAS",
+   "codigo": "2314501",
+   "nombre": "CREACION DE LOS SERVICIOS DE INVESTIGACION Y ENSEÑANZA EN OVINOS Y CAPRINOS EN LA UNIVERSIDAD NACIONAL TORIBIO RODRIGUEZ DE MENDOZA DE AMAZONAS",
+   "monto": 16930022,
+   "tipo": "proyecto",
+   "categoria": "PROGRAMAS PRESUPUESTALES",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "518",
+   "beneficiario_nombre": "U.N. AGRARIA LA MOLINA",
+   "codigo": "2411120",
+   "nombre": "CREACION DEL PARQUE DE TECNOLOGIA E INNOVACION PARA EL AGRO DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA, DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+   "monto": 14789360,
+   "tipo": "proyecto",
+   "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "541",
+   "beneficiario_nombre": "U.N. TORIBIO RODRIGUEZ DE MENDOZA DE AMAZONAS",
+   "codigo": "2314836",
+   "nombre": "CONSTRUCCION Y EQUIPAMIENTO DEL INSTITUTO DE MEDICINA TROPICAL DE LA UNIVERSIDAD NACIONAL TORIBIO RODRIGUEZ DE MENDOZA DE AMAZONAS, SEDE CHACHAPOYAS PROVINCIA DE CHACHAPOYAS, REGION AMAZONAS",
+   "monto": 13358473,
+   "tipo": "proyecto",
+   "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "514",
+   "beneficiario_nombre": "U.N. DE INGENIERIA",
+   "codigo": "2251110",
+   "nombre": "MEJORAMIENTO DEL SERVICIO DE FORMACION PROFESIONAL EN INGENIERIA ELECTRICA DE LA UNIVERSIDAD NACIONAL DE INGENIERIA DISTRITO DE RIMAC - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+   "monto": 12716162,
+   "tipo": "proyecto",
+   "categoria": "PROGRAMAS PRESUPUESTALES",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": null,
+   "beneficiario_nombre": null,
+   "codigo": "2382580",
+   "nombre": "MEJORAMIENTO DE LA GESTION DE LOS SERVICIOS DE EDUCACION SUPERIOR UNIVERSITARIA Y TECNOLOGICA A NIVEL NACIONAL",
+   "monto": 11327033,
+   "tipo": "proyecto",
+   "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS",
+   "match": "dudoso",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": null,
+   "beneficiario_nombre": null,
+   "codigo": "2383140",
+   "nombre": "MEJORA DE LA CALIDAD Y PERTINENCIA DE LOS SERVICIOS DE EDUCACION SUPERIOR UNIVERSITARIA Y TECNOLOGICA A NIVEL NACIONAL",
+   "monto": 9071999,
+   "tipo": "proyecto",
+   "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS",
+   "match": "dudoso",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "522",
+   "beneficiario_nombre": "U.N. DE CAJAMARCA",
+   "codigo": "2561950",
+   "nombre": "MEJORAMIENTO DEL SERVICIO DE FORMACION DE PREGRADO EN EDUCACION SUPERIOR UNIVERSITARIA DE LA E.A.P DE BIOLOGIA Y BIOTECNOLOGIA DE LA FACULTAD DE CIENCIAS DE LA SALUD DE LA UNIVERSIDAD NACIONAL DE CAJAMARCA CAJAMARCA DEL DISTRITO DE CAJAMARCA - PROVINCIA DE CAJAMARCA - DEPARTAMENTO DE CAJAMARCA",
+   "monto": 2905797,
+   "tipo": "proyecto",
+   "categoria": "PROGRAMAS PRESUPUESTALES",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "521",
+   "beneficiario_nombre": "U.N. DE PIURA",
+   "codigo": "2301079",
+   "nombre": "CREACION DEL PABELLON DE LABORATORIOS PARA EL MEJORAMIENTO DEL SERVICIO EDUCATIVO DE LA FACULTAD DE INGENIERIA INDUSTRIAL DE LA UNIVERSIDAD NACIONAL DE PIURA, DISTRITO DE CASTILLA,PROVINCIA Y DEPARTAMENTO DE PIURA",
+   "monto": 2717479,
+   "tipo": "proyecto",
+   "categoria": "PROGRAMAS PRESUPUESTALES",
+   "match": "nombre",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "010",
+   "pliego_ejecutor_nombre": "DIRECCION NACIONAL DE INTELIGENCIA",
+   "beneficiario": "510",
+   "beneficiario_nombre": "U.N. MAYOR DE SAN MARCOS",
+   "codigo": "2252835",
+   "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS SERVICIOS ACADEMICOS Y ADMINISTRATIVOS DE LAS E.P DE TECNOLOGIA MEDICA Y ENFERMERIA DE LA FACULTAD DE MEDICINA HUMANA EN LA CIUDAD UNIVERSITARIA DE LA UNMSM,DISTRITO,PROVINCIA Y DEPARTAMENTO DE LIMA",
+   "monto": 2340481,
+   "tipo": "proyecto",
+   "categoria": "PROGRAMAS PRESUPUESTALES",
+   "match": "sigla",
+   "cui_en_siaf_de": []
+  },
+  {
+   "pliego_ejecutor": "342",
+   "pliego_ejecutor_nombre": "INSTITUTO PERUANO DEL DEPORTE",
+   "beneficiario": "516",
+   "beneficiario_nombre": "U.N. SAN CRISTOBAL DE HUAMANGA",
+   "codigo": "2538952",
+   "nombre": "MEJORAMIENTO DE LOS SERVICIOS DEL COMEDOR Y RESIDENCIA DE LA UNIVERSIDAD NACIONAL DE SAN CRISTOBAL DE HUAMANGA, DISTRITO DE AYACUCHO - PROVINCIA DE HUAMANGA - DEPARTAMENTO DE AYACUCHO",
+   "monto": 1096155,
+   "tipo": "proyecto",
+   "categoria": "ASIGNACIONES PRESUPUESTALES QUE NO RESULTAN EN PRODUCTOS",
+   "match": "nombre",
+   "cui_en_siaf_de": [
+    "516"
+   ]
+  }
+ ],
  "disposiciones": [
   {
    "articulo": "Art. 3",
