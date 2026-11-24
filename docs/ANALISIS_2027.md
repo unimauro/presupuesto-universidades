@@ -75,3 +75,26 @@ El reparto parece seguir sobre todo al **canon disponible** y a la cartera de pr
 ## Por estudiante
 
 En las 48 universidades con matrícula (SIRIES 2023), la mediana del PIA por estudiante pasa de **S/ 18,954 (2026)** a **S/ 20,752 (2027)**. Ojo: la matrícula usada es de 2023.
+
+## ⚠️ El otro lado: 2026 fue un año de recorte (agregado el 24-nov tras revisar el caso UNALM)
+
+Comparar el PIA 2027 contra el PIA 2026 parte de un año recortado:
+
+- **43 de 67 universidades** arrancaron 2026 con menos PIA que en 2025.
+- **32 de 67** reciben en 2027 **menos de lo que terminaron teniendo en 2026** (su PIM 2026).
+- **20** pierden recursos ordinarios (Tesoro). Varias lo compensan con ingresos propios (RDR) **proyectados**, que tendrán que recaudar.
+
+**Caso Agraria La Molina (pliego 518):**
+
+| | Monto | Variación |
+|---|---|---|
+| PIA 2025 | S/ 206.5 M | |
+| PIA 2026 | S/ 171.0 M | **−17 %** frente a 2025 |
+| PIA 2027 (dictamen) | S/ 171.1 M | +0.1 % frente al PIA 2026 |
+| PIM 2026 | S/ 202.5 M | el PIA 2027 queda **−15.5 %** por debajo |
+| PIM 2025 | S/ 245.9 M | el PIA 2027 queda −30 % por debajo |
+
+- **Tesoro (recursos ordinarios):** S/ 163.0 M → S/ 141.0 M, **−S/ 22.0 M (−13.5 %)**.
+- **Ingresos propios (RDR):** S/ 8.0 M → S/ 28.2 M, +S/ 20.2 M. El total se sostiene solo si la UNALM recauda más de tres veces lo que tenía presupuestado en RDR para 2026.
+
+**Plata para universidades en otros pliegos.** El Anexo 5 asigna dentro del pliego del MINEDU (010) proyectos para universidades. Por ejemplo, el CUI 2411120, "Parque de Tecnología e Innovación para el Agro de la UNALM", tiene S/ 14.8 M, y hay un laboratorio de camélidos de la UNA Puno. Ese dinero no aparece en los pliegos universitarios; se está cuantificando.
