@@ -333,7 +333,7 @@
       data: {
         labels: yrs.map(yTick),
         datasets: [{ label: 'Ejecución', data: ej, borderRadius: 6, valueLabel: v => isMobile() ? '' : Math.round(v) + '%',
-          backgroundColor: yrs.map((yy, i) => isPartial(yy) ? cssVar('--line-strong') : cssVar('--' + ({ good: 'good', warn: 'warn', bad: 'bad', na: 'line' })[semaforo(ej[i] / 100)])) }],
+          backgroundColor: yrs.map((yy, i) => isPartial(yy) ? cssVar('--line-strong') : cssVar('--' + ({ good: 'sem-good', warn: 'sem-warn', bad: 'sem-bad', na: 'line' })[semaforo(ej[i] / 100)])) }],
       },
       options: {
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttP, title: it => yearLbl(it[0].label) } } },
@@ -641,16 +641,18 @@
     $('#vr-order', el).addEventListener('change', e => { S.vr.order = e.target.value; renderVariacion(); });
     const moverChart = (cid, list, color) => {
       if (!list.length) return;
-      const vals = list.map(r => byAbs ? +(r.dabs / 1e6).toFixed(1) : +(r.dv * 100).toFixed(1));
-      const lbl = v => byAbs ? (v > 0 ? '+' : v < 0 ? '−' : '') + soles(Math.abs(v) * 1e6) : fmtChg(v / 100);
+      // Se dibuja la magnitud (barras hacia la derecha) y la etiqueta conserva el signo real
+      const raw = list.map(r => byAbs ? +(r.dabs / 1e6).toFixed(1) : +(r.dv * 100).toFixed(1));
+      const vals = raw.map(Math.abs);
+      const lbl = (v, i) => { const x = raw[i]; return byAbs ? (x > 0 ? '+' : x < 0 ? '−' : '') + soles(Math.abs(x) * 1e6) : fmtChg(x / 100); };
       const maxAbs = Math.max(...vals.map(Math.abs), 1);
       sizeFor(cid, list.length, isMobile() ? 30 : 26, 140);
       mkChart(cid, {
         type: 'bar',
         data: { labels: list.map(r => uName(r.u)), datasets: [{ label: 'Variación', data: vals, borderRadius: 6, borderSkipped: false, maxBarThickness: 22,
-          backgroundColor: vals.map(v => cssVar(v >= 0 ? color : '--bad')), valueLabel: v => lbl(v) }] },
+          backgroundColor: raw.map(v => cssVar(v >= 0 ? color : '--sem-bad')), valueLabel: (v, i) => lbl(v, i) }] },
         options: {
-          indexAxis: 'y', layout: { padding: { right: 64, left: vals.some(v => v < 0) ? 64 : 0 } },
+          indexAxis: 'y', layout: { padding: { right: 72 } },
           plugins: { legend: { display: false }, tooltip: { callbacks: {
             title: it => (list[it[0].dataIndex] || {}).u.nombre || it[0].label,
             label: ctx => { const r = list[ctx.dataIndex]; return [`Variación: ${fmtVarTxt(r.dv)}`, `${a}: ${fmtM(r.va)}`, `${b}: ${fmtM(r.vb)}`, `Δ S/: ${num(r.dabs) === null ? SD : fmtSigned(r.dabs)}`]; },
@@ -659,8 +661,8 @@
         },
       }, cid === 'ch-vr-up' ? upTitle : lowTitle);
     };
-    moverChart('ch-vr-up', ups, '--good');
-    moverChart('ch-vr-down', lows, noneDown ? '--c-pia' : '--bad');
+    moverChart('ch-vr-up', ups, '--sem-good');
+    moverChart('ch-vr-down', lows, noneDown ? '--c-pia' : '--sem-bad');
   }
   // Mini bloque en la ficha: serie nominal vs real
   function fichaVrHtml(u) {
@@ -684,6 +686,119 @@
       ] },
       options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ttM, title: it => yearLbl(it[0].label) } } }, scales: { y: { beginAtZero: true, ticks: { callback: tickM } } } },
     }, `${METRIC_LBL[m]} de ${uName(u)} en soles nominales y reales`);
+  }
+
+  // ================================================================== LÍNEA BASE (vs resto del Estado)
+  // Etiqueta al final de cada línea: dataset.endLabel = texto corto
+  const endLabelPlugin = {
+    id: 'endLabel',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      const items = [];
+      chart.data.datasets.forEach((ds, di) => {
+        if (!ds.endLabel) return;
+        const meta = chart.getDatasetMeta(di); if (meta.hidden) return;
+        let i = ds.data.length - 1; while (i >= 0 && num(ds.data[i]) === null) i--;
+        if (i < 0) return;
+        const pt = meta.data[i];
+        items.push({ x: pt.x + 8, y: pt.y, txt: `${ds.endLabel} ${Math.round(ds.data[i])}`, col: ds.borderColor });
+      });
+      // evita superposición: separa verticalmente
+      items.sort((a, b) => a.y - b.y);
+      for (let k = 1; k < items.length; k++) if (items[k].y - items[k - 1].y < 15) items[k].y = items[k - 1].y + 15;
+      ctx.save();
+      ctx.font = `800 12px ${cssVar('--font-cifras') || 'sans-serif'}`;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      items.forEach(it => { ctx.fillStyle = it.col; ctx.fillText(it.txt, it.x, it.y); });
+      ctx.restore();
+    },
+  };
+  S.lb = { base: null, m: 'dev', real: true };
+  const BL_SERIES = [
+    { k: 'uni', lbl: 'Universidades', short: 'Univ.', c: '--c-dev', w: 4 },
+    { k: 'total', lbl: 'Total Estado', short: 'Estado', c: '--f1', w: 2.5 },
+    { k: 'edu', lbl: 'Educación', short: 'Educ.', c: '--g5', w: 2.5 },
+    { k: 'pbi', lbl: 'PBI', short: 'PBI', c: '--g1', w: 2.5, dash: [6, 4] },
+    { k: 'ipc', lbl: 'Precios (IPC)', short: 'IPC', c: '--c-pia', w: 2, dash: [3, 3], nominalOnly: true },
+  ];
+  function blVal(k, y, m, real) {
+    const b = ((S.data.baseline || {}).anios || {})[String(y)] || {};
+    let v = null;
+    if (k === 'uni') v = nacional(y)[m];
+    else if (k === 'total') v = num((b.total || {})[m]);
+    else if (k === 'edu') v = num((b.funcion_educacion || {})[m]) ?? num((b.sector_educacion || {})[m]);
+    else if (k === 'pbi') v = num(b.pbi_nominal);
+    else if (k === 'ipc') return ipcIdx(y);
+    return real ? toReal(v, y) : v;
+  }
+  function renderLineabase() {
+    const el = $('#body-lineabase'); const bl = S.data.baseline;
+    if (!bl || !bl.anios) return;
+    const yrs = S.years.filter(y => bl.anios[String(y)]);
+    if (!S.lb.base || !yrs.includes(String(S.lb.base))) S.lb.base = yrs.includes('2016') ? '2016' : yrs[0];
+    if (!hasIpc()) S.lb.real = false;
+    const { base, m } = S.lb; const real = S.lb.real;
+    const yEnd = yrs.filter(y => !isPartial(y)).slice(-1)[0] || yrs[yrs.length - 1];
+    const idx = (k, y) => { const b0 = blVal(k, base, m, real), v = blVal(k, y, m, real); return (num(b0) && num(v) !== null) ? +(v / b0 * 100).toFixed(1) : null; };
+    const series = BL_SERIES.filter(sr => !(real && sr.nominalOnly)).filter(sr => yrs.some(y => num(blVal(sr.k, y, m, real)) !== null));
+    const chg = k => { const a0 = blVal(k, base, m, real), a1 = blVal(k, yEnd, m, real); return pctChg(a0, a1); };
+    const cu = chg('uni'), ct = chg('total');
+    const modo = real ? 'en términos reales' : 'en soles corrientes';
+    const frase = (cu === null || ct === null) ? '' :
+      `Entre ${base} y ${yEnd} el presupuesto de las universidades ${cu >= 0 ? 'creció' : 'cayó'} ${fmtChg(Math.abs(cu)).replace(/^[+−]/, '')} ${modo}; el presupuesto público total, ${fmtChg(Math.abs(ct)).replace(/^[+−]/, '')}${ct < 0 ? ' (caída)' : ''}. ` +
+      (Math.abs(cu - ct) < 0.02 ? 'Crecieron a un ritmo similar.' : cu > ct ? 'Las universidades crecieron más que el conjunto del Estado.' : 'Las universidades crecieron menos que el conjunto del Estado.');
+    const share = yrs.map(y => div(blVal('uni', y, m, false), blVal('total', y, m, false)));
+    const shPbi = yrs.map(y => div(blVal('uni', y, m, false), blVal('pbi', y, m, false)));
+    const iEnd = yrs.indexOf(yEnd);
+    const yOpts = yrs.filter(y => !isPartial(y)).map(y => `<option value="${esc(y)}"${String(y) === String(base) ? ' selected' : ''}>${esc(y)}</option>`).join('');
+    el.innerHTML = `
+      <div class="controls">
+        <label>Año base (= 100)<select id="lb-base">${yOpts}</select></label>
+        ${seg('Métrica', [['dev', 'Devengado'], ['pim', 'PIM'], ['pia', 'PIA']], m)}
+        ${hasIpc() ? `<div class="seg" role="group" aria-label="Moneda"><button type="button" data-v="1" aria-pressed="${real}">Real</button><button type="button" data-v="0" aria-pressed="${!real}">Nominal</button></div>` : ''}
+      </div>
+      <p class="note">${real ? `<strong>Real</strong>: descontando la inflación (soles de ${esc(ipcBase())}).` : '<strong>Nominal</strong>: soles de cada año; la línea de precios (IPC) muestra cuánto subió el costo de vida.'}</p>
+      ${frase ? `<p class="sentence">${esc(frase)}</p>` : ''}
+      <div class="card" style="margin-top:12px">
+        <h3>Índice ${esc(base)} = 100</h3>
+        <p class="sub">${esc(METRIC_LBL[m])} ${esc(modo)}. Más de 100 = creció desde ${esc(base)}.</p>
+        <div class="chart tall"><canvas id="ch-lb"></canvas></div>
+      </div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <h3>Universidades como % del presupuesto público</h3>
+          <p class="big-fig">${esc(fmtP(share[iEnd], 2))}<span> en ${esc(yEnd)}</span></p>
+          <div class="chart"><canvas id="ch-lb-sh"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Universidades como % del PBI</h3>
+          <p class="big-fig">${esc(fmtP(shPbi[iEnd], 2))}<span> en ${esc(yEnd)}</span></p>
+          <div class="chart"><canvas id="ch-lb-pbi"></canvas></div>
+        </div>
+      </div>
+      ${bl.fuente || bl.nota ? `<p class="note">${esc([bl.fuente, bl.nota].filter(Boolean).join(' · '))}</p>` : ''}`;
+    $('#lb-base', el).addEventListener('change', e => { S.lb.base = e.target.value; renderLineabase(); });
+    bindSeg(el, (v, g) => { const l = g.getAttribute('aria-label'); if (l === 'Métrica') S.lb.m = v; else if (l === 'Moneda') S.lb.real = v === '1'; renderLineabase(); });
+    // El devengado del año en curso es parcial: la línea termina en el último año cerrado
+    const yrsI = m === 'dev' ? yrs.filter(y => !isPartial(y)) : yrs;
+    mkChart('ch-lb', {
+      type: 'line',
+      data: { labels: yrsI.map(yTick), datasets: series.map(sr => ({ label: sr.lbl, endLabel: isMobile() ? sr.short : sr.lbl, data: yrsI.map(y => idx(sr.k, y)),
+        borderColor: cssVar(sr.c), backgroundColor: cssVar(sr.c), borderWidth: sr.w, borderDash: sr.dash, tension: 0, cubicInterpolationMode: 'monotone', pointRadius: yrsI.map(y => String(y) === String(base) ? 4 : 0) })) },
+      options: {
+        layout: { padding: { right: isMobile() ? 78 : 140 } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { title: it => yearLbl(it[0].label), label: ctx => `${ctx.dataset.label}: ${num(ctx.raw) === null ? SD : nf(ctx.raw, 0)}` } } },
+        scales: { y: { ticks: { callback: v => nf(v, 0) } } },
+      },
+      plugins: [endLabelPlugin],
+    }, `Índice ${base} = 100 del presupuesto de universidades frente al Estado`);
+    const barOpts = d => ({
+      plugins: { legend: { display: false }, tooltip: { callbacks: { title: it => yearLbl(it[0].label), label: ctx => fmtP(ctx.raw / 100, d) } } },
+      scales: { y: { beginAtZero: true, ticks: { callback: v => nf(v, d) + ' %' } } },
+    });
+    mkChart('ch-lb-sh', { type: 'bar', data: { labels: yrs.map(yTick), datasets: [{ label: '% del presupuesto público', data: share.map(v => v === null ? null : +(v * 100).toFixed(2)), backgroundColor: fadeFor(yrs, cssVar('--c-dev')) }] }, options: barOpts(1) }, 'Universidades como porcentaje del presupuesto público total');
+    mkChart('ch-lb-pbi', { type: 'bar', data: { labels: yrs.map(yTick), datasets: [{ label: '% del PBI', data: shPbi.map(v => v === null ? null : +(v * 100).toFixed(3)), backgroundColor: fadeFor(yrs, cssVar('--g1')) }] }, options: barOpts(2) }, 'Universidades como porcentaje del PBI');
   }
 
   // ================================================================== 2. RANKING
@@ -1087,7 +1202,7 @@
     mkChart('ch-inv', {
       type: 'bar',
       data: { labels: ordered.map(uName), datasets: [{ label: 'Ejecución de inversión', data: vals, borderRadius: 6, valueLabel: v => Math.round(v) + ' %',
-        backgroundColor: vals.map(v => cssVar('--' + ({ good: 'good', warn: 'warn', bad: 'bad', na: 'line-strong' })[semaforo(v === null ? null : v / 100)])) }] },
+        backgroundColor: vals.map(v => cssVar('--' + ({ good: 'sem-good', warn: 'sem-warn', bad: 'sem-bad', na: 'line-strong' })[semaforo(v === null ? null : v / 100)])) }] },
       options: {
         indexAxis: 'y',
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttP, title: it => (ordered[it[0].dataIndex] || {}).nombre || it[0].label } } },
@@ -1233,15 +1348,39 @@
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
       <div id="ex-host"></div>
+      <div class="card" style="margin-top:12px" id="ex-ley">
+        <h3>¿Qué dice la ley sobre el gasto de las universidades?</h3>
+        ${disp.length ? `<p class="sub">${disp.length} disposiciones${x.version && String(x.version).toLowerCase() !== 'ley' ? ' (pueden cambiar en el Congreso)' : ''}. Filtra por tema.</p>
+          <div class="chips" role="group" aria-label="Filtrar por tema" id="ex-temas"></div>
+          <div class="disp-grid" id="ex-disp" aria-live="polite"></div>` : '<p class="empty">Aún no se han extraído disposiciones del documento.</p>'}
+      </div>
       <div class="grid two" style="margin-top:12px">
-        <div class="card"><h3>Disposiciones relevantes para universidades</h3>
-          ${disp.length ? '<ul class="tlist">' + disp.map(d => `<li><span class="t-top"><strong>${linkOrText(d.url, d.articulo || 'Disposición')}</strong></span><span class="t-fin">${esc(d.resumen || '')}</span></li>`).join('') + '</ul>' : '<p class="empty">Aún no se han extraído disposiciones del documento.</p>'}
-        </div>
         <div class="card"><h3>Documentos</h3>
           ${docs.length ? '<ul class="tlist">' + docs.map(d => `<li><span class="t-top"><strong>${linkOrText(d.url, d.titulo || 'Documento')}</strong>${d.tipo ? `<span class="pill na">${esc(d.tipo)}</span>` : ''}</span></li>`).join('') + '</ul>' : '<p class="empty">Sin documentos enlazados.</p>'}
           ${notas.length ? '<ul class="note" style="padding-left:18px">' + notas.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : ''}
         </div>
       </div>`;
+    if (disp.length) {
+      const temaDe = d => String(d.tema || 'General').trim() || 'General';
+      const temas = [...new Set(disp.map(temaDe))].sort((a, b) => a.localeCompare(b, LOC));
+      S.exp.tema = temas.includes(S.exp.tema) ? S.exp.tema : '';
+      const drawDisp = () => {
+        $('#ex-temas', el).innerHTML = [['', `Todos (${disp.length})`]].concat(temas.map(t => [t, `${t} (${disp.filter(d => temaDe(d) === t).length})`]))
+          .map(([v, l]) => `<button type="button" class="chip" data-t="${esc(v)}" aria-pressed="${S.exp.tema === v}">${esc(l)}</button>`).join('');
+        const list = disp.filter(d => !S.exp.tema || temaDe(d) === S.exp.tema);
+        const groups = S.exp.tema ? [S.exp.tema] : temas;
+        $('#ex-disp', el).innerHTML = groups.map(t => {
+          const items = list.filter(d => temaDe(d) === t); if (!items.length) return '';
+          return `<h4 class="disp-tema">${esc(t)}</h4>` + items.map(d => `<article class="disp">
+            <header><strong>${linkOrText(d.url, d.articulo || 'Disposición')}</strong>${num(d.monto) !== null ? `<span class="disp-monto">${esc(soles(d.monto))}</span>` : ''}</header>
+            ${d.resumen ? `<p>${esc(d.resumen)}</p>` : ''}
+            ${d.cita ? `<blockquote>${esc(d.cita)}</blockquote>` : ''}
+          </article>`).join('');
+        }).join('');
+      };
+      drawDisp();
+      $('#ex-temas', el).addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; S.exp.tema = b.dataset.t; drawDisp(); });
+    }
     const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
     makeTable($('#ex-host', el), {
       rowClass: r => (num(r.p26) !== null && r.p26 < BASE_CHICA) ? 'row-dim' : '',
@@ -1490,7 +1629,7 @@
     S.unis.filter(u => A(u, y)).forEach(u => { (byDep[u.departamento || 'Sin departamento'] = byDep[u.departamento || 'Sin departamento'] || []).push(u); });
     $('#mp-deps-grid', el).innerHTML = Object.keys(byDep).sort((p, q) => byDep[q].length - byDep[p].length || p.localeCompare(q, LOC))
       .map(dpt => `<div><h4>${esc(titleCase(dpt))} (${byDep[dpt].length})</h4>${byDep[dpt].sort((p, q) => (tot(q, y, 'pim') || 0) - (tot(p, y, 'pim') || 0)).map(u => `<a href="#u=${encodeURIComponent(u.pliego)}" title="${esc(u.nombre || '')}">${esc(uName(u))}</a>`).join('')}</div>`).join('');
-    $('#mp-legend', el).innerHTML = [['good', 'Ejecución ≥ 90 %'], ['warn', '75–90 %'], ['bad', '< 75 %'], ['line-strong', 's/d']]
+    $('#mp-legend', el).innerHTML = [['sem-good', 'Ejecución ≥ 90 %'], ['sem-warn', '75–90 %'], ['sem-bad', '< 75 %'], ['line-strong', 's/d']]
       .map(([c, l]) => `<li><i style="background:${cssVar('--' + c)};border-radius:50%"></i>${esc(l)}</li>`).join('') + '<li>Tamaño = PIM</li>';
     loadLeaflet().then(drawMap).catch(() => { $('#map', el).innerHTML = '<p class="empty">No se pudo cargar el mapa. Revisa tu conexión.</p>'; });
   }
@@ -1521,7 +1660,7 @@
     const maxPim = Math.max(1, ...pts.map(u => tot(u, y, 'pim') || 0));
     pts.sort((a, b) => (tot(b, y, 'pim') || 0) - (tot(a, y, 'pim') || 0)).forEach(u => {
       const k = kpi(u, y);
-      const col = cssVar('--' + ({ good: 'good', warn: 'warn', bad: 'bad', na: 'line-strong' })[semaforo(k.ejec)]);
+      const col = cssVar('--' + ({ good: 'sem-good', warn: 'sem-warn', bad: 'sem-bad', na: 'line-strong' })[semaforo(k.ejec)]);
       const r = 5 + 28 * Math.sqrt((tot(u, y, 'pim') || 0) / maxPim);
       L.circleMarker([u.lat, u.lng], { radius: r, color: col, weight: 1.5, fillColor: col, fillOpacity: .45 })
         .bindPopup(`<strong>${esc(u.nombre || uName(u))}</strong><br>${esc(u.departamento || '')}<br>PIM ${esc(y)}: <b>${esc(fmtM(tot(u, y, 'pim')))}</b><br>Devengado: ${esc(fmtM(tot(u, y, 'dev')))}<br>Ejecución: <b>${esc(fmtP(k.ejec))}</b><br><a href="#u=${encodeURIComponent(u.pliego)}">Ver ficha →</a>`)
@@ -1639,7 +1778,7 @@
 
   // ================================================================== registro / lazy render
   const SECTIONS = {
-    resumen: renderResumen, variacion: renderVariacion, ranking: renderRanking, trayectoria: renderTrayectoria, expectativa: renderExpectativa, gasto: renderGasto,
+    resumen: renderResumen, variacion: renderVariacion, lineabase: renderLineabase, ranking: renderRanking, trayectoria: renderTrayectoria, expectativa: renderExpectativa, gasto: renderGasto,
     fuentes: renderFuentes, infra: renderInfra, idi: renderIdi, ficha: renderFicha, mapa: renderMapa,
     metodologia: renderMetodologia,
   };
@@ -1873,6 +2012,11 @@
     const vrLinked = readVrParams();
 
     // Expectativa 2027: solo si viene en los datos
+    if (d.baseline && d.baseline.anios && Object.keys(d.baseline.anios).length) {
+      $('#lineabase').hidden = false; $('#nav-lineabase').hidden = false;
+    } else {
+      $('#lineabase').remove(); $('#nav-lineabase').remove(); delete SECTIONS.lineabase;
+    }
     if (d.expectativa_2027 && typeof d.expectativa_2027 === 'object') {
       $('#expectativa').hidden = false; $('#nav-expectativa').hidden = false;
     } else {

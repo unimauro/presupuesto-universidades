@@ -564,3 +564,23 @@ tbody tr:hover { background: var(--surface-2); }
 tr.row-dim td { opacity: .62; }
 tr.row-dim td.sticky-col { opacity: 1; }
 tr.row-dim td.sticky-col .uni-link { opacity: .7; }
+
+/* Línea base */
+.big-fig { font: 900 clamp(40px, 11vw, 64px)/.9 var(--font-display); font-stretch: 62%; margin: 6px 0 10px; color: var(--c-dev); font-variant-numeric: proportional-nums lining-nums; }
+.big-fig span { font: 600 14px var(--font-cifras); color: var(--muted); margin-left: 8px; font-stretch: 100%; }
+/* Disposiciones por tema */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.chip { font: 700 13px var(--font-cifras); padding: 8px 14px; min-height: 40px; border-radius: 999px; border: 2px solid var(--ink); background: var(--bg); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.disp-grid { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 860px) { .disp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .disp-tema { grid-column: 1 / -1; } }
+.disp-tema { margin: 10px 0 0; font: 800 13px var(--font-cifras); text-transform: uppercase; letter-spacing: .12em; color: var(--ochre-text); }
+.disp { border: 2px solid var(--ink); padding: 12px 14px; background: var(--bg); }
+.disp header { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.disp-monto { font: 800 15px var(--font-cifras); background: var(--tu); color: #1E1428; padding: 2px 8px; }
+.disp p { margin: 6px 0 0; font-size: 15px; }
+.disp blockquote { margin: 8px 0 0; padding: 6px 10px; border-left: 4px solid var(--line-strong); color: var(--muted); font-size: 14px; font-style: italic; }
+
+/* Semáforo para gráficos (barras, mapa): el ámbar usa ají para distinguirse del PIA */
+:root { --sem-good: #0B6B4E; --sem-warn: #F2B705; --sem-bad: #C4122F; }
+:root[data-theme="dark"] { --sem-good: #3FBF8C; --sem-warn: #F7C843; --sem-bad: #FF6B7A; }

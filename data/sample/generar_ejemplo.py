@@ -211,10 +211,24 @@ def main():
         "notas": ["Cifras ficticias de ejemplo para probar la sección."],
         "total_universidades": {"pia_2027": t27, "pia_2026": t26, "var_pct": round((t27 / t26 - 1) * 100, 2)},
         "disposiciones": [
-            {"articulo": "[Ejemplo] Art. 25", "resumen": "Autoriza modificaciones presupuestales para el pago de la homologación docente.", "url": None},
-            {"articulo": "[Ejemplo] 45.ª Disposición Complementaria Final", "resumen": "Recursos para mantenimiento de infraestructura universitaria.", "url": None},
+            {"articulo": "[Ejemplo] Art. 25", "tema": "Personal docente", "resumen": "Autoriza modificaciones presupuestales para el pago de la homologación docente.", "cita": "Autorízase, durante el Año Fiscal 2027, ... (texto de ejemplo)", "monto": 150000000, "url": None},
+            {"articulo": "[Ejemplo] 45.ª Disposición Complementaria Final", "tema": "Infraestructura", "resumen": "Recursos para mantenimiento de infraestructura universitaria.", "cita": None, "monto": 80000000, "url": None},
+            {"articulo": "[Ejemplo] 46.ª Disposición Complementaria Final", "tema": "Infraestructura", "resumen": "Prioriza proyectos de inversión con expediente técnico aprobado.", "cita": None, "monto": None, "url": None},
+            {"articulo": "[Ejemplo] Art. 31", "tema": "Investigación", "resumen": "Recursos para el programa presupuestal 0137 en universidades licenciadas.", "cita": None, "monto": 25000000, "url": None},
         ],
     }
+
+    # Línea base ficticia: presupuesto público total, educación, niveles de gobierno y PBI
+    baseline = {"fuente": "[Ejemplo] MEF Consulta Amigable (todos los niveles) y BCRP (PBI)", "anios": {}}
+    for y in ANIOS:
+        k = y - ANIOS[0]
+        tot_pim = 157e9 * (1.055 ** k) * r(0.98, 1.02)
+        tri = lambda pim, e=0.86: {"pia": round(pim * 0.88), "pim": round(pim), "dev": round(pim * e * (0.78 if y == PARCIAL else 1))}
+        baseline["anios"][str(y)] = {
+            "total": tri(tot_pim), "gob_nacional": tri(tot_pim * 0.58), "gob_regionales": tri(tot_pim * 0.22),
+            "gob_locales": tri(tot_pim * 0.20, 0.7), "sector_educacion": tri(tot_pim * 0.12),
+            "funcion_educacion": tri(tot_pim * 0.18), "pbi_nominal": round(659e9 * (1.06 ** k)),
+        }
 
     nacional = {}
     for y in ANIOS:
@@ -240,6 +254,7 @@ def main():
             {"norma": "[Ejemplo] Ley de Presupuesto del Sector Público 2025", "titulo": "Asigna el PIA a los pliegos universitarios", "fecha": "2024-12-05", "tipo": "Ley", "url": None},
         ],
         "expectativa_2027": expectativa,
+        "baseline": baseline,
         "ipc": {"base": 2025, "fuente": "[Ejemplo] IPC Lima, promedio anual", "url": None,
                 "nota": "Soles reales de 2025 = nominal × 100 / índice del año.",
                 "indice": {str(y): round(100 / (1.03 ** (2025 - y)), 3) for y in ANIOS}},

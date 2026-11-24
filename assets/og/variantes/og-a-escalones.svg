@@ -5,18 +5,18 @@
 <rect x="60" y="253.2" width="320" height="251.8" fill="#B5A68C"/>
 <rect x="60" y="253.2" width="320" height="6" fill="#1E1428" opacity=".25"/>
 <text x="60" y="239.21831618952513" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="34" font-weight="700" fill="#F4EEE2" text-anchor="start" >Me asignaron</text>
-<text x="220.0" y="357.2183161895251" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="100" font-weight="900" fill="#1E1428" text-anchor="middle" letter-spacing="-0.5">S/ 6,955</text>
-<text x="220.0" y="393.2183161895251" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="24" font-weight="700" fill="#1E1428" text-anchor="middle" >millones · PIA</text>
+<text x="220.0" y="357.2183161895251" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="100" font-weight="900" fill="#1E1428" text-anchor="middle" letter-spacing="-0.5">S/ 6.95</text>
+<text x="220.0" y="393.2183161895251" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="24" font-weight="700" fill="#1E1428" text-anchor="middle" >mil millones · PIA</text>
 <rect x="420" y="225.0" width="320" height="280.0" fill="#7C8EF0"/>
 <rect x="420" y="225.0" width="320" height="6" fill="#1E1428" opacity=".25"/>
 <text x="420" y="211.0" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="34" font-weight="700" fill="#F4EEE2" text-anchor="start" >Me ampliaron</text>
-<text x="580.0" y="329.0" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="100" font-weight="900" fill="#1E1428" text-anchor="middle" letter-spacing="-0.5">S/ 7,734</text>
-<text x="580.0" y="365.0" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="24" font-weight="700" fill="#1E1428" text-anchor="middle" >millones · PIM</text>
+<text x="580.0" y="329.0" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="100" font-weight="900" fill="#1E1428" text-anchor="middle" letter-spacing="-0.5">S/ 7.73</text>
+<text x="580.0" y="365.0" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="24" font-weight="700" fill="#1E1428" text-anchor="middle" >mil millones · PIM</text>
 <rect x="780" y="252.8" width="320" height="252.2" fill="#FF5C9A"/>
 <rect x="780" y="252.8" width="320" height="6" fill="#1E1428" opacity=".25"/>
 <text x="780" y="238.76562874171017" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="34" font-weight="700" fill="#F4EEE2" text-anchor="start" >Gasté</text>
-<text x="940.0" y="356.7656287417102" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="100" font-weight="900" fill="#1E1428" text-anchor="middle" letter-spacing="-0.5">S/ 6,967</text>
-<text x="940.0" y="392.7656287417102" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="24" font-weight="700" fill="#1E1428" text-anchor="middle" >millones · devengado</text>
+<text x="940.0" y="356.7656287417102" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="100" font-weight="900" fill="#1E1428" text-anchor="middle" letter-spacing="-0.5">S/ 6.97</text>
+<text x="940.0" y="392.7656287417102" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="24" font-weight="700" fill="#1E1428" text-anchor="middle" >mil millones · devengado</text>
 <g transform="translate(40 527) scale(0.71875)"><rect width="64" height="64" rx="12" fill="#26346F"/><path d="M12 22 L32 11 L52 22 Z" fill="none" stroke="#E6E8F3" stroke-width="2.6" stroke-linejoin="round"/><rect x="15" y="34" width="6" height="16" rx="1" fill="#E6E8F3"/><rect x="25" y="27" width="6" height="23" rx="1" fill="#E6E8F3"/><rect x="35" y="38" width="6" height="12" rx="1" fill="#E6E8F3" opacity=".7"/><rect x="45" y="30" width="4" height="20" rx="1" fill="#E0A447"/><path d="M11 53 H53" stroke="#E6E8F3" stroke-width="2.6" stroke-linecap="round"/><path d="M8 42 H56" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2 2" opacity=".55"/></g>
 <text x="98" y="552" font-family="'Archivo ExtraCondensed', 'Archivo', 'Arial Narrow', sans-serif" font-size="26" font-weight="800" fill="#F4EEE2" text-anchor="start" >Radiografía Presupuestal</text>
 <text x="98" y="578" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif" font-size="16" font-weight="400" fill="#D2BDF0" text-anchor="start" >65 universidades públicas · 2025 · MEF – SIAF</text>

@@ -925,8 +925,32 @@
       { const [c, u] = heroParts(tot); $('#hero-cifra').textContent = c; $('#hero-unidad').textContent = u; }
       $('#hero-dek').innerHTML = `gastaron en ${esc(Y)}${par} las ${esc(U.length)} universidades públicas del Perú.${h ? ` La <mark>${esc(label(h))}</mark> no tiene datos ese año.` : ' Elige la tuya y mira a dónde se fue cada sol.'}`;
     }
+    tresNumeros(Y, h, U);
     $('#uni-hint').innerHTML = h ? `Mostrando <strong>${esc(fullName(h))}</strong>. <a href="${esc(fichaHref(h))}">Ver su ficha completa</a>` : 'Las diez historias se personalizan con la tuya.';
     $('#year-note').textContent = isPartial() ? `${Y} está en curso: cifras parciales.` : `Último año cerrado: ${S.closed[S.closed.length - 1]}.`;
+  }
+
+  // "Tu universidad en 3 números" (o las universidades juntas): ejecución, gasto por estudiante y % pagado con lo que cobra.
+  function tresNumeros(Y, h, U) {
+    const box = $('#tres'); if (!box) return;
+    const ht = h && h.anios && h.anios[Y];
+    let titulo, rows;
+    if (ht && ht.total) {
+      const k = ht.kpi || {};
+      const ej = isNum(k.ejec) ? k.ejec : div(val(ht.total, 'dev'), val(ht.total, 'pim'));
+      const pe = isNum(k.gasto_por_estudiante) ? k.gasto_por_estudiante : (isNum(ht.estudiantes) && ht.estudiantes > 0 ? div(val(ht.total, 'dev'), ht.estudiantes) : null);
+      titulo = `La <mark>${esc(label(h))}</mark> en 3 números`;
+      rows = [[pct(ej), 'de lo que tenía se gastó (devengado / PIM)'], [soles(pe), 'gastó por estudiante en el año'], [pct(k.pct_rdr), 'de su gasto lo pagó con lo que cobra (RDR)']];
+    } else {
+      const dev = sum(U.map((u) => val(u.anios[Y].total, 'dev'))), pim = sum(U.map((u) => val(u.anios[Y].total, 'pim')));
+      const pes = U.map((u) => { const a = u.anios[Y]; return isNum(a.estudiantes) && a.estudiantes > 0 ? div(val(a.total, 'dev'), a.estudiantes) : null; });
+      const rd = U.filter((u) => u.anios[Y].kpi && isNum(u.anios[Y].kpi.pct_rdr));
+      const rdr = div(sum(rd.map((u) => u.anios[Y].kpi.pct_rdr * (val(u.anios[Y].total, 'dev') || 0))), sum(rd.map((u) => val(u.anios[Y].total, 'dev'))));
+      titulo = 'Las universidades públicas en 3 números';
+      rows = [[pct(div(dev, pim)), 'de lo que tenían se gastó (devengado / PIM)'], [soles(median(pes)), 'gasta por estudiante la universidad típica'], [pct(rdr), 'del gasto se pagó con lo que cobran (RDR)']];
+    }
+    box.innerHTML = `<h2>${titulo}</h2><dl>${rows.map(([n, t]) => `<div><dt>${esc(n)}</dt><dd>${esc(t)}</dd></div>`).join('')}</dl><p class="s">Año ${esc(Y)}${isPartial() ? ' (en curso, parcial)' : ''}. Fuente: MEF.</p>`;
+    box.hidden = false;
   }
 
   function shareURL() {

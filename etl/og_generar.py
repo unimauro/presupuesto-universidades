@@ -92,9 +92,27 @@ def share_personal(d, y):
     return per / tot if tot else None
 
 
-def millones(v):
-    """6967055836 -> '6,967' (millones de soles, sin decimales, separador de miles como en index)."""
-    return f"{round(v / 1e6):,}"
+NB = "\u00a0"   # espacio no separable entre S/, número y unidad (BRAND.md §5b)
+
+
+def cifra(v, dec=1):
+    """Formato adaptativo (BRAND.md §5b) partido en (número, unidad) para la cifra héroe:
+    6967055836 -> ('S/ 7.0', 'mil millones'); 53.4e6 -> ('S/ 53.4', 'millones'); 850e3 -> ('S/ 850', 'mil')."""
+    a = abs(v)
+    if a >= 1e9:
+        return f"S/{NB}{v / 1e9:.{dec}f}", f"mil{NB}millones"
+    if a >= 1e6:
+        return f"S/{NB}{v / 1e6:,.{dec}f}", "millones"
+    if a >= 1e5:
+        return f"S/{NB}{v / 1e3:,.0f}", "mil"
+    if a >= 1e3:
+        return f"S/{NB}{v / 1e3:,.1f}", "mil"
+    return f"S/{NB}{v:,.0f}", ""
+
+
+def cifra_txt(v, dec=1):
+    n, u = cifra(v, dec)
+    return f"{n}{NB}{u}" if u else n
 
 
 # ---------- piezas SVG ----------
@@ -176,16 +194,18 @@ def og_escalones(d, y, T, sample):
         c.append(f'<rect x="{x}" y="{ytop:.1f}" width="{w}" height="{h:.1f}" fill="{col}"/>')
         c.append(f'<rect x="{x}" y="{ytop:.1f}" width="{w}" height="6" fill="{TINTA}" opacity=".25"/>')
         c.append(t(x, ytop - 14, cap, 34, PAPEL, TEXTO, "700"))
-        c.append(disp(x + w / 2, ytop + 104, f"S/ {millones(v)}", 100, TINTA, "middle"))
-        c.append(t(x + w / 2, ytop + 140, f"millones · {sig}", 24, TINTA, TEXTO, "700", "middle"))
+        # 2 decimales (excepción a §5b): con 1 decimal PIA 6.95 y devengado 6.97 se leerían iguales ("7.0").
+        num, uni = cifra(v, 2)
+        c.append(disp(x + w / 2, ytop + 104, num, 100, TINTA, "middle"))
+        c.append(t(x + w / 2, ytop + 140, f"{uni} · {sig}", 24, TINTA, TEXTO, "700", "middle"))
     return lienzo("\n".join(c), sample=sample, fuente=f"{T['n']} universidades públicas · {y} · MEF – SIAF")
 
 
 def og_nadie(d, y, T, sample):
     c = [t(70, 120, "Nadie:", 54, TINTA2, TEXTO, "400"),
          disp(70, 220, f"Las universidades públicas en {y}:", 84, TINTA),
-         disp(70, 380, f"*gastan S/ {millones(T['dev'])} millones*", 124, CHICHA),
-         t(70, 460, f"de S/ {millones(T['pim'])} millones disponibles", 38, TINTA2, TEXTO, "700"),
+         disp(70, 380, f"*gastan {cifra_txt(T['dev'])}*", 124, CHICHA),
+         t(70, 460, f"de {cifra_txt(T['pim'])} disponibles", 38, TINTA2, TEXTO, "700"),
          ]
     return lienzo("\n".join(c), bg=PAPEL, claro=True, sample=sample,
                   fuente=f"Devengado vs PIM · {T['n']} universidades · MEF – SIAF")
@@ -196,12 +216,12 @@ def og_expectativa(d, y, T, sample):
     c = [f'<rect x="40" y="40" width="550" height="460" fill="{ANIL}"/>',
          f'<rect x="610" y="40" width="550" height="460" fill="{CHICHA}"/>',
          disp(315, 120, "EXPECTATIVA", 64, PAPEL, "middle", "800"),
-         disp(315, 330, f"S/ {millones(T['pim'])}", 190, AJI, "middle"),
-         t(315, 385, "millones", 40, PAPEL, TEXTO, "700", "middle"),
+         disp(315, 330, cifra(T['pim'])[0], 190, AJI, "middle"),
+         t(315, 385, cifra(T['pim'])[1], 40, PAPEL, TEXTO, "700", "middle"),
          t(315, 460, f"presupuesto {y} (PIM)", 30, PAPEL, TEXTO, "400", "middle"),
          disp(885, 120, "REALIDAD", 64, "#FFFFFF", "middle", "800"),
-         disp(885, 330, f"S/ {millones(T['dev'])}", 190, "#FFFFFF", "middle"),
-         t(885, 385, "millones", 40, "#FFFFFF", TEXTO, "700", "middle"),
+         disp(885, 330, cifra(T['dev'])[0], 190, "#FFFFFF", "middle"),
+         t(885, 385, cifra(T['dev'])[1], 40, "#FFFFFF", TEXTO, "700", "middle"),
          t(885, 460, f"gastado: {ej * 100:.0f}%" if ej else "gastado", 30, "#FFFFFF", TEXTO, "400", "middle"),
          ]
     return lienzo("\n".join(c), sample=sample, fuente=f"{T['n']} universidades públicas · {y} · MEF – SIAF")
@@ -210,11 +230,12 @@ def og_expectativa(d, y, T, sample):
 # ---------- historias ----------
 def og_historias(d, y, T, sample, claro=False):
     ink = TINTA if claro else PAPEL
-    cifra = CHICHA if claro else AJI
+    col = CHICHA if claro else AJI
     sub = TINTA2 if claro else LILA
     c = [disp(60, 118, "¿A dónde se va la plata", 104, ink),
          disp(60, 222, "de tu universidad?", 104, ink),
-         disp(54, 420, f"S/ {millones(T['dev'])} millones", 200, cifra),
+         (f'<text x="54" y="420" font-family="{DISPLAY}" font-weight="900" font-size="230" fill="{col}" letter-spacing="-0.5">'
+          f'{escape(cifra(T["dev"])[0])}<tspan font-size="120" dx="28">{escape(cifra(T["dev"])[1])}</tspan></text>'),
          t(62, 480, f"gastaron las {T['n']} universidades públicas en {y}. Te lo contamos en 8 historias.", 29, sub, TEXTO, "700"),
          ]
     return lienzo("\n".join(c), bg=PAPEL if claro else MAIZ, claro=claro, sample=sample,
@@ -228,15 +249,15 @@ def og_2027(d, sample):
     c = [disp(60, 120, "Lo que viene en", 96),
          disp(60, 300, "2027", 230, AJI)]
     if T27 and T27.get("pia"):
-        c += [disp(1140, 300, f"S/ {millones(T27['pia'])}", 200, PAPEL, "end"),
-              t(1140, 350, "millones de PIA", 36, LILA, TEXTO, "700", "end")]
+        c += [disp(1140, 300, cifra(T27['pia'])[0], 200, PAPEL, "end"),
+              t(1140, 350, f"{cifra(T27['pia'])[1]} de PIA", 36, LILA, TEXTO, "700", "end")]
         if T26 and T26.get("pia"):
             var = T27["pia"] / T26["pia"] - 1
-            c.append(t(60, 470, f"{'+' if var >= 0 else ''}{var * 100:.1f}% frente al PIA 2026 (nominal)", 38, PAPEL, TEXTO, "700"))
+            c.append(t(60, 470, f"{'+' if var >= 0 else '−'}{abs(var) * 100:.1f}% frente al PIA 2026 (nominal)", 38, PAPEL, TEXTO, "700"))
         fuente = "PIA 2027 · MEF – SIAF"
     else:
         c += [disp(1140, 330, "S/ ¿?", 300, DEV_O, "end"),
-              t(60, 400, (f"2026 arrancó con S/ {millones(T26['pia'])} millones" if T26 and T26.get("pia") else "Aún sin datos de 2026"), 40, PAPEL, TEXTO, "700"),
+              t(60, 400, (f"2026 arrancó con {cifra_txt(T26['pia'])}" if T26 and T26.get("pia") else "Aún sin datos de 2026"), 40, PAPEL, TEXTO, "700"),
               t(60, 460, "El PIA 2027 llega con la Ley de Presupuesto", 32, LILA)]
         fuente = "PIA 2026 · MEF – SIAF · 2027 aún sin datos"
     return lienzo("\n".join(c), sample=sample, fuente=fuente)
