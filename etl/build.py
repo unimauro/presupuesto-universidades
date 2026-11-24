@@ -231,6 +231,12 @@ def main():
     if ipc:
         obs["ipc"] = {"base": 2025, "indice": ipc["indice_promedio_anual"], "fuente": ipc["fuente"], "url": ipc["url"],
                       "nota": "Soles reales de 2025 = nominal × 100 / índice del año. " + ipc.get("nota_2026", "")}
+    # Nombres de pliego ejecutor tomados del encabezado del Anexo 5 ("Pliego : 010M. DE EDUCACION"); el mapeo
+    # de ley2027 confundía el 010 con otro pliego.
+    EJEC = {"010": "MINISTERIO DE EDUCACION", "342": "INSTITUTO PERUANO DEL DEPORTE"}
+    for x in (l27.get("en_otros_pliegos") or []):
+        if x.get("pliego_ejecutor") in EJEC:
+            x["pliego_ejecutor_nombre"] = EJEC[x["pliego_ejecutor"]]
     if l27:
         obs["expectativa_2027"] = {k: l27.get(k) for k in
                                    ("version", "norma", "fecha", "url", "estado_tramite", "documentos", "notas",

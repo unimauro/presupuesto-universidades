@@ -1606,6 +1606,7 @@
       </div>
       <div id="cats27" style="margin-top:16px"></div>
       <div id="a27" style="margin-top:16px"></div>
+      <div id="otros27" style="margin-top:16px"></div>
       <div class="kpis">
         ${kpiBox('PIA 2027 (universidades)', fmtM(p27), rows.length + ' universidades', 'accent')}
         ${kpiBox('PIA 2026', fmtM(p26), 'apertura del año en curso')}
@@ -1671,6 +1672,7 @@
     exp2027TotalChart('ch-exp-tot');
     renderCats27($('#cats27', el));
     renderA2027($('#a27', el));
+    renderOtros27($('#otros27', el));
     const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
     makeTable($('#ex-host', el), {
       rowClass: r => (num(r.p26) !== null && r.p26 < BASE_CHICA) ? 'row-dim' : '',
@@ -1852,7 +1854,8 @@
           const inner = c.k === 'nueva' ? `<b>${esc(soles(num(r.pia_2027)))}</b>`
             : c.k === 'sin_2027' ? ''
             : `<b>${esc(fmtChg(num(r.var_pct)))}</b><span>vs PIM ${esc(fmtChg(num(r.var_vs_pim_2026)))}</span>`;
-          return `<a class="cat-chip" href="#u=${encodeURIComponent(r.pliego)}" title="${esc(tip)}"><strong>${esc(name)}</strong>${inner}</a>`;
+          const ou = uniBy(r.pliego); const om = ou ? num((expOf(ou) || {}).monto_en_otros_pliegos) : null;
+          return `<a class="cat-chip" href="#u=${encodeURIComponent(r.pliego)}" title="${esc(tip + (om ? ' · ' + otrosLinea(ou) : ''))}"><strong>${esc(name)}</strong>${inner}${om ? `<em class="cat-otros">+${esc(soles(om))} ${esc([...new Set(otrosDe(r.pliego).map(ejecCorto))].join('/') || 'otros')}</em>` : ''}</a>`;
         }).join('');
         return `<article class="cat-card cat-${esc(c.k)}">
           <header><span class="cat-n">${esc(c.ic)} ${esc(fmtN(info.n ?? list.length))}</span><h4>${esc(c.t)}</h4></header>
@@ -1865,6 +1868,46 @@
         <p class="sub">Cada universidad comparada con su PIA 2026 <em>y</em> con lo que realmente tuvo en 2026 (PIM). Toca una para abrir su ficha. Cifras: Δ % del PIA 2027 frente al PIA 2026, y debajo frente al PIM 2026.</p>
         <div class="cat-grid">${CAT27.map(card).join('')}</div>
         <p class="note">El PIM 2026 es ${esc(pimCorte)} y aún puede subir hasta fin de año: si sube, algunas que hoy "suben de verdad" podrían quedar "solo en papel" frente al PIM final. Montos nominales; propuesta del dictamen.</p>`;
+    });
+  }
+
+  // ================================================================== 2027: plata para universidades en OTROS pliegos (MINEDU, IPD…)
+  // El pliego 010 es el Ministerio de Educación; el nombre que trae el dato para 010 no corresponde (se corrige al mostrar).
+  const EJEC_NOMBRE = { '010': 'Ministerio de Educación', '342': 'Instituto Peruano del Deporte' };
+  const ejecNombre = r => EJEC_NOMBRE[String(r.pliego_ejecutor)] || titleCase(r.pliego_ejecutor_nombre || ('Pliego ' + (r.pliego_ejecutor || '')));
+  const ejecCorto = r => ({ '010': 'MINEDU', '342': 'IPD' }[String(r.pliego_ejecutor)] || ejecNombre(r));
+  const otrosDe = pl => (((S.data || {}).expectativa_2027 || {}).en_otros_pliegos || []).filter(r => String(r.beneficiario) === String(pl));
+  // Línea para ficha / chip: "+ S/ 14.8 M en proyectos del MINEDU para la UNALM"
+  function otrosLinea(u) {
+    const e = expOf(u) || {}; const m = num(e.monto_en_otros_pliegos);
+    if (!m) return '';
+    const ej = [...new Set(otrosDe(u.pliego).map(ejecCorto))];
+    return `+ ${soles(m)} en proyectos ${ej.length ? 'del ' + ej.join(' y del ') : 'de otros pliegos'} para la ${uName(u)}`;
+  }
+  function renderOtros27(host) {
+    const x = S.data.expectativa_2027 || {}; const list = Array.isArray(x.en_otros_pliegos) ? x.en_otros_pliegos : [];
+    if (!list.length) { host.innerHTML = ''; return; }
+    const t = x.total_universidades || {};
+    const asign = num(t.en_otros_pliegos_asignado) ?? sum(list.filter(r => r.beneficiario).map(r => num(r.monto)));
+    const dud = num(t.en_otros_pliegos_dudoso) ?? sum(list.filter(r => !r.beneficiario).map(r => num(r.monto)));
+    const mas = num(t.pia_2027_mas_otros_pliegos);
+    host.innerHTML = `
+      <div class="card otros27">
+        <h3>Plata para universidades en otros pliegos (${esc(soles(asign))})</h3>
+        <p class="sub">Proyectos de inversión <strong>para</strong> universidades que en la propuesta 2027 están presupuestados en el MINEDU u otra entidad.${dud ? ` Además, ${esc(soles(dud))} en proyectos con beneficiario dudoso.` : ''}${mas ? ` Sumándolos, el PIA 2027 de las universidades más estos proyectos llega a <strong>${esc(soles(mas))}</strong>.` : ''}</p>
+        <p class="note warn">Los ejecuta el MINEDU u otra entidad, no la universidad; <strong>no se suman al PIA de cada universidad</strong> (por eso no cambian su categoría). El Anexo 5 solo cubre el Gobierno Nacional: faltan los proyectos para universidades en gobiernos regionales y locales.</p>
+        <div id="otros27-host"></div>
+      </div>`;
+    const rows = list.map(r => Object.assign({}, r, { u: r.beneficiario ? uniBy(r.beneficiario) : null }));
+    makeTable($('#otros27-host', host), {
+      id: 'o27t', caption: 'Proyectos 2027 para universidades en otros pliegos. Montos en soles.', rows, sort: { k: 'monto', dir: -1 }, search: { ph: 'Proyecto, código o universidad', text: r => [r.nombre, r.codigo, r.beneficiario_nombre, r.u && r.u.corto, ejecNombre(r)].join(' ') },
+      mobilePick: ['uni', 'ejec', 'monto'], mdef: 'monto',
+      cols: [
+        { k: 'proy', lbl: 'Proyecto', sticky: true, m: true, get: r => r.nombre || '', html: r => `<span class="proy-n" title="${esc(r.nombre || '')}">${esc(shortTxt(titleCase(r.nombre || 'Proyecto'), isMobile() ? 90 : 150))}</span><span class="proy-meta">${esc(r.codigo || '')}${r.beneficiario ? '' : ' · <span class="tag">beneficiario dudoso</span>'}</span>` },
+        { k: 'uni', lbl: 'Universidad', get: r => (r.u ? uName(r.u) : ''), html: r => r.u ? `<a class="uni-link" href="#u=${encodeURIComponent(r.u.pliego)}" title="${esc(r.u.nombre || '')}">${esc(uName(r.u))}</a>` : '<span class="muted">sin identificar</span>' },
+        { k: 'ejec', lbl: 'Lo ejecuta', get: r => ejecNombre(r), fmt: v => v },
+        { k: 'monto', lbl: 'Monto 2027', m: true, get: r => num(r.monto), html: r => `<strong>${esc(soles(num(r.monto)))}</strong>` },
+      ],
     });
   }
 
@@ -1979,6 +2022,7 @@
     return `<div class="ch27">
       <a class="h27-chip ${cls(vA)}" href="#expectativa"><b>2027: ${esc(soles(p27))}</b></a>
       <p class="ch27-cmp"><span class="${cls(vA)}">${esc(vA === null ? 'nueva' : fmtChg(vA))} vs PIA 2026</span> · <span class="${cls(vM)}">${esc(fmtChg(vM))} vs PIM 2026</span> · <span class="${cls(v65)}">${esc(fmtChg(v65))} el PIA 2026 vs 2025</span></p>
+      ${otrosLinea(u) ? `<p class="ch27-otros">${esc(otrosLinea(u))}</p>` : ''}
       <div class="ch27-mini">${svg}<span class="small muted"><i class="lg-pia"></i>PIA · <i class="lg-pim"></i>PIM · <i class="lg-27"></i>2027</span></div>
     </div>`;
   }

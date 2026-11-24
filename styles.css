@@ -755,3 +755,7 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 
 /* Móvil: la fuente y el matiz largo quedan en la sección 2027; el sello indica la versión */
 @media (max-width: 639px) { .hero .h27-fine { display: none; } }
+
+.ch27-otros { margin: 2px 0 6px; font: 700 13px var(--font-cifras); color: var(--accent); }
+.cat-otros { font-style: normal; font: 700 10.5px var(--font-cifras); color: var(--accent); }
+.otros27 .note.warn { margin: 6px 0 12px; }
