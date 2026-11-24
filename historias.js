@@ -321,7 +321,7 @@
     const rows = o.rows; const C = colors();
     const data = rows.filter((r) => !r.sep);
     if (!data.length) { box.innerHTML = '<p class="empty">Sin datos suficientes.</p>'; return; }
-    const rowH = 32, labW = W < 520 ? 108 : 180, vW = 56;
+    const rowH = 32, labW = o.labW || (W < 520 ? 108 : 180), vW = o.vW || 56;
     const vmin = Math.min(0, ...data.map((r) => r.v)), vmax = Math.max(0, ...data.map((r) => r.v));
     const pL = labW + (vmin < 0 ? vW : 6), pR = W - (vmax > 0 ? vW : 6);
     const x = (v) => pL + ((v - vmin) / ((vmax - vmin) || 1)) * (pR - pL);
@@ -330,10 +330,10 @@
     rows.forEach((r, k) => {
       const y = k * rowH + 4;
       if (r.sep) { g += `<line class="grid" x1="${labW}" x2="${W}" y1="${y + rowH / 2}" y2="${y + rowH / 2}" stroke-dasharray="2 4"/><text x="0" y="${y + 21}">⋯</text>`; return; }
-      const isTu = r.key === S.hl, xv = x(r.v), bx = Math.min(x0, xv), bwid = Math.max(1, Math.abs(xv - x0));
+      const isTu = !!S.hl && r.key === S.hl, xv = x(r.v), bx = Math.min(x0, xv), bwid = Math.max(1, Math.abs(xv - x0));
       if (isTu) g += `<rect class="tu-bg" x="0" y="${y + 4}" width="${Math.min(labW - 6, cw(r.ax, 7.9) + 10)}" height="${rowH - 8}" rx="2"/>`;
-      g += `<text ${isTu ? 'class="t-tu" ' : ''}x="${isTu ? 5 : 0}" y="${y + 21}">${esc(r.ax)}</text>`;
-      g += `<rect class="growx" style="--d:${(k * 0.04).toFixed(2)}s;${r.v < 0 ? 'transform-origin:right center' : ''}" x="${bx.toFixed(1)}" y="${y + 6}" width="${bwid.toFixed(1)}" height="${rowH - 12}" fill="${isTu ? C.tu : (r.v < 0 ? o.colorNeg || o.color : o.color)}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''} data-tip="${esc(r.full + ': ' + o.fmt(r.v))}"/>`;
+      g += `<text ${isTu ? 'class="t-tu" ' : r.key && r.key === o.hiKey ? 'class="t-ink" ' : ''}x="${isTu ? 5 : 0}" y="${y + 21}">${esc(r.ax)}</text>`;
+      g += `<rect class="growx" style="--d:${(k * 0.04).toFixed(2)}s;${r.v < 0 ? 'transform-origin:right center' : ''}" x="${bx.toFixed(1)}" y="${y + 6}" width="${bwid.toFixed(1)}" height="${rowH - 12}" fill="${isTu ? C.tu : r.key && r.key === o.hiKey ? o.hiColor : (r.v < 0 ? o.colorNeg || o.color : o.color)}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''} data-tip="${esc(r.full + ': ' + o.fmt(r.v))}"/>`;
       g += r.v < 0 ? `<text class="t-ink" x="${xv - 5}" y="${y + 21}" text-anchor="end">${esc(o.fmt(r.v))}</text>` : `<text class="t-ink" x="${xv + 5}" y="${y + 21}">${esc(o.fmt(r.v))}</text>`;
     });
     g += `<line class="axis" x1="${x0}" x2="${x0}" y1="0" y2="${H}"/>`;
@@ -771,7 +771,67 @@
       },
     },
 
-    // 9. Las que más crecieron (año anterior → año elegido, en soles reales)
+    // 9. Línea base: ¿crecieron más que el resto del Estado?
+    {
+      id: 'vs-estado', need: 'base', col: 'titicaca', sec: 'trayectoria', toc: '¿Más que el resto del Estado?', sk: 'de cada S/ 100 del Estado van a universidades',
+      build() {
+        const B = S.d.baseline && S.d.baseline.anios, N = S.d.nacional || {};
+        if (!B) return { cifra: SD, titulo: 'de cada S/ 100 del Estado van a universidades públicas', html: '<p class="empty">Aún no hay datos del resto del Estado para comparar.</p>' };
+        const ok = (y) => B[y] && N[y] && B[y].total && isNum(N[y].pim);
+        const yrs = S.closed.filter(ok);
+        if (yrs.length < 2) return { cifra: SD, titulo: 'de cada S/ 100 del Estado van a universidades públicas', html: '<p class="empty">Faltan años para comparar.</p>' };
+        const y0 = yrs[0], yZ = yrs[yrs.length - 1], yA = yrs.includes('2016') ? '2016' : y0;
+        const sh = div(N[yZ].pim, val(B[yZ].total, 'pim'));
+        const shares = yrs.map((y) => div(N[y].pim, val(B[y].total, 'pim'))).filter(isNum);
+        const pbiSh = yrs.map((y) => (isNum(B[y].pbi_nominal) && B[y].pbi_nominal > 0 ? div(N[y].dev, B[y].pbi_nominal) : null)).filter(isNum);
+        // A) devengado real yA→yZ
+        const gReal = (a, b) => (isNum(a) && isNum(b) ? div(real(b, yZ), real(a, yA)) - 1 : null);
+        const rowsA = [
+          { key: 'u', ax: 'Universidades', full: 'Universidades públicas', v: gReal(N[yA].dev, N[yZ].dev) },
+          { key: 'e', ax: 'Función Educación', full: 'Función Educación (los 3 niveles de gobierno)', v: gReal(val(B[yA].funcion_educacion, 'dev'), val(B[yZ].funcion_educacion, 'dev')) },
+          { key: 't', ax: 'Todo el Estado', full: 'Presupuesto público total', v: gReal(val(B[yA].total, 'dev'), val(B[yZ].total, 'dev')) },
+        ].filter((r) => isNum(r.v));
+        // B) PIM nominal y0→yZ, en veces (y PBI)
+        const veces = (a, b) => (isNum(a) && isNum(b) && a > 0 ? b / a : null);
+        const yPbi = [...yrs].reverse().find((y) => isNum(B[y].pbi_nominal));
+        const rowsB = [
+          { key: 'u', ax: 'Universidades', full: 'Universidades públicas (PIM)', v: veces(N[y0].pim, N[yZ].pim) },
+          { key: 'e', ax: 'Función Educación', full: 'Función Educación (PIM)', v: veces(val(B[y0].funcion_educacion, 'pim'), val(B[yZ].funcion_educacion, 'pim')) },
+          { key: 'p', ax: `PBI${yPbi !== yZ ? ' (' + yPbi + ')' : ''}`, full: 'PBI nominal (BCRP)', v: yPbi ? veces(B[y0].pbi_nominal, B[yPbi].pbi_nominal) : null },
+          { key: 't', ax: 'Todo el Estado', full: 'Presupuesto público total (PIM)', v: veces(val(B[y0].total, 'pim'), val(B[yZ].total, 'pim')) },
+        ].filter((r) => isNum(r.v)).sort((a, b) => b.v - a.v);
+        const vx = (v) => '×' + new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+        const uA = rowsA.find((r) => r.key === 'u'), tA = rowsA.find((r) => r.key === 't'), eA = rowsA.find((r) => r.key === 'e');
+        const uB = rowsB.find((r) => r.key === 'u'), lessB = rowsB.filter((r) => r.key !== 'u' && r.v > (uB ? uB.v : Infinity));
+        const nNew = isNum(N[yZ].n_unis) && isNum(N[y0].n_unis) ? N[yZ].n_unis - N[y0].n_unis : null;
+        const rng = (a) => (a.length ? `entre ${pct(Math.min(...a), 1)} y ${pct(Math.max(...a), 1)}` : SD);
+        const cents = (v) => (isNum(v) ? nf1.format(v * 100) : SD);
+        return {
+          cifra: `S/ ${esc(cents(sh))}`,
+          titulo: `de cada S/ 100 del presupuesto del Estado fueron a universidades públicas en ${esc(yZ)}. ¿Crecieron más que el resto?`,
+          html: `<p class="lead">Depende de cómo lo mires, y aquí van las dos formas, sin trampa.</p>
+            <p><strong>Mirando lo gastado y descontando la inflación</strong> (${esc(yA)} a ${esc(yZ)}), las universidades crecieron ${esc(pctSigned(uA && uA.v))}: más que todo el Estado (${esc(pctSigned(tA && tA.v))}) y casi igual que toda la función Educación (${esc(pctSigned(eA && eA.v))}).</p>
+            <p><strong>Mirando el presupuesto final en soles de cada año</strong> (${esc(y0)} a ${esc(yZ)}), el de las universidades se multiplicó ${esc(uB ? vx(uB.v) : SD)}${lessB.length ? `, menos que ${esc(lessB.map((r) => r.ax.toLowerCase().replace('todo el estado', 'todo el Estado').replace('función educación', 'la función Educación').replace(/^pbi/, 'el PBI') + ' (' + vx(r.v) + ')').join(', '))}` : ''}.${isNum(nNew) && nNew > 0 ? ` Y eso que en el periodo se sumaron ${esc(nNew)} universidades nuevas.` : ''}</p>
+            <p>En resumen, su peso casi no se mueve: ${esc(rng(shares))} del presupuesto público cada año y ${esc(rng(pbiSh))} del PBI.</p>
+            <figure class="fig anim"><p class="fig-t">Lo gastado, en soles de ${esc(ipcBase())}: ${esc(yA)} a ${esc(yZ)}</p><div data-fig="a"></div></figure>
+            <figure class="fig anim"><p class="fig-t">El presupuesto final, en soles de cada año: ¿cuántas veces se multiplicó de ${esc(y0)} a ${esc(yZ)}?</p><div data-fig="b"></div></figure>
+            ${caveat([
+              'Los años de inicio cambian la foto: ' + y0 + ' y ' + yA + ' dan resultados distintos. Por eso mostramos las dos comparaciones.',
+              'El presupuesto total suma los tres niveles de gobierno y tiene doble conteo por transferencias entre niveles; sirve para comparar tendencias, no para sumar.',
+              'La función Educación incluye colegios, institutos y universidades de los tres niveles de gobierno.',
+              'Que las universidades pesen poco o mucho no dice si el monto es suficiente: eso depende de cuántos estudiantes atienden y de qué calidad se espera.',
+            ])}<p class="src">${esc(SRC_MEF)} Resto del Estado y PBI: ${esc(S.d.baseline.fuente || 'MEF y BCRP')}. Inflación: BCRP.</p>`,
+          mount(el) {
+            return [
+              [$('[data-fig="a"]', el), (b, C = colors()) => hbars(b, { rows: rowsA, labW: 132, color: C.pia, hiKey: 'u', hiColor: C.dev, fmt: (v) => pctSigned(v), aria: `Crecimiento real del gasto devengado ${yA}-${yZ}: universidades, función Educación y todo el Estado` })],
+              [$('[data-fig="b"]', el), (b, C = colors()) => hbars(b, { rows: rowsB, labW: 132, vW: 64, color: C.pia, hiKey: 'u', hiColor: C.pim, fmt: vx, aria: `Veces que se multiplicó el presupuesto final ${y0}-${yZ}: universidades, función Educación, PBI y todo el Estado` })],
+            ];
+          },
+        };
+      },
+    },
+
+    // 10. Las que más crecieron (año anterior → año elegido, en soles reales)
     {
       id: 'crecieron', need: 'base', col: 'cochinilla', sec: 'trayectoria', toc: 'Las que más crecieron', sk: 'cambió el gasto de la universidad típica en un año',
       build(Y) {
@@ -806,7 +866,7 @@
       },
     },
 
-    // 10. Lo que viene en 2027
+    // 11. Lo que viene en 2027
     {
       id: 'en-2027', need: 'base', col: 'maiz', sec: 'ley2027', toc: 'Lo que viene en 2027', sk: 'propone el presupuesto 2027',
       build() {
@@ -897,7 +957,7 @@
     const Y = S.Y;
     let out;
     try { out = st.build(Y); } catch (e) { console.error(e); out = { cifra: '?', titulo: esc(st.sk), html: '<p class="empty">No se pudo calcular esta historia con los datos disponibles.</p>' }; }
-    const partialNote = isPartial() && st.id !== 'real' && st.id !== 'en-2027'
+    const partialNote = isPartial() && !['real', 'vs-estado', 'en-2027'].includes(st.id)
       ? `<p class="parcial">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): lo gastado aún es parcial y no se compara con años cerrados.</p>` : '';
     sec.innerHTML = portada(i, `<h2 id="h-${esc(st.id)}"><span class="cifra">${out.cifra}</span><span class="cap-t">${out.titulo}</span></h2>`) +
       `<div class="cuerpo">${partialNote}${out.html}${st.sec ? `<p class="ver"><a href="index.html#${esc(st.sec)}">Verlo a fondo en el observatorio</a></p>` : ''}</div>`;
@@ -928,7 +988,7 @@
       $('#hero-dek').innerHTML = `gastaron en ${esc(Y)}${par} las ${esc(U.length)} universidades públicas del Perú.${h ? ` La <mark>${esc(label(h))}</mark> no tiene datos ese año.` : ' Elige la tuya y mira a dónde se fue cada sol.'}`;
     }
     tresNumeros(Y, h, U);
-    $('#uni-hint').innerHTML = h ? `Mostrando <strong>${esc(fullName(h))}</strong>. <a href="${esc(fichaHref(h))}">Ver su ficha completa</a>` : 'Las diez historias se personalizan con la tuya.';
+    $('#uni-hint').innerHTML = h ? `Mostrando <strong>${esc(fullName(h))}</strong>. <a href="${esc(fichaHref(h))}">Ver su ficha completa</a>` : 'Las once historias se personalizan con la tuya.';
     $('#year-note').textContent = isPartial() ? `${Y} está en curso: cifras parciales.` : `Último año cerrado: ${S.closed[S.closed.length - 1]}.`;
   }
 

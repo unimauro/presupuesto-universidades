@@ -343,6 +343,128 @@
   }
 
 
+  // ================================================================== uniPicker: combobox con autocompletado
+  // uniPicker(host, {id, label, value, values, multiple, max, placeholder, allLabel, onSelect})
+  //  - single: onSelect(pliego | '' (si allLabel) | null)  · multiple: onSelect([pliegos])
+  const RECENT_KEY = 'rp-recientes';
+  const getRecent = () => { try { const a = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); return Array.isArray(a) ? a.filter(p => uniBy(p)).slice(0, 5) : []; } catch (e) { return []; } };
+  const pushRecent = p => { try { const a = [String(p)].concat(getRecent().filter(x => x !== String(p))).slice(0, 5); localStorage.setItem(RECENT_KEY, JSON.stringify(a)); } catch (e) { /* sin storage */ } };
+  // Resalta (con <mark>) los fragmentos que coinciden ignorando tildes; todo escapado
+  function hlText(text, toks) {
+    text = String(text ?? '');
+    if (!toks.length) return esc(text);
+    let norm = '', map = [];
+    for (let i = 0; i < text.length; i++) {
+      const n = text[i].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      for (let k = 0; k < n.length; k++) { norm += n[k]; map.push(i); }
+    }
+    const marks = new Array(text.length).fill(false);
+    toks.forEach(t => { let from = 0, j; while (t && (j = norm.indexOf(t, from)) >= 0) { for (let k = j; k < j + t.length; k++) marks[map[k]] = true; from = j + t.length; } });
+    let out = '', open = false;
+    for (let i = 0; i < text.length; i++) {
+      if (marks[i] && !open) { out += '<mark>'; open = true; }
+      if (!marks[i] && open) { out += '</mark>'; open = false; }
+      out += esc(text[i]);
+    }
+    return out + (open ? '</mark>' : '');
+  }
+  let pickerSeq = 0;
+  function uniPicker(host, o) {
+    const id = o.id || ('up' + (++pickerSeq)); const listId = id + '-list';
+    let values = o.multiple ? (o.values || []).filter(p => uniBy(p)).map(String) : [];
+    let value = o.multiple ? null : (o.value == null ? null : String(o.value));
+    let items = [], active = -1;
+    const labelOf = p => { if (p === '' && o.allLabel) return o.allLabel; const u = uniBy(p); return u ? `${uName(u)} — ${titleCase(u.nombre || '')}` : ''; };
+    host.innerHTML = `
+      <div class="up${o.multiple ? ' up-multi' : ''}">
+        ${o.label ? `<label class="up-lbl" for="${esc(id)}">${esc(o.label)}</label>` : ''}
+        ${o.multiple ? `<div class="up-chips" aria-live="polite"></div>` : ''}
+        <div class="up-box">
+          <svg class="up-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <input id="${esc(id)}" type="text" role="combobox" aria-expanded="false" aria-controls="${esc(listId)}" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false"
+            placeholder="${esc(o.placeholder || 'Escribe sigla, nombre o ciudad')}" value="${esc(o.multiple ? '' : labelOf(value))}">
+          <button type="button" class="up-x" aria-label="Limpiar"${(o.multiple || !value) ? ' hidden' : ''}>×</button>
+        </div>
+        <ul class="up-list" id="${esc(listId)}" role="listbox" hidden${o.label ? ` aria-label="${esc(o.label)}"` : ''}></ul>
+      </div>`;
+    const root = $('.up', host), inp = $('input', root), list = $('.up-list', root), xb = $('.up-x', root), chips = $('.up-chips', root);
+    const drawChips = () => {
+      if (!chips) return;
+      chips.innerHTML = values.map(p => `<span class="up-chip"><b>${esc(uName(uniBy(p)))}</b><button type="button" data-rm="${esc(p)}" aria-label="Quitar ${esc(uName(uniBy(p)))}">×</button></span>`).join('');
+      inp.disabled = !!(o.max && values.length >= o.max);
+      inp.placeholder = inp.disabled ? `Máximo ${o.max}. Quita una para cambiar.` : (o.placeholder || 'Añade una universidad');
+    };
+    const haystack = u => normTxt([u.corto, u.nombre, u.ciudad, u.departamento, u.pliego].join(' '));
+    const optHtml = (u, i, toks) => `<li role="option" id="${esc(id)}-o${i}" data-p="${esc(u.pliego)}" aria-selected="${i === active}" class="up-opt${i === active ? ' is-active' : ''}">
+        <span class="up-sig">${hlText(uName(u), toks)}</span>
+        <span class="up-nom">${hlText(titleCase(u.nombre || ''), toks)}</span>
+        ${u.departamento ? `<span class="up-dep">${hlText(titleCase(u.ciudad && normTxt(u.ciudad) !== normTxt(u.departamento) ? `${u.ciudad}, ${u.departamento}` : u.departamento), toks)}</span>` : ''}
+      </li>`;
+    function build(q) {
+      const toks = normTxt(q).split(/\s+/).filter(Boolean);
+      const pool = S.unis.filter(u => !values.includes(u.pliego));
+      let html = '';
+      items = [];
+      if (!toks.length) {
+        const rec = getRecent().map(uniBy).filter(u => u && pool.includes(u));
+        const big = unisByPim(S.lastClosed).filter(u => pool.includes(u) && !rec.includes(u)).slice(0, 8);
+        if (o.allLabel) { items.push({ all: true }); html += `<li role="option" id="${esc(id)}-o0" data-p="" class="up-opt up-all${active === 0 ? ' is-active' : ''}" aria-selected="${active === 0}"><span class="up-sig">${esc(o.allLabel)}</span></li>`; }
+        if (rec.length) { html += '<li class="up-grp" role="presentation">Recientes</li>'; rec.forEach(u => { html += optHtml(u, items.length, []); items.push(u); }); }
+        html += '<li class="up-grp" role="presentation">Más grandes (PIM)</li>'; big.forEach(u => { html += optHtml(u, items.length, []); items.push(u); });
+      } else {
+        const found = pool.filter(u => { const h = haystack(u); return toks.every(t => h.includes(t)); })
+          .sort((a, b) => {
+            const sa = normTxt(uName(a)).startsWith(toks[0]) ? 0 : 1, sb = normTxt(uName(b)).startsWith(toks[0]) ? 0 : 1;
+            return sa - sb || (tot(b, S.lastClosed, 'pim') || 0) - (tot(a, S.lastClosed, 'pim') || 0);
+          }).slice(0, 30);
+        found.forEach(u => { html += optHtml(u, items.length, toks); items.push(u); });
+        if (!found.length) html = `<li class="up-empty" role="presentation">Sin coincidencias para “${esc(q)}”. Prueba con la sigla o la ciudad.</li>`;
+      }
+      list.innerHTML = html;
+    }
+    const open = () => { build(inp.value === labelOf(value) ? '' : inp.value); list.hidden = false; inp.setAttribute('aria-expanded', 'true'); };
+    const close = () => { list.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); active = -1; };
+    const setActive = i => {
+      const opts = $$('.up-opt', list); if (!opts.length) return;
+      active = (i + opts.length) % opts.length;
+      opts.forEach((li, k) => { li.classList.toggle('is-active', k === active); li.setAttribute('aria-selected', String(k === active)); });
+      inp.setAttribute('aria-activedescendant', opts[active].id);
+      opts[active].scrollIntoView({ block: 'nearest' });
+    };
+    const choose = p => {
+      if (o.multiple) {
+        if (!p || values.includes(p)) return;
+        values = values.concat([p]); pushRecent(p); inp.value = ''; drawChips(); close();
+        o.onSelect && o.onSelect(values.slice());
+        return;
+      }
+      value = p; inp.value = labelOf(p); xb.hidden = !p; close();
+      if (p) pushRecent(p);
+      o.onSelect && o.onSelect(p);
+    };
+    inp.addEventListener('focus', () => {
+      inp.select(); open();
+      if (isMobile()) setTimeout(() => root.scrollIntoView({ block: 'start', behavior: 'smooth' }), 250);
+    });
+    inp.addEventListener('input', () => { active = -1; open(); if (!o.multiple) xb.hidden = !inp.value; });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (list.hidden) open(); setActive(active + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (list.hidden) open(); setActive(active - 1); }
+      else if (e.key === 'Enter') {
+        const opts = $$('.up-opt', list);
+        const li = opts[active >= 0 ? active : (inp.value.trim() ? 0 : -1)];
+        if (li && !list.hidden) { e.preventDefault(); choose(li.dataset.p); }
+      } else if (e.key === 'Escape') { if (!o.multiple) inp.value = labelOf(value); close(); }
+    });
+    list.addEventListener('mousedown', e => e.preventDefault());
+    list.addEventListener('click', e => { const li = e.target.closest('.up-opt'); if (li) choose(li.dataset.p); });
+    inp.addEventListener('blur', () => setTimeout(() => { if (!root.contains(document.activeElement)) { if (!o.multiple) inp.value = labelOf(value); close(); } }, 120));
+    if (xb) xb.addEventListener('click', () => { inp.value = ''; xb.hidden = true; if (o.allLabel) choose(''); else { value = null; o.onSelect && o.onSelect(null); } inp.focus(); });
+    if (chips) chips.addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (!b) return; values = values.filter(p => p !== b.dataset.rm); drawChips(); o.onSelect && o.onSelect(values.slice()); });
+    drawChips();
+    return { set: p => { value = p; inp.value = labelOf(p); xb.hidden = !p; } };
+  }
+
   // ================================================================== Tabla reutilizable
   // makeTable(host, {id, caption, rows, cols, search, filters, sort, limit, mobilePick, mdef, rank})
   //  cols: [{k, lbl, get(r), html?(r) (ya escapado), fmt?(v), txt?, sticky?, nosort?, m? (siempre visible en móvil)}]
@@ -888,8 +1010,7 @@
       <div class="card">
         <h3>PIA → PIM → devengado, ${esc(yearLbl(y))}</h3>
         <div class="controls" style="margin:8px 0">
-          <label class="grow">Resaltar universidad<input type="search" id="tr-hl" list="tr-hl-list" placeholder="Sigla o nombre" autocomplete="off" value="${esc(S.tray.hl)}"></label>
-          <datalist id="tr-hl-list">${all.map(u => `<option value="${esc(uName(u))}">${esc(titleCase(u.nombre || ''))}</option>`).join('')}</datalist>
+          <div class="grow up-host" id="tr-hl"></div>
           <label>Ordenar por<select id="tr-ord">${Object.entries(ORD).map(([k, [l]]) => `<option value="${k}"${S.tray.order === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
           <label>Cantidad<select id="tr-n">${[[15, 'Top 15'], [30, 'Top 30'], [0, `Todas (${all.length})`]].map(([v, l]) => `<option value="${v}"${+S.tray.n === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
         </div>
@@ -900,7 +1021,7 @@
       <div id="tr-table"></div>
       <div class="grid two" style="margin-top:12px">
         <div class="card">
-          <div class="controls" style="margin-bottom:6px"><label class="grow">Universidad<select id="tr-uni">${uniOptions(S.tray.uni)}</select></label></div>
+          <div class="controls" style="margin-bottom:6px"><div class="grow up-host" id="tr-uni"></div></div>
           <h3>Trayectoria ${esc(uName(tUni))}</h3>
           <p class="sub">PIA, PIM y devengado por año (millones de soles).</p>
           <div class="chart"><canvas id="ch-tray-uni"></canvas></div>
@@ -913,7 +1034,7 @@
         </div>
       </div>`;
     $('#tr-year', el).addEventListener('change', e => setYear(e.target.value));
-    $('#tr-uni', el).addEventListener('change', e => { S.tray.uni = e.target.value; renderTrayectoria(); });
+    uniPicker($('#tr-uni', el), { id: 'tr-uni-in', label: 'Universidad', value: S.tray.uni, onSelect: p => { if (p) { S.tray.uni = p; renderTrayectoria(); } } });
     const trRows = all.map(u => {
       const a = A(u, y) || {}; const pia = tot(u, y, 'pia'), pim = tot(u, y, 'pim');
       const tr = Array.isArray(a.transferencias) ? a.transferencias : [];
@@ -942,7 +1063,7 @@
       ],
     });
 
-    const findU = q => { const n = normTxt(q.trim()); if (!n) return null; return all.find(u => normTxt(uName(u)) === n) || all.find(u => normTxt(uName(u) + ' ' + u.nombre).includes(n)) || null; };
+    const findU = p => (p ? uniBy(p) : null);
     const drawTray = () => {
       const [ordLbl, f] = ORD[S.tray.order] || ORD.pim;
       const sorted = all.slice().sort((p, q) => {
@@ -979,7 +1100,7 @@
       }, `PIA, PIM y devengado por universidad en ${y}`);
     };
     drawTray();
-    $('#tr-hl', el).addEventListener('input', debounce(e => { S.tray.hl = e.target.value; drawTray(); }, 250));
+    uniPicker($('#tr-hl', el), { id: 'tr-hl-in', label: 'Resaltar universidad', value: S.tray.hl || null, placeholder: 'Escribe para resaltar una', onSelect: p => { S.tray.hl = p || ''; drawTray(); } });
     $('#tr-ord', el).addEventListener('change', e => { S.tray.order = e.target.value; drawTray(); });
     $('#tr-n', el).addEventListener('change', e => { S.tray.n = +e.target.value; drawTray(); });
 
@@ -1049,7 +1170,7 @@
           ${legendHtml(cats)}
         </div>
         <div class="card">
-          <div class="controls" style="margin-bottom:6px"><label class="grow">Ver evolución de<select class="c-uni">${uniOptions(st.uni, 'Todas las universidades (suma)')}</select></label></div>
+          <div class="controls" style="margin-bottom:6px"><div class="grow up-host c-uni"></div></div>
           <h3>Evolución ${st.uni ? esc(uName(uniBy(st.uni))) : 'del conjunto'}</h3>
           <p class="sub">Millones de soles por año (${st.metric === 'pim' ? 'PIM' : st.metric === 'pia' ? 'PIA' : 'devengado'}).</p>
           <div class="chart"><canvas id="${key}-evo"></canvas></div>
@@ -1059,7 +1180,7 @@
   }
   function bindComp(el, st, rerender) {
     $('.c-year', el).addEventListener('change', e => setYear(e.target.value));
-    $('.c-uni', el).addEventListener('change', e => { st.uni = e.target.value; rerender(); });
+    uniPicker($('.c-uni', el), { label: 'Ver evolución de', value: st.uni || '', allLabel: 'Todas las universidades (suma)', onSelect: p => { st.uni = p || ''; rerender(); } });
     bindSeg(el, (v, g) => { if (g.closest('.controls') && v) { st.metric = v; rerender(); } });
   }
 
@@ -1468,7 +1589,7 @@
     const link = location.href.split('#')[0] + '#u=' + encodeURIComponent(u.pliego);
     el.innerHTML = `
       <div class="controls">
-        <label class="grow">Universidad<select id="fi-uni">${uniOptions(u.pliego)}</select></label>
+        <div class="grow up-host" id="fi-uni"></div>
         <label>Año<select id="fi-year">${yearOptions(y)}</select></label>
       </div>
       <div class="ficha-head">
@@ -1520,9 +1641,8 @@
 
       <h3 style="margin:24px 0 8px">Comparador</h3>
       <div class="controls">
-        <label>Universidad A<select disabled aria-readonly="true"><option>${esc(uName(u))}</option></select></label>
-        <label>Universidad B<select id="fi-c1">${uniOptions(S.ficha.cmp[0] || '', '— ninguna —')}</select></label>
-        <label>Universidad C<select id="fi-c2">${uniOptions(S.ficha.cmp[1] || '', '— ninguna —')}</select></label>
+        <p class="cmp-a">Comparando <span class="up-chip is-a"><b>${esc(uName(u))}</b></span> con:</p>
+        <div class="grow up-host" id="fi-cmp"></div>
       </div>
       <div class="grid two">
         <div class="card"><h3>Componentes del índice (0–100)</h3><p class="sub">Referencial, no oficial. Más alto = mejor posición relativa. Componentes sin dato no se dibujan.${Array.isArray(idx.ventana) && idx.ventana.length ? ` Ventana: ${esc(idx.ventana.join(', '))}.` : ''}${num(idx.cobertura_pesos) !== null ? ` Cobertura de pesos (${esc(uName(u))}): ${esc(fmtP(idx.cobertura_pesos, 0))}.` : ''}</p><div class="chart sq"><canvas id="ch-radar"></canvas></div></div>
@@ -1534,16 +1654,15 @@
         </div>
       </div>`;
 
-    $('#fi-uni', el).addEventListener('change', e => selectUni(e.target.value, false));
+    uniPicker($('#fi-uni', el), { id: 'fi-uni-in', label: 'Universidad', value: u.pliego, onSelect: p => { if (p) selectUni(p, false); } });
     // Enlace a la página estática de la universidad (u/<slug>/), si existe el mapa de slugs
     loadSlugs().then(m => {
       const sl = m && m[u.pliego]; const box = $('#fi-seo', el);
       if (sl && box && S.ficha.uni === u.pliego) box.innerHTML = `<a href="u/${encodeURIComponent(sl)}/">${esc('Página de esta universidad')}</a>`;
     });
     $('#fi-year', el).addEventListener('change', e => setYear(e.target.value));
-    const onCmp = () => { S.ficha.cmpTouched = true; S.ficha.cmp = [$('#fi-c1', el).value, $('#fi-c2', el).value].filter(Boolean); renderFicha(); };
-    $('#fi-c1', el).addEventListener('change', onCmp);
-    $('#fi-c2', el).addEventListener('change', onCmp);
+    uniPicker($('#fi-cmp', el), { id: 'fi-cmp-in', label: 'Universidades a comparar (hasta 2)', multiple: true, max: 2, values: S.ficha.cmp.filter(p => p !== u.pliego), placeholder: 'Añade una universidad',
+      onSelect: vs => { S.ficha.cmpTouched = true; S.ficha.cmp = vs; renderFicha(); } });
     $('#fi-copy', el).addEventListener('click', async e => {
       try { await navigator.clipboard.writeText(link); e.target.textContent = 'Copiado'; }
       catch (err) { e.target.textContent = 'Copia el enlace de la izquierda'; }
@@ -1921,26 +2040,16 @@
     $('#hero-finding').innerHTML = `En ${esc(y)}, las ${esc(nU)} universidades públicas con presupuesto propio tuvieron <strong>${esc(fmtM(n.pim))}</strong> (PIM); gastaron el <strong>${esc(fmtP(ej))}</strong>${per !== null ? `, y <strong>${esc(Math.round(per * 100))} céntimos</strong> de cada sol gastado fueron a planilla de personal` : ''}.`;
   }
   function setupHeroSearch() {
-    const f = $('#hero-search'), inp = $('#hs-input'), msg = $('#hs-msg');
-    const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    $('#hs-list').innerHTML = S.unis.slice().sort((a, b) => uName(a).localeCompare(uName(b), LOC))
-      .map(u => `<option value="${esc(uName(u))} · ${esc(titleCase(u.nombre || ''))}"></option>`).join('');
-    const find = q => {
-      const n = norm(q); if (!n) return null;
-      const sig = n.split(' · ')[0];
-      return S.unis.find(u => norm(uName(u)) === sig || norm(u.pliego) === n)
-        || S.unis.find(u => norm(uName(u) + ' · ' + titleCase(u.nombre || '')) === n)
-        || S.unis.find(u => norm(u.nombre).includes(n) || norm(uName(u)).includes(n));
-    };
-    const go = () => {
-      const u = find(inp.value);
-      if (!u) { msg.textContent = 'No encontramos esa universidad. Prueba con la sigla o parte del nombre.'; return; }
-      msg.textContent = '';
+    const f = $('#hero-search');
+    let chosen = null;
+    const go = p => {
+      const u = uniBy(p || chosen); if (!u) { $('#hs-msg').textContent = 'Elige una universidad de la lista.'; return; }
+      $('#hs-msg').textContent = '';
       const h = '#u=' + encodeURIComponent(u.pliego);
       if (location.hash === h) handleHash(); else location.hash = h;
     };
+    uniPicker($('#hs-picker'), { id: 'hs-input', label: 'Busca tu universidad', placeholder: 'Sigla, nombre o ciudad, p. ej. UNSAAC', onSelect: p => { chosen = p; if (p) go(p); } });
     f.addEventListener('submit', e => { e.preventDefault(); go(); });
-    inp.addEventListener('change', () => { if (find(inp.value) && inp.value.includes(' · ')) go(); });
   }
 
   // ------------------------------------------------------------------ carga de datos

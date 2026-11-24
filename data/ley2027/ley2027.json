@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-24T05:21:14+00:00",
+ "generado": "2026-11-24T05:24:39+00:00",
  "version": "dictamen",
  "norma": "Dictamen de la Comisión Bicameral de Presupuesto recaído en la Proposición Legislativa N° 00002-2026-2031-CR (Ley de Presupuesto del Sector Público para el Año Fiscal 2027)",
  "fecha": "2026-11-05",
@@ -11572,6 +11572,7 @@
  "disposiciones": [
   {
    "articulo": "Art. 3",
+   "grupo": "Alcance",
    "tema": "alcance",
    "alcance": "general",
    "resumen": "Las reglas de austeridad, personal y modificaciones del Capítulo II son de cumplimiento obligatorio para las universidades públicas.",
@@ -11583,6 +11584,7 @@
   },
   {
    "articulo": "Art. 4.2",
+   "grupo": "Alcance",
    "tema": "control del gasto",
    "alcance": "general",
    "resumen": "Los actos que autoricen gastos sin crédito presupuestario no son eficaces; responden el titular y los jefes de presupuesto y administración.",
@@ -11594,6 +11596,7 @@
   },
   {
    "articulo": "Art. 5.1",
+   "grupo": "Alcance",
    "tema": "control del gasto",
    "alcance": "general",
    "resumen": "El titular (rector), el jefe de presupuesto y el jefe de administración responden por la aplicación de la ley.",
@@ -11605,6 +11608,7 @@
   },
   {
    "articulo": "Art. 6",
+   "grupo": "Personal y docentes",
    "tema": "remuneraciones",
    "alcance": "especifica",
    "resumen": "Prohíbe en las universidades públicas reajustar o crear remuneraciones, bonificaciones, incentivos u otros conceptos, por cualquier fuente.",
@@ -11616,6 +11620,7 @@
   },
   {
    "articulo": "Art. 7.1",
+   "grupo": "Personal y docentes",
    "tema": "aguinaldos y escolaridad",
    "alcance": "especifica",
    "resumen": "Docentes universitarios (Ley 30220) y servidores 276 perciben aguinaldos de Fiestas Patrias y Navidad de hasta S/ 300 c/u y escolaridad de hasta S/ 400.",
@@ -11627,6 +11632,7 @@
   },
   {
    "articulo": "Art. 8.1 (encabezado)",
+   "grupo": "Personal y docentes",
    "tema": "ingreso de personal",
    "alcance": "general",
    "resumen": "Prohíbe incorporar personal y nombrar en el sector público, salvo las excepciones listadas.",
@@ -11638,6 +11644,7 @@
   },
   {
    "articulo": "Art. 8.1 c)",
+   "grupo": "Personal y docentes",
    "tema": "ingreso de personal",
    "alcance": "general",
    "resumen": "Permite contratar por reemplazo de ceses (desde julio de 2025), suplencias y ascensos, por concurso y con plaza registrada en el AIRHSP; no habilita plazas nuevas.",
@@ -11649,6 +11656,7 @@
   },
   {
    "articulo": "Art. 8.1 d)",
+   "grupo": "Personal y docentes",
    "tema": "docentes: nombramiento",
    "alcance": "especifica",
    "resumen": "Exceptúa de la prohibición el nombramiento de docentes universitarios en plaza presupuestada.",
@@ -11660,6 +11668,7 @@
   },
   {
    "articulo": "Art. 8.1 f)",
+   "grupo": "Personal y docentes",
    "tema": "docentes: contratación",
    "alcance": "especifica",
    "resumen": "Exceptúa de la prohibición la contratación de docentes universitarios en plaza presupuestada.",
@@ -11671,6 +11680,7 @@
   },
   {
    "articulo": "Art. 8.2",
+   "grupo": "Personal y docentes",
    "tema": "ingreso de personal",
    "alcance": "general",
    "resumen": "Las excepciones exigen plaza en CAP/PAP o CPE, registro en AIRHSP, certificación presupuestal e informe favorable de presupuesto sobre sostenibilidad futura.",
@@ -11682,6 +11692,7 @@
   },
   {
    "articulo": "Art. 8.3",
+   "grupo": "Personal y docentes",
    "tema": "horas extras",
    "alcance": "general",
    "resumen": "Prohíbe pagar horas extras en todas las entidades, cualquiera sea el régimen laboral.",
@@ -11693,6 +11704,7 @@
   },
   {
    "articulo": "Art. 9.1",
+   "grupo": "Modificaciones presupuestales",
    "tema": "modificaciones: personal",
    "alcance": "general",
    "resumen": "La partida 2.1.1 (retribuciones) no puede habilitar ni ser habilitada, salvo dentro de la partida en el mismo pliego y excepciones tasadas (sentencias, CTS, ESSALUD, etc.).",
@@ -11704,6 +11716,7 @@
   },
   {
    "articulo": "Art. 9.2",
+   "grupo": "Modificaciones presupuestales",
    "tema": "modificaciones: pensiones",
    "alcance": "general",
    "resumen": "La partida 2.2.1 (pensiones) no puede habilitar a otras, salvo entre unidades ejecutoras del mismo pliego.",
@@ -11715,6 +11728,7 @@
   },
   {
    "articulo": "Art. 9.3",
+   "grupo": "CAS",
    "tema": "CAS",
    "alcance": "general",
    "resumen": "La partida de CAS (2.1.1 13) no puede ser habilitada, salvo entre unidades ejecutoras del mismo pliego.",
@@ -11726,6 +11740,7 @@
   },
   {
    "articulo": "Art. 9.4",
+   "grupo": "Modificaciones presupuestales",
    "tema": "modificaciones: cargas sociales",
    "alcance": "general",
    "resumen": "Los recursos de contribuciones a la seguridad social (2.1.3) no pueden destinarse a otras partidas.",
@@ -11737,6 +11752,7 @@
   },
   {
    "articulo": "Art. 9.7",
+   "grupo": "Modificaciones presupuestales",
    "tema": "modificaciones: emergencias",
    "alcance": "general",
    "resumen": "Prohíbe anular créditos de las actividades de atención de emergencias y Fenómeno El Niño, salvo dentro del mismo pliego y actividad.",
@@ -11748,6 +11764,7 @@
   },
   {
    "articulo": "Art. 9.9",
+   "grupo": "Modificaciones presupuestales",
    "tema": "consultorías y publicidad",
    "alcance": "general",
    "resumen": "Las partidas de consultorías, publicidad e imagen institucional y servicios diversos no pueden recibir recursos de otras partidas.",
@@ -11759,6 +11776,7 @@
   },
   {
    "articulo": "Art. 37 a)–b)",
+   "grupo": "Modificaciones presupuestales",
    "tema": "programas presupuestales (PP 0066/0137)",
    "alcance": "general",
    "resumen": "En los programas presupuestales solo se habilitan recursos si se cumplieron las metas físicas; las transferencias entre pliegos exigen productos del mismo programa y decreto supremo.",
@@ -11770,6 +11788,7 @@
   },
   {
    "articulo": "Art. 10.1",
+   "grupo": "Bienes y servicios",
    "tema": "viajes al exterior",
    "alcance": "general",
    "resumen": "Los viajes al exterior con recursos públicos son en clase económica, con excepciones para altos funcionarios en vuelos largos o estancias cortas.",
@@ -11781,6 +11800,7 @@
   },
   {
    "articulo": "Art. 10.2",
+   "grupo": "CAS",
    "tema": "locación y CAS: tope",
    "alcance": "general",
    "resumen": "El honorario mensual de locadores y CAS no puede superar el tope del D.U. 038-2006.",
@@ -11792,6 +11812,7 @@
   },
   {
    "articulo": "Art. 10.3",
+   "grupo": "Bienes y servicios",
    "tema": "telefonía",
    "alcance": "general",
    "resumen": "Tope de gasto en telefonía móvil de S/ 120 mensuales por equipo; un equipo por persona; el exceso lo paga el usuario.",
@@ -11803,6 +11824,7 @@
   },
   {
    "articulo": "Art. 10.4",
+   "grupo": "Bienes y servicios",
    "tema": "vehículos: compra",
    "alcance": "general",
    "resumen": "Solo se compran vehículos para intervenciones propias o para renovar unidades de 10 años o más, con resolución indelegable del titular y en el marco de Invierte.pe.",
@@ -11814,6 +11836,7 @@
   },
   {
    "articulo": "Art. 10.5",
+   "grupo": "Bienes y servicios",
    "tema": "vehículos: uso",
    "alcance": "especifica",
    "resumen": "En las universidades públicas la asignación exclusiva de vehículo es solo para uso oficial del rector.",
@@ -11825,6 +11848,7 @@
   },
   {
    "articulo": "Cuadragésima novena DCF",
+   "grupo": "Bienes y servicios",
    "tema": "celebraciones y agasajos",
    "alcance": "general",
    "resumen": "Prohíbe gastar en celebraciones, agasajos o similares, salvo lo propio de las funciones de la entidad.",
@@ -11836,6 +11860,7 @@
   },
   {
    "articulo": "Art. 14",
+   "grupo": "Bienes y servicios",
    "tema": "contrataciones: umbrales",
    "alcance": "general",
    "resumen": "Licitación pública para obras desde S/ 5 000 000 y para bienes desde S/ 468 000; concurso público para servicios desde S/ 468 000; supervisión obligatoria en obras desde S/ 4 300 000.",
@@ -11847,6 +11872,7 @@
   },
   {
    "articulo": "Art. 11.1–11.3",
+   "grupo": "Inversiones",
    "tema": "inversiones: anulaciones",
    "alcance": "general",
    "resumen": "Anular recursos de inversiones requiere opinión de la OPMI y de presupuesto; no se anulan inversiones con avance >90 %; lo anulado solo va a inversiones con expediente técnico.",
@@ -11858,6 +11884,7 @@
   },
   {
    "articulo": "Art. 12.1",
+   "grupo": "Inversiones",
    "tema": "inversiones: previsión presupuestaria",
    "alcance": "general",
    "resumen": "Permite convocar en los últimos 4 meses de 2027 con previsión presupuestaria basada en el proyecto de presupuesto 2028.",
@@ -11869,6 +11896,7 @@
   },
   {
    "articulo": "Quincuagésima quinta DCF",
+   "grupo": "Inversiones",
    "tema": "compromisos plurianuales",
    "alcance": "general",
    "resumen": "Contratos o adendas que generen gasto en años siguientes requieren certificación o previsión presupuestaria previa.",
@@ -11880,6 +11908,7 @@
   },
   {
    "articulo": "Art. 82.1",
+   "grupo": "Canon",
    "tema": "canon",
    "alcance": "especifica",
    "resumen": "Canon, sobrecanon, regalías, FOCAM y renta de aduanas (y saldos): hasta 50 % inversiones, 5 % preinversión, 20 % gasto corriente de investigación y mantenimiento, 10 % software, licencias, patentes y CBC; nunca remuneraciones.",
@@ -11891,6 +11920,7 @@
   },
   {
    "articulo": "Art. 82.2",
+   "grupo": "Canon",
    "tema": "canon",
    "alcance": "especifica",
    "resumen": "Mismos porcentajes para saldos de canon transferidos por gobiernos regionales e incorporados como Donaciones y Transferencias.",
@@ -11902,6 +11932,7 @@
   },
   {
    "articulo": "Art. 82.3",
+   "grupo": "Canon",
    "tema": "canon",
    "alcance": "especifica",
    "resumen": "Para usar el canon según el art. 82, exceptúa a las universidades de las reglas de anulación de inversiones (11.3) y de programas presupuestales (37 a).",
@@ -11913,6 +11944,7 @@
   },
   {
    "articulo": "Art. 17",
+   "grupo": "CAS",
    "tema": "CAS",
    "alcance": "general",
    "resumen": "Prohíbe financiar CAS con mayores ingresos o saldos de balance de Recursos Directamente Recaudados.",
@@ -11924,6 +11956,7 @@
   },
   {
    "articulo": "Art. 18",
+   "grupo": "CAS",
    "tema": "CAS",
    "alcance": "general",
    "resumen": "Prohíbe contratar CAS con recursos de inversiones y financiar CAS desde partidas de mantenimiento.",
@@ -11935,6 +11968,7 @@
   },
   {
    "articulo": "Art. 19.1",
+   "grupo": "CAS",
    "tema": "CAS",
    "alcance": "general",
    "resumen": "Fija un número máximo de puestos CAS por pliego según el Anexo I (no se obtuvo el Anexo I por pliego).",
@@ -11946,6 +11980,7 @@
   },
   {
    "articulo": "Art. 19.2",
+   "grupo": "CAS",
    "tema": "CAS",
    "alcance": "general",
    "resumen": "Los CAS transitorios fuera del límite no requieren financiamiento anualizado y vencen a más tardar el 31-dic-2027.",
@@ -11957,6 +11992,7 @@
   },
   {
    "articulo": "Art. 22",
+   "grupo": "Personal y docentes",
    "tema": "incrementos: 276",
    "alcance": "general",
    "resumen": "Autoriza al MEF a aprobar por decreto supremo un nuevo MUC para servidores 276 del GN (incluye administrativos de universidades), según el convenio colectivo centralizado 2026-2027.",
@@ -11968,6 +12004,7 @@
   },
   {
    "articulo": "Art. 24",
+   "grupo": "Personal y docentes",
    "tema": "incrementos: 276 CAFAE",
    "alcance": "general",
    "resumen": "Autoriza al MEF a aprobar nuevos montos de la Escala Base del Incentivo Único CAFAE para servidores 276.",
@@ -11979,6 +12016,7 @@
   },
   {
    "articulo": "Art. 25",
+   "grupo": "Personal y docentes",
    "tema": "incrementos: 728",
    "alcance": "general",
    "resumen": "Autoriza al MEF a aprobar un incremento mensual para servidores 728 del GN y gobiernos regionales.",
@@ -11990,6 +12028,7 @@
   },
   {
    "articulo": "Art. 27",
+   "grupo": "Personal y docentes",
    "tema": "incrementos: CAS",
    "alcance": "general",
    "resumen": "Autoriza al MEF a aprobar un incremento mensual para servidores CAS del GN y gobiernos regionales.",
@@ -12001,6 +12040,7 @@
   },
   {
    "articulo": "Art. 29",
+   "grupo": "Personal y docentes",
    "tema": "incrementos: servicio civil",
    "alcance": "general",
    "resumen": "Autoriza al MEF a aprobar un incremento mensual de la compensación de servidores de la Ley 30057.",
@@ -12012,6 +12052,7 @@
   },
   {
    "articulo": "Art. 32",
+   "grupo": "Personal y docentes",
    "tema": "negociación colectiva",
    "alcance": "general",
    "resumen": "Exceptúa de la prohibición del art. 6 los conceptos aprobados por convenios colectivos, actas o laudos conforme a la Ley 31188.",
@@ -12023,6 +12064,7 @@
   },
   {
    "articulo": "Art. 33",
+   "grupo": "Personal y docentes",
    "tema": "negociación colectiva",
    "alcance": "general",
    "resumen": "Los recursos para negociación colectiva descentralizada (2.5.6 1.1 1/2) no pueden moverse a otras partidas ni recibir recursos.",
@@ -12034,6 +12076,7 @@
   },
   {
    "articulo": "Art. 34",
+   "grupo": "Personal y docentes",
    "tema": "arbitrajes laborales",
    "alcance": "general",
    "resumen": "Los laudos laborales deben respetar las normas fiscales y las medidas de austeridad de la ley.",
@@ -12045,6 +12088,7 @@
   },
   {
    "articulo": "Trigésima sétima DCF",
+   "grupo": "Personal y docentes",
    "tema": "remuneraciones",
    "alcance": "general",
    "resumen": "Todo ingreso del personal se aprueba en montos fijos; no se permiten porcentajes, sistemas vinculantes ni indexación.",
@@ -12056,6 +12100,7 @@
   },
   {
    "articulo": "Art. 79",
+   "grupo": "Personal y docentes",
    "tema": "docentes: bonificación investigador",
    "alcance": "especifica",
    "resumen": "MINEDU puede transferir hasta S/ 26 521 910 a universidades para la bonificación especial del docente investigador (art. 86 Ley 30220), vía decreto supremo; exceptúa del art. 6.",
@@ -12067,6 +12112,7 @@
   },
   {
    "articulo": "Art. 66.3",
+   "grupo": "Investigación y estudiantes",
    "tema": "docentes: incentivo investigación",
    "alcance": "especifica",
    "resumen": "Universidades con fondos concursables pueden pagar incentivos a docentes investigadores con cargo a Donaciones y Transferencias, con conformidad del Vicerrectorado de Investigación.",
@@ -12078,6 +12124,7 @@
   },
   {
    "articulo": "Art. 64",
+   "grupo": "Investigación y estudiantes",
    "tema": "investigación: viáticos externos",
    "alcance": "especifica",
    "resumen": "Universidades (SINACTI) pueden pagar pasajes, alimentación y hospedaje a científicos externos para apoyo técnico, evaluaciones y jurados de CTI.",
@@ -12089,6 +12136,7 @@
   },
   {
    "articulo": "Art. 78",
+   "grupo": "Investigación y estudiantes",
    "tema": "estudiantes: subvenciones",
    "alcance": "especifica",
    "resumen": "Universidades pueden otorgar subvenciones a estudiantes y graduados (movilidad, congresos, concursos, titulación) por cualquier fuente; MINEDU dicta lineamientos en 30 días.",
@@ -12100,6 +12148,7 @@
   },
   {
    "articulo": "Art. 13.1 ñ)",
+   "grupo": "Transferencias",
    "tema": "transferencias recibidas",
    "alcance": "especifica",
    "resumen": "MINEDU puede transferir hasta S/ 169 419 978 al INEI y/o universidades públicas, por convenio, para formación, capacitación y evaluación en materia educativa.",
@@ -12111,6 +12160,7 @@
   },
   {
    "articulo": "Art. 13 (MINCETUR, literal iv)",
+   "grupo": "Transferencias",
    "tema": "transferencias recibidas",
    "alcance": "especifica",
    "resumen": "MINCETUR puede transferir hasta S/ 2 000 000 a la UNTRM, la UN de San Martín, la UNA Puno, la UNSA y CENFOTUR Cusco para formar intérpretes de turismo comunitario.",
@@ -12122,6 +12172,7 @@
   },
   {
    "articulo": "Art. 60",
+   "grupo": "Transferencias",
    "tema": "transferencias otorgadas",
    "alcance": "especifica",
    "resumen": "Universidades pueden transferir recursos (RO, canon, RDR) al IGP, SENAMHI, INAIGEM, INGEMMET, CENEPRED y otros para estudios de riesgo de desastres (PP 0068), por resolución del titular.",
@@ -12133,6 +12184,7 @@
   },
   {
    "articulo": "Art. 16.1",
+   "grupo": "Modificaciones presupuestales",
    "tema": "modificaciones sectoriales",
    "alcance": "general",
    "resumen": "Ministerios y entidades de su sector pueden transferirse recursos RO por decreto supremo para implementar políticas públicas (aplicable a MINEDU y universidades si se consideran de su sector).",
@@ -12144,6 +12196,7 @@
   },
   {
    "articulo": "Art. 15.1",
+   "grupo": "Reserva y universidades nuevas",
    "tema": "reserva de contingencia",
    "alcance": "general",
    "resumen": "El MEF puede asignar recursos de la Reserva de Contingencia a entidades del GN para reactivación, seguridad, elecciones y Panamericanos 2027.",
@@ -12155,6 +12208,7 @@
   },
   {
    "articulo": "Décima sétima DCF",
+   "grupo": "Reserva y universidades nuevas",
    "tema": "reserva de contingencia",
    "alcance": "general",
    "resumen": "El MEF puede retirar recursos RO de los pliegos (incluidas universidades) hacia la Reserva de Contingencia, por decreto supremo.",
@@ -12166,6 +12220,7 @@
   },
   {
    "articulo": "Art. 87.1–87.2",
+   "grupo": "Reserva y universidades nuevas",
    "tema": "universidades nuevas",
    "alcance": "especifica",
    "resumen": "El MEF puede financiar con la Reserva de Contingencia (RO) la implementación inicial de 26 universidades creadas por ley, con refrendo de MINEDU; no fija monto.",
@@ -12177,6 +12232,7 @@
   },
   {
    "articulo": "Art. 87.3",
+   "grupo": "Reserva y universidades nuevas",
    "tema": "universidades nuevas: CAS",
    "alcance": "especifica",
    "resumen": "Universidades que inician desde el 2.º semestre de 2026 registran puestos CAS en el AIRHSP sin sujetarse al tope del Anexo I.",
@@ -12188,6 +12244,7 @@
   },
   {
    "articulo": "Art. 87.4",
+   "grupo": "Reserva y universidades nuevas",
    "tema": "moratoria",
    "alcance": "especifica",
    "resumen": "Moratoria en 2027 para crear y autorizar nuevas universidades públicas, salvo las de licencia denegada y las de la Ley 30597 con su oferta actual.",

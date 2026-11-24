@@ -190,3 +190,30 @@ D = [
      "Moratoria en 2027 para crear y autorizar nuevas universidades públicas, salvo las de licencia denegada y las de la Ley 30597 con su oferta actual.",
      "la moratoria para la creación y autorización de funcionamiento de nuevas universidades públicas.", None),
 ]
+
+
+def grupo(tema):
+    """Agrupa el tema (subcategoría) en uno de 10 grupos para filtrar."""
+    t = tema.lower()
+    if t in ("alcance", "control del gasto"):
+        return "Alcance"
+    if t.startswith("universidades nuevas") or t in ("reserva de contingencia", "moratoria"):
+        return "Reserva y universidades nuevas"
+    if t == "canon":
+        return "Canon"
+    if "investigación" in t or t.startswith("estudiantes"):
+        return "Investigación y estudiantes"
+    if t.startswith("transferencias"):
+        return "Transferencias"
+    if t == "cas" or t.startswith("locación y cas"):
+        return "CAS"
+    if t.startswith("inversiones") or t == "compromisos plurianuales":
+        return "Inversiones"
+    if t.startswith("modificaciones") or t.startswith("programas presupuestales") or t == "consultorías y publicidad":
+        return "Modificaciones presupuestales"
+    if t in ("viajes al exterior", "telefonía", "celebraciones y agasajos", "contrataciones: umbrales") or t.startswith("vehículos"):
+        return "Bienes y servicios"
+    if t in ("remuneraciones", "aguinaldos y escolaridad", "ingreso de personal", "horas extras",
+             "negociación colectiva", "arbitrajes laborales") or t.startswith(("docentes", "incrementos")):
+        return "Personal y docentes"
+    raise ValueError(f"tema sin grupo: {tema}")

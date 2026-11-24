@@ -94,12 +94,10 @@
     <p class="lede">Cuánto se les asignó al inicio del año (<abbr title="Presupuesto Institucional de Apertura">PIA</abbr>), cuánto terminaron teniendo (<abbr title="Presupuesto Institucional Modificado">PIM</abbr>), cuánto gastaron realmente (<abbr title="Gasto reconocido como obligación de pago">devengado</abbr>), en qué y con qué dinero.</p>
     <p class="hero-finding" id="hero-finding">En 2025, las 65 universidades públicas con presupuesto propio tuvieron <strong>S/ 7.7 mil M</strong> (PIM); gastaron el <strong>90.1 %</strong>, y <strong>47 céntimos</strong> de cada sol gastado fueron a planilla de personal.</p>
     <form class="hero-search" id="hero-search" role="search" autocomplete="off">
-      <label for="hs-input">Busca tu universidad</label>
       <div class="hs-row">
-        <input id="hs-input" type="search" list="hs-list" placeholder="Sigla o nombre, p. ej. UNSAAC" aria-describedby="hs-msg">
+        <div id="hs-picker" class="up-host grow"></div>
         <button type="submit" class="btn">Ver ficha</button>
       </div>
-      <datalist id="hs-list"></datalist>
       <p id="hs-msg" class="note" aria-live="polite"></p>
     </form>
     <p class="hero-meta" id="hero-meta"></p>

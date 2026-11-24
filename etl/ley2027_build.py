@@ -266,7 +266,7 @@ def parse_anexo8(codigos):
 def disposiciones():
     """Lista de disposiciones con validación de la cita textual contra el dictamen."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from ley2027_disposiciones import D
+    from ley2027_disposiciones import D, grupo
     raw = "\n".join((p.extract_text() or "") for p in pypdf.PdfReader(CACHE / "Dictamen_PL00002_LP.pdf").pages)
     norm = lambda x: re.sub(r"\s+", " ", x).strip()
     texto = norm(raw)
@@ -278,7 +278,7 @@ def disposiciones():
             print(f"AVISO: cita no encontrada literalmente ({art}): {cita[:60]}...")
         if len(cita.split()) > 40:
             print(f"AVISO: cita > 40 palabras ({art})")
-        out.append(OrderedDict(articulo=art, tema=tema, alcance=alcance, resumen=resumen, cita=cita,
+        out.append(OrderedDict(articulo=art, grupo=grupo(tema), tema=tema, alcance=alcance, resumen=resumen, cita=cita,
                                cita_verificada=ok, monto=monto, url=url,
                                fuente_texto="texto sustitutorio del dictamen (5-nov-2026)"))
     return out

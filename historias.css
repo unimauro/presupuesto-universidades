@@ -96,7 +96,7 @@ h1{font:900 clamp(44px,13.4vw,112px)/.88 var(--font-display);font-stretch:62%;le
 .indice a b{font:900 26px/1 var(--font-display);font-stretch:62%;min-width:1.4em;font-variant-numeric:tabular-nums}
 .indice a:hover span{text-decoration:underline;text-underline-offset:3px}
 @media (min-width:720px){
-  .indice ol{grid-template-columns:repeat(5,1fr)}
+  .indice ol{grid-template-columns:repeat(4,1fr)}
   .indice a{flex-direction:column;align-items:flex-start;justify-content:space-between;min-height:132px;padding:10px 12px 12px;font-size:15px}
   .indice a b{font-size:44px}
 }
@@ -306,6 +306,7 @@ details.datos summary{cursor:pointer;min-height:44px;display:flex;align-items:ce
 @media (min-width:1024px){
   .hero-in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:0 56px;align-items:start}
   .hero-side{padding-top:18px}
+  .indice ol{grid-template-columns:repeat(6,1fr)}
   h1{font-size:clamp(76px,7.4vw,100px);max-width:none}
   .hero-num .cifra{font-size:clamp(120px,13vw,180px)}
   .hero-num .unidad{font-size:clamp(34px,3.6vw,52px)}
