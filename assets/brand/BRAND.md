@@ -128,7 +128,8 @@ Las portadas de capítulo mantienen su color en ambos temas.
 - Espacios no separables entre `S/`, número y unidad (no se parte en dos líneas).
 - Porcentajes: ≥ 100 % sin decimales; variaciones ≥ 1000 % como `×11.5 veces`; signo menos tipográfico `−`.
 - Cifra héroe: número + unidad aparte (`S/ 7.0` + `mil millones`).
-- Cuando hay que comparar montos cercanos (PIA vs devengado) se usa el formato fino `S/ 6,954.6 M` (`solesF()` en historias.js).
+- Cuando hay que comparar montos cercanos (PIA vs devengado) se usa el formato fino `S/ 6,954.6 M` (`solesF()` en historias.js);
+  en las OG de escalones (`og.png`) se admite `S/ 6.95 mil millones` (2 decimales) por la misma razón.
 
 ## 5c. Equivalencias para `styles.css` (index)
 | Token actual de index | Token v2 | Claro | Oscuro |
@@ -147,6 +148,8 @@ Las portadas de capítulo mantienen su color en ambos temas.
 | `--c-pia` / `--c-pim` / `--c-dev` | `--color-pia` / `--color-pim` / `--color-dev` | `#8A7756` / `#2B3FA8` / `#C81E64` | `#B5A68C` / `#7C8EF0` / `#FF5C9A` |
 | `--good` / `--warn` / `--bad` | (semáforo) | `#0B6B4E` / `#A27A00` / `#C4122F` | `#3FBF8C` / `#E0B341` / `#FF6B7A` |
 | `--good-bg` / `--warn-bg` / `--bad-bg` | | `#D7EBDF` / `#F6E9C2` / `#F6D6DA` | `#163326` / `#3A2F12` / `#3E1820` |
+| `--warn-text` (texto sobre `--warn-bg`, AA en 12–13 px) | | `#6B5100` | `#E0B341` |
+| `--sem-good` / `--sem-warn` / `--sem-bad` (barras y círculos de mapa) | | selva `#0B6B4E` / ají `#F2B705` / cochinilla `#C4122F` | `#3FBF8C` / `#F7C843` / `#FF6B7A` |
 | `--g1` 2.1 | `--color-personal` | `#4A1F6B` | `#A57BD6` |
 | `--g2` 2.2 | `--color-pensiones` | `#9B7BC0` | `#D2BDF0` |
 | `--g3` 2.3 | `--color-bys` | `#D9651A` | `#F59A45` |
@@ -168,6 +171,11 @@ Archivos sin cambios: `logo.svg`, `logo-dark.svg`, `logo-mark.svg`, favicons, `a
 `etl/og_generar.py`; regenerar con la paleta y fuentes de esta versión: fondo `#4A1F6B` o `#F4EEE2`, cifra en Archivo
 62 %/900 color ají `#F2B705` o chicha `#C81E64`, textos en Atkinson). TTF: `~/Library/Fonts/Archivo[wdth,wght].ttf` y
 `AtkinsonHyperlegibleNext[wght].ttf` (github.com/google/fonts `ofl/archivo`, `ofl/atkinsonhyperlegiblenext`).
+
+**Fuentes en las OG (rsvg/pango):** pango no aplica el eje de ancho de una fuente variable, así que `font-stretch:62%` sale a
+ancho normal. `etl/og_generar.py --instanciar-archivo` crea con fontTools la instancia `ArchivoExtraCondensed[wght].ttf`
+(wdth = 62, conserva el eje de peso) en `~/Library/Fonts/`; las OG la usan por el nombre "Archivo ExtraCondensed".
+La guarda sobre fondo maíz lleva una línea de tinta de 4 px encima para que su tramo maíz no se pierda.
 
 ## 7. Tono
 Pícaro y cercano, nunca acusador. Describir datos: "no se gastó", "quedó sin devengar", "baja ejecución". Prohibido
