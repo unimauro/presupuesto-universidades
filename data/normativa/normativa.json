@@ -1,8 +1,8 @@
 {
- "generado": "2026-11-23T23:50:39",
+ "generado": "2026-11-23T23:52:30",
  "notas": [
   "Fuente de normas: buscador de normas legales de gob.pe (MEF y MINEDU) + PDFs oficiales (El Peruano/anexos).",
-  "PIA por pliego: Anexo 4 de cada Ley de Presupuesto (copias de mef.gob.pe vía gob.pe o Internet Archive; mef.gob.pe bloquea la descarga automatizada). 2016 (Ley 30372) y Proyecto 2027 no ubicados.",
+  "PIA por pliego: Anexo 4 de cada Ley de Presupuesto (copias de mef.gob.pe vía gob.pe o Internet Archive; mef.gob.pe bloquea la descarga automatizada). 2016 (Ley 30372) no ubicado. El presupuesto 2027 lo cubre data/ley2027/.",
   "transferencias: solo DS/DU de transferencia de partidas o crédito suplementario que mencionan universidades en gob.pe; la cobertura NO es exhaustiva (hay DS que transfieren a 'diversos pliegos' sin mencionar universidades en el sumario).",
   "por_pliego vacío = el PDF no desagrega por universidad o no se pudo leer; no se imputa.",
   "desglose_fuente: 'anexo' (tabla del anexo), 'cuerpo' (filas 5xx en el texto), 'cuerpo_pliego_unico' (DS a favor de UNA universidad: recibe el total), 'cuerpo_tabla_a_la' (TOTAL EGRESOS bajo el pliego en la tabla A LA).",
@@ -13,7 +13,7 @@
   "Regenerar (venv ~/.venvs/pu-normativa): normativa_descubrir.py → normativa_descargar.py → normativa_texto.py → normativa_leyes.py → normativa_canon.py → normativa_build.py (todos en etl/)."
  ],
  "resumen": {
-  "documentos": 141,
+  "documentos": 139,
   "transferencias": 73,
   "transferencias_con_desglose": 58,
   "transferencias_que_cuadran": 40,
@@ -645,13 +645,6 @@
     "572": 25648738,
     "573": 23919705
    }
-  },
-  {
-   "anio": 2027,
-   "norma": "Proyecto de Ley de Presupuesto 2027",
-   "url": "https://www.mef.gob.pe/contenidos/presu_publ/sectr_publ/proy_2027/Anexos/Anexo_4.PDF",
-   "pia_por_pliego": {},
-   "nota": "No se pudo descargar el Anexo 4 (mef.gob.pe bloquea descarga automatizada y no hay copia archivada)."
   }
  ],
  "transferencias": [
@@ -21071,18 +21064,6 @@
    "anio": 2025,
    "fecha": "2025-12-30",
    "tipo": "ds"
-  },
-  {
-   "titulo": "Proyecto de Ley de Presupuesto 2027 — Anexo 4: Distribución del gasto por niveles de gobierno, pliegos y fuentes de financiamiento (AF 2027)",
-   "url": "https://www.mef.gob.pe/contenidos/presu_publ/sectr_publ/proy_2027/Anexos/Anexo_4.PDF",
-   "anio": 2026,
-   "tipo": "ley"
-  },
-  {
-   "titulo": "Proyecto de Ley de Presupuesto del Sector Público para el AF 2027 (PL 00002/2026-2031-CR, presentado por el Ejecutivo el 28-ago-2026, Oficio 242-2026-PR) — dictamen; copia NO oficial (lpderecho.pe). Anexo 4 por pliego no ubicado en fuente oficial accesible.",
-   "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
-   "anio": 2026,
-   "tipo": "ley"
   },
   {
    "titulo": "MEF — Consulta de Transferencias a los Gobiernos Nacional, Regional, Local y EPS (canon, sobrecanon, regalías y FOCAM a universidades)",
