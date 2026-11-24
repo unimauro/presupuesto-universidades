@@ -1774,7 +1774,7 @@
           mobilePick: ['monto', 'acum', 'hist'], mdef: 'monto',
           filters: [depFilter(o => o.u, rows), { k: 'nv', lbl: 'Estado', opts: [['', 'Todos'], ['n', 'Solo NUEVOS'], ['v', 'Solo los que ya venían']], test: (o, v) => (v === 'n') === o.nuevo }],
           cols: [
-            { k: 'proy', lbl: 'Proyecto', sticky: true, m: true, wrap: true, get: o => o.nombre || '', html: o => `<span class="proy-n">${esc(titleCase(o.nombre || 'Proyecto'))}</span><span class="uni-sub">${o.nuevo ? '<span class="tag new">NUEVO</span> ' : '<span class="tag">Ya venía</span> '}${esc(o.codigo || '')} · ${o.u ? `<a href="#u=${encodeURIComponent(o.u.pliego)}">${esc(uName(o.u))}</a>` : esc(o.uni || '')}</span>` },
+            { k: 'proy', lbl: 'Proyecto', sticky: true, m: true, wrap: true, get: o => o.nombre || '', html: o => `<span class="proy-n" title="${esc(o.nombre || '')}">${esc(shortTxt(titleCase(o.nombre || 'Proyecto'), isMobile() ? 90 : 160))}</span><span class="proy-meta">${o.nuevo ? '<span class="tag new">NUEVO</span> ' : '<span class="tag">Ya venía</span> '}${esc(o.codigo || '')} · ${o.u ? `<a href="#u=${encodeURIComponent(o.u.pliego)}">${esc(uName(o.u))}</a>` : esc(o.uni || '')}</span>` },
             { k: 'monto', lbl: 'Monto 2027', m: true, get: o => num(o.monto_2027), html: o => `<strong>${esc(soles(num(o.monto_2027)))}</strong>` },
             { k: 'hist', lbl: 'PIM / devengado 2021-2026', nosort: true, get: () => null, html: o => o.nuevo ? '<span class="muted small">sin historia</span>' : sparkSvg(o.historia) },
             { k: 'acum', lbl: 'Devengado acumulado', get: o => num(o.dev_acumulado), fmt: v => num(v) === null ? '—' : soles(v) },
@@ -1790,7 +1790,7 @@
         search: { ph: 'Actividad o universidad', text: a => [a.nombre, a.codigo, a.uni, a.u && a.u.nombre, a.u && a.u.departamento].join(' ') },
         filters: [depFilter(a => a.u, acts)],
         cols: [
-          { k: 'act', lbl: 'Actividad', sticky: true, m: true, wrap: true, get: a => a.nombre || '', html: a => `<span class="proy-n">${esc(titleCase(a.nombre || 'Actividad'))}</span><span class="uni-sub">${esc(a.codigo || '')} · ${a.u ? `<a href="#u=${encodeURIComponent(a.u.pliego)}">${esc(uName(a.u))}</a>` : esc(a.uni || '')}</span>` },
+          { k: 'act', lbl: 'Actividad', sticky: true, m: true, wrap: true, get: a => a.nombre || '', html: a => `<span class="proy-n">${esc(titleCase(a.nombre || 'Actividad'))}</span><span class="proy-meta">${esc(a.codigo || '')} · ${a.u ? `<a href="#u=${encodeURIComponent(a.u.pliego)}">${esc(uName(a.u))}</a>` : esc(a.uni || '')}</span>` },
           { k: 'monto', lbl: 'Monto 2027', m: true, get: a => num(a.monto_2027), fmt: soles },
         ],
       });

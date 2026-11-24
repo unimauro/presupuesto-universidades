@@ -1,0 +1,121 @@
+/* =====================================================================
+   HERO v3: arte peruano (sol Inti, cordillera con andenes, frontón cuyas
+   columnas son el PIM 2012-2025) + guarda de pallay como borde inferior.
+   Se carga DESPUÉS de styles.css. Todo va bajo .hero-v3 para no pisar nada.
+   Arte: assets/hero/hero.svg (escritorio), hero-movil.svg (banda móvil),
+   guarda.svg (tesela). Regenerar con: python3 assets/hero/generar_hero.py
+   ===================================================================== */
+.hero.hero-v3 {
+  --guarda-h: 20px;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: calc(var(--guarda-h) + 4px);   /* deja sitio a la guarda */
+  overflow: hidden;
+}
+.hero.hero-v3 > * { max-width: none; }
+.hero-v3 .hero-txt { max-width: 720px; padding-bottom: 18px; }
+
+/* Título más chico: 3-4 líneas en escritorio, 4 en móvil */
+.hero.hero-v3 h1 {
+  font-size: clamp(40px, 10.6vw, 60px);
+  line-height: .9;
+  max-width: 15ch;
+  margin-bottom: 14px;
+}
+.hero-v3 .lede { font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
+.hero-v3 .hero-finding { margin-top: 0; }
+
+/* Guarda de pallay: línea de tinta + franja de 9 colores con rombos */
+.hero.hero-v3::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: calc(var(--guarda-h) + 4px);
+  border-top: 4px solid #1E1428;
+  background: url("guarda.svg") left top / auto var(--guarda-h) repeat-x;
+  box-sizing: border-box;
+}
+
+/* ---------- Arte ---------- */
+.hero-v3 .hero-arte {
+  position: relative;
+  container-type: inline-size;
+  margin: 0 -16px;                 /* a sangre en móvil */
+  line-height: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.hero-v3 .hero-arte img { display: block; width: 100%; height: auto; aspect-ratio: 375 / 150; }
+
+/* Cifras colgadas (solo escritorio; en móvil se lee la frase #hero-finding) */
+.hero-v3 .hc { display: none; }
+
+@media (min-width: 1024px) {
+  .hero.hero-v3 {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr);
+    column-gap: clamp(24px, 3vw, 48px);
+    align-items: end;
+    padding-top: 44px;
+  }
+  .hero-v3 .hero-txt { align-self: center; padding-bottom: 40px; }
+  .hero.hero-v3 h1 { font-size: clamp(56px, 5.6vw, 84px); max-width: 11.5ch; line-height: .88; }
+  .hero-v3 .lede { font-size: 16px; max-width: 52ch; }
+  /* En escritorio las cifras las cuentan las etiquetas colgadas: la frase queda para lectores de pantalla */
+  .hero-v3 .hero-finding {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .hero-v3 .hero-arte { margin: -44px 0 0; align-self: end; max-width: 600px; justify-self: end; width: 100%; }
+  .hero-v3 .hero-arte img { aspect-ratio: 600 / 640; }
+
+  /* cordel de feria del que cuelgan las etiquetas */
+  .hero-v3 .hero-arte::before {
+    content: ""; position: absolute; left: -4%; right: -4%; top: 0;
+    height: 2px; background: #F4EEE2; opacity: .8; z-index: 1;
+  }
+  .hero-v3 .hc {
+    display: block; position: absolute; z-index: 2;
+    padding: 1.6cqw 2.4cqw 1.9cqw;
+    border: 2px solid #1E1428;
+    background: #F4EEE2; color: #1E1428;
+    box-shadow: 4px 4px 0 #1E1428;
+    line-height: 1;
+    transform-origin: 50% calc(-1 * var(--cuerda));
+    transform: rotate(var(--giro, 0deg));
+  }
+  /* la cuerda: sube hasta el cordel */
+  .hero-v3 .hc::before {
+    content: ""; position: absolute; left: 50%; bottom: 100%;
+    width: 2px; height: var(--cuerda); margin-left: -1px; background: #F4EEE2;
+  }
+  /* el ojal */
+  .hero-v3 .hc::after {
+    content: ""; position: absolute; left: 50%; top: 5px; width: 8px; height: 8px; margin-left: -4px;
+    border-radius: 50%; background: #2B3FA8; border: 2px solid #1E1428; box-sizing: border-box;
+  }
+  .hero-v3 .hc b {
+    display: block; margin-top: 1.4cqw;
+    font-family: var(--font-display); font-weight: 900; font-stretch: 62%;
+    font-size: clamp(30px, 9cqw, 52px); letter-spacing: -.01em; white-space: nowrap;
+    font-variant-numeric: lining-nums;
+  }
+  .hero-v3 .hc span { display: block; margin-top: .5em; font: 700 clamp(12px, 2.8cqw, 15px)/1.2 var(--font-texto); }
+  .hero-v3 .hc-pim { --cuerda: 3cqw; --giro: -3deg; left: 2%; top: 3cqw; background: #F2B705; }
+  .hero-v3 .hc-ej  { --cuerda: 6cqw; --giro: 2.5deg; right: 3%; top: 6cqw; }
+  .hero-v3 .hc-per { --cuerda: 46cqw; --giro: -1.5deg; right: 1%; top: 46cqw; background: #F4EEE2; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-v3 .hc { animation: hc-balanceo 1.4s cubic-bezier(.3,1.6,.5,1) both; animation-delay: .5s; }
+    .hero-v3 .hc-ej { animation-delay: .62s; }
+    .hero-v3 .hc-per { animation-delay: .74s; }
+    @keyframes hc-balanceo {
+      from { transform: rotate(calc(var(--giro, 0deg) + 9deg)); opacity: 0; }
+      20% { opacity: 1; }
+      to { transform: rotate(var(--giro, 0deg)); opacity: 1; }
+    }
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero.hero-v3 { grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr); }
+}
