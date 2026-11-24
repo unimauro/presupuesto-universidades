@@ -67,8 +67,10 @@ def kpis(a):
     k["ejec_idi"] = ratio(i.get("dev"), i.get("pim")) if i and i.get("pim") else None
     r = find(a.get("fuente"), RX["rdr"])
     k["pct_rdr"] = ratio(r and (r.get("dev") or r.get("pim")), base) if r else None
-    ing = (a.get("ingresos") or {}).get("fuente") or {}
-    ri = find(ing, RX["rdr"])
+    # RDR sin saldos de balance: los saldos registran caja acumulada y distorsionan (p.ej. canon no gastado).
+    ri = (a.get("ingresos") or {}).get("rdr_sin_saldos")
+    if not ri:
+        ri = find((a.get("ingresos") or {}).get("fuente") or {}, RX["rdr"])
     k["rdr_recaudado"] = ri.get("recaudado") if ri else None
     k["rdr_recaudado_vs_pim"] = ratio(ri.get("recaudado"), ri.get("pim")) if ri else None
     est = a.get("estudiantes")
@@ -96,6 +98,7 @@ COMPONENTES = {
     "autonomia_rdr": ("pct_rdr", 0.15),          # capacidad de generar recursos propios
 }
 VENTANA = 3
+EXCLUIR = {"540"}  # Asamblea Nacional de Rectores (2012-2016): pliego del sector, no es universidad
 
 
 def main():
@@ -124,6 +127,8 @@ def main():
 
     unis = []
     for pl, g in sorted(gu.items()):
+        if pl in EXCLUIR:
+            continue
         c = cu.get(pl, {})
         out = {"pliego": pl, "nombre": c.get("nombre") or g.get("nombre"), "corto": c.get("corto") or c.get("sigla"),
                "departamento": c.get("departamento"), "ciudad": c.get("ciudad"), "lat": c.get("lat"), "lng": c.get("lng"),
@@ -192,7 +197,10 @@ def main():
         "fuentes": [
             {"nombre": "MEF – Consulta Amigable (SIAF)", "url": "https://apps5.mineco.gob.pe/transparencia/Navegador/default.aspx"},
             {"nombre": "MEF – Datos Abiertos, Presupuesto y ejecución de gasto", "url": "https://datosabiertos.mef.gob.pe/dataset/presupuesto-y-ejecucion-de-gasto"},
-        ] + [{"nombre": v, "url": ""} for v in (ctx.get("fuentes") or {}).values() if isinstance(v, str)],
+        ] + [{"nombre": v, "url": (re.search(r"https?://\S+", v) or [""])[0].rstrip(").,;"),
+              "tema": {"matricula": "estudiantes", "estudiantes": "estudiantes", "pubs": "pubs",
+                       "publicaciones": "pubs"}.get(k, k)}
+             for k, v in (ctx.get("fuentes") or {}).items() if isinstance(v, str)],
         "documentos": nor.get("documentos", []),
         "leyes": [{k: l.get(k) for k in ("anio", "norma", "url")} for l in nor.get("leyes", [])],
         "universidades": unis,

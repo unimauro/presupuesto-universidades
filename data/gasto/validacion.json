@@ -1,5 +1,4551 @@
 {
- "generado": "2026-11-23T23:12:47",
- "descuadres": [],
+ "generado": "2026-11-23T23:16:29",
+ "descuadres": [
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 575060200.0,
+   "total": 575296480.0,
+   "dif": -236280.0
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 474051138.12,
+   "total": 474287418.12,
+   "dif": -236280.0
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 464575615.64,
+   "total": 464811895.64,
+   "dif": -236280.0
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 463133668.05,
+   "total": 463369948.05,
+   "dif": -236280.0
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 462914577.6,
+   "total": 463150857.6,
+   "dif": -236280.0
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 559180232.0,
+   "total": 575296480.0,
+   "dif": -16116248.0
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 464767636.55,
+   "total": 474287418.12,
+   "dif": -9519781.57
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 455573348.24,
+   "total": 464811895.64,
+   "dif": -9238547.4
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 454141595.65,
+   "total": 463369948.05,
+   "dif": -9228352.4
+  },
+  {
+   "pliego": "510",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 453936987.33,
+   "total": 463150857.6,
+   "dif": -9213870.27
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 233294446.0,
+   "total": 233580214.0,
+   "dif": -285768.0
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 187824131.87,
+   "total": 188109899.87,
+   "dif": -285768.0
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 187688799.14,
+   "total": 187974567.14,
+   "dif": -285768.0
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 185610307.36,
+   "total": 185896075.36,
+   "dif": -285768.0
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 185292819.83,
+   "total": 185443587.83,
+   "dif": -150768.0
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 224187189.0,
+   "total": 233580214.0,
+   "dif": -9393025.0
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 186252131.37,
+   "total": 188109899.87,
+   "dif": -1857768.5
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 186116798.64,
+   "total": 187974567.14,
+   "dif": -1857768.5
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 184038306.86,
+   "total": 185896075.36,
+   "dif": -1857768.5
+  },
+  {
+   "pliego": "511",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 183587136.33,
+   "total": 185443587.83,
+   "dif": -1856451.5
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 236012194.0,
+   "total": 236034694.0,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 195903091.67,
+   "total": 195925591.67,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 191207722.48,
+   "total": 191230222.48,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 185104851.44,
+   "total": 185127351.44,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 185026102.34,
+   "total": 185048602.34,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 235381594.0,
+   "total": 236034694.0,
+   "dif": -653100.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 195272521.67,
+   "total": 195925591.67,
+   "dif": -653070.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 190577152.48,
+   "total": 191230222.48,
+   "dif": -653070.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 184474631.44,
+   "total": 185127351.44,
+   "dif": -652720.0
+  },
+  {
+   "pliego": "512",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 184395882.34,
+   "total": 185048602.34,
+   "dif": -652720.0
+  },
+  {
+   "pliego": "513",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 375309358.0,
+   "total": 377160055.0,
+   "dif": -1850697.0
+  },
+  {
+   "pliego": "513",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 361644468.87,
+   "total": 363495164.91,
+   "dif": -1850696.04
+  },
+  {
+   "pliego": "513",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 350269624.55,
+   "total": 352120320.59,
+   "dif": -1850696.04
+  },
+  {
+   "pliego": "513",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 348436513.93,
+   "total": 350287155.97,
+   "dif": -1850642.04
+  },
+  {
+   "pliego": "513",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 348353945.74,
+   "total": 350204587.78,
+   "dif": -1850642.04
+  },
+  {
+   "pliego": "514",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 237148727.0,
+   "total": 291150309.0,
+   "dif": -54001582.0
+  },
+  {
+   "pliego": "514",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 211062300.6,
+   "total": 256613038.55,
+   "dif": -45550737.95
+  },
+  {
+   "pliego": "514",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 205288585.25,
+   "total": 239633305.46,
+   "dif": -34344720.21
+  },
+  {
+   "pliego": "514",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 198082078.75,
+   "total": 218915992.57,
+   "dif": -20833913.82
+  },
+  {
+   "pliego": "514",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 198043082.36,
+   "total": 218849858.23,
+   "dif": -20806775.87
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 159700365.0,
+   "total": 159847926.0,
+   "dif": -147561.0
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 138804576.87,
+   "total": 138952137.87,
+   "dif": -147561.0
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 132031923.45,
+   "total": 132179484.45,
+   "dif": -147561.0
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 131029619.57,
+   "total": 131177180.57,
+   "dif": -147561.0
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 130959322.87,
+   "total": 131106883.87,
+   "dif": -147561.0
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 145733870.0,
+   "total": 159847926.0,
+   "dif": -14114056.0
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 124866477.21,
+   "total": 138952137.87,
+   "dif": -14085660.66
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 118093823.79,
+   "total": 132179484.45,
+   "dif": -14085660.66
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 117101541.64,
+   "total": 131177180.57,
+   "dif": -14075638.93
+  },
+  {
+   "pliego": "515",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 117031244.94,
+   "total": 131106883.87,
+   "dif": -14075638.93
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 105295651.0,
+   "total": 105381052.0,
+   "dif": -85401.0
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 75940135.69,
+   "total": 75962635.69,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 73770739.39,
+   "total": 73793239.39,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 73760044.02,
+   "total": 73782544.02,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 73456558.02,
+   "total": 73479058.02,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 94733014.0,
+   "total": 105381052.0,
+   "dif": -10648038.0
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 74250001.88,
+   "total": 75962635.69,
+   "dif": -1712633.81
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 72355802.73,
+   "total": 73793239.39,
+   "dif": -1437436.66
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 72345107.36,
+   "total": 73782544.02,
+   "dif": -1437436.66
+  },
+  {
+   "pliego": "516",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 72041621.36,
+   "total": 73479058.02,
+   "dif": -1437436.66
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 129975169.0,
+   "total": 130135913.0,
+   "dif": -160744.0
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 119271782.54,
+   "total": 119432526.54,
+   "dif": -160744.0
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 117755509.32,
+   "total": 117916253.32,
+   "dif": -160744.0
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 113089976.03,
+   "total": 113250720.03,
+   "dif": -160744.0
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 112965225.24,
+   "total": 113125969.24,
+   "dif": -160744.0
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 128001977.0,
+   "total": 130135913.0,
+   "dif": -2133936.0
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 118232239.8,
+   "total": 119432526.54,
+   "dif": -1200286.74
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 116715966.58,
+   "total": 117916253.32,
+   "dif": -1200286.74
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 112058275.29,
+   "total": 113250720.03,
+   "dif": -1192444.74
+  },
+  {
+   "pliego": "517",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 111968005.5,
+   "total": 113125969.24,
+   "dif": -1157963.74
+  },
+  {
+   "pliego": "518",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 142542269.0,
+   "total": 156916045.0,
+   "dif": -14373776.0
+  },
+  {
+   "pliego": "518",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 119858418.61,
+   "total": 130686076.26,
+   "dif": -10827657.65
+  },
+  {
+   "pliego": "518",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 119245476.22,
+   "total": 130040228.49,
+   "dif": -10794752.27
+  },
+  {
+   "pliego": "518",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 119240296.22,
+   "total": 130033808.49,
+   "dif": -10793512.27
+  },
+  {
+   "pliego": "518",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 119192252.16,
+   "total": 129948196.21,
+   "dif": -10755944.05
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 100404452.0,
+   "total": 100550944.0,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 96884435.25,
+   "total": 97030927.25,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 96310501.87,
+   "total": 96456993.87,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 93653504.61,
+   "total": 93799996.61,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 93619753.92,
+   "total": 93766245.92,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 99373117.0,
+   "total": 100550944.0,
+   "dif": -1177827.0
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 96445209.76,
+   "total": 97030927.25,
+   "dif": -585717.49
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 95881188.38,
+   "total": 96456993.87,
+   "dif": -575805.49
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 93224263.12,
+   "total": 93799996.61,
+   "dif": -575733.49
+  },
+  {
+   "pliego": "519",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 93190512.43,
+   "total": 93766245.92,
+   "dif": -575733.49
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 193262889.0,
+   "total": 193335271.0,
+   "dif": -72382.0
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 179401278.54,
+   "total": 179473660.54,
+   "dif": -72382.0
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 176856982.7,
+   "total": 176929364.7,
+   "dif": -72382.0
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 161997506.26,
+   "total": 162069888.26,
+   "dif": -72382.0
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 161853967.01,
+   "total": 161926349.01,
+   "dif": -72382.0
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 190340657.0,
+   "total": 193335271.0,
+   "dif": -2994614.0
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 177751585.12,
+   "total": 179473660.54,
+   "dif": -1722075.42
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 175238042.28,
+   "total": 176929364.7,
+   "dif": -1691322.42
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 160451355.84,
+   "total": 162069888.26,
+   "dif": -1618532.42
+  },
+  {
+   "pliego": "520",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 160307816.59,
+   "total": 161926349.01,
+   "dif": -1618532.42
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 159482183.0,
+   "total": 159611573.0,
+   "dif": -129390.0
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 156830068.92,
+   "total": 156959458.92,
+   "dif": -129390.0
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 146486313.1,
+   "total": 146615703.1,
+   "dif": -129390.0
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 143286226.55,
+   "total": 143415616.55,
+   "dif": -129390.0
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 143286226.55,
+   "total": 143415616.55,
+   "dif": -129390.0
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 148536931.0,
+   "total": 159611573.0,
+   "dif": -11074642.0
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 146831825.59,
+   "total": 156959458.92,
+   "dif": -10127633.33
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 144358011.17,
+   "total": 146615703.1,
+   "dif": -2257691.93
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 141172979.66,
+   "total": 143415616.55,
+   "dif": -2242636.89
+  },
+  {
+   "pliego": "521",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 141172979.66,
+   "total": 143415616.55,
+   "dif": -2242636.89
+  },
+  {
+   "pliego": "522",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 159542486.0,
+   "total": 159857286.0,
+   "dif": -314800.0
+  },
+  {
+   "pliego": "522",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 138767700.83,
+   "total": 139082500.83,
+   "dif": -314800.0
+  },
+  {
+   "pliego": "522",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 110019536.44,
+   "total": 110334336.44,
+   "dif": -314800.0
+  },
+  {
+   "pliego": "522",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 107028063.21,
+   "total": 107342863.21,
+   "dif": -314800.0
+  },
+  {
+   "pliego": "522",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 107010232.73,
+   "total": 107325032.73,
+   "dif": -314800.0
+  },
+  {
+   "pliego": "523",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pia",
+   "suma": 151626593.0,
+   "total": 151664905.0,
+   "dif": -38312.0
+  },
+  {
+   "pliego": "523",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 166018218.0,
+   "total": 166816785.0,
+   "dif": -798567.0
+  },
+  {
+   "pliego": "523",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 118592821.79,
+   "total": 119209349.61,
+   "dif": -616527.82
+  },
+  {
+   "pliego": "523",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 105463165.03,
+   "total": 105974180.03,
+   "dif": -511015.0
+  },
+  {
+   "pliego": "523",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 105327917.05,
+   "total": 105838356.05,
+   "dif": -510439.0
+  },
+  {
+   "pliego": "523",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 105235366.54,
+   "total": 105743634.37,
+   "dif": -508267.83
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 235131084.0,
+   "total": 235303230.0,
+   "dif": -172146.0
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 161265062.15,
+   "total": 161437208.15,
+   "dif": -172146.0
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 136912561.95,
+   "total": 137084707.95,
+   "dif": -172146.0
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 136596116.67,
+   "total": 136768262.67,
+   "dif": -172146.0
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 136534899.91,
+   "total": 136707045.91,
+   "dif": -172146.0
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 234444690.0,
+   "total": 235303230.0,
+   "dif": -858540.0
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 160580475.34,
+   "total": 161437208.15,
+   "dif": -856732.81
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 136348372.37,
+   "total": 137084707.95,
+   "dif": -736335.58
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 136031927.09,
+   "total": 136768262.67,
+   "dif": -736335.58
+  },
+  {
+   "pliego": "524",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 135970710.33,
+   "total": 136707045.91,
+   "dif": -736335.58
+  },
+  {
+   "pliego": "525",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 85412332.0,
+   "total": 85622332.0,
+   "dif": -210000.0
+  },
+  {
+   "pliego": "525",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 80215272.84,
+   "total": 80425272.84,
+   "dif": -210000.0
+  },
+  {
+   "pliego": "525",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 76804290.6,
+   "total": 77014290.6,
+   "dif": -210000.0
+  },
+  {
+   "pliego": "525",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 76052798.32,
+   "total": 76262798.32,
+   "dif": -210000.0
+  },
+  {
+   "pliego": "525",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 76050306.93,
+   "total": 76260306.93,
+   "dif": -210000.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 53692619.0,
+   "total": 53768564.0,
+   "dif": -75945.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 49241120.87,
+   "total": 49317065.87,
+   "dif": -75945.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 48569615.88,
+   "total": 48645560.88,
+   "dif": -75945.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 48113647.51,
+   "total": 48189592.51,
+   "dif": -75945.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 48106867.41,
+   "total": 48182812.41,
+   "dif": -75945.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 53344050.0,
+   "total": 53768564.0,
+   "dif": -424514.0
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 49090047.46,
+   "total": 49317065.87,
+   "dif": -227018.41
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 48419382.47,
+   "total": 48645560.88,
+   "dif": -226178.41
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 47965614.1,
+   "total": 48189592.51,
+   "dif": -223978.41
+  },
+  {
+   "pliego": "526",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 47958834.0,
+   "total": 48182812.41,
+   "dif": -223978.41
+  },
+  {
+   "pliego": "527",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 102680551.0,
+   "total": 102979151.0,
+   "dif": -298600.0
+  },
+  {
+   "pliego": "527",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 83535112.93,
+   "total": 83833712.93,
+   "dif": -298600.0
+  },
+  {
+   "pliego": "527",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 70105698.84,
+   "total": 70394498.84,
+   "dif": -288800.0
+  },
+  {
+   "pliego": "527",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 66560753.93,
+   "total": 66849553.93,
+   "dif": -288800.0
+  },
+  {
+   "pliego": "527",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 66559143.93,
+   "total": 66847943.93,
+   "dif": -288800.0
+  },
+  {
+   "pliego": "528",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 116556037.0,
+   "total": 117072217.0,
+   "dif": -516180.0
+  },
+  {
+   "pliego": "528",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 97849412.25,
+   "total": 98237517.0,
+   "dif": -388104.75
+  },
+  {
+   "pliego": "528",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 94136758.9,
+   "total": 94524863.65,
+   "dif": -388104.75
+  },
+  {
+   "pliego": "528",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 93499026.34,
+   "total": 93835912.05,
+   "dif": -336885.71
+  },
+  {
+   "pliego": "528",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 93481440.86,
+   "total": 93818326.57,
+   "dif": -336885.71
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 102999531.0,
+   "total": 103086165.0,
+   "dif": -86634.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 78578018.15,
+   "total": 78632585.15,
+   "dif": -54567.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 75940491.28,
+   "total": 75995058.28,
+   "dif": -54567.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 73977554.66,
+   "total": 74032121.66,
+   "dif": -54567.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 73879654.86,
+   "total": 73934221.86,
+   "dif": -54567.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 102431255.0,
+   "total": 103086165.0,
+   "dif": -654910.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 78163710.23,
+   "total": 78632585.15,
+   "dif": -468874.92
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 75526683.56,
+   "total": 75995058.28,
+   "dif": -468374.72
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 73593508.94,
+   "total": 74032121.66,
+   "dif": -438612.72
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 73502133.49,
+   "total": 73934221.86,
+   "dif": -432088.37
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 102043987.0,
+   "total": 103086165.0,
+   "dif": -1042178.0
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 77782164.23,
+   "total": 78632585.15,
+   "dif": -850420.92
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 75144637.36,
+   "total": 75995058.28,
+   "dif": -850420.92
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 73196562.74,
+   "total": 74032121.66,
+   "dif": -835558.92
+  },
+  {
+   "pliego": "529",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 73105187.29,
+   "total": 73934221.86,
+   "dif": -829034.57
+  },
+  {
+   "pliego": "530",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 110956313.0,
+   "total": 111989623.0,
+   "dif": -1033310.0
+  },
+  {
+   "pliego": "530",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 92797618.77,
+   "total": 93339881.17,
+   "dif": -542262.4
+  },
+  {
+   "pliego": "530",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 92182797.75,
+   "total": 92725060.15,
+   "dif": -542262.4
+  },
+  {
+   "pliego": "530",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 92177307.37,
+   "total": 92719069.77,
+   "dif": -541762.4
+  },
+  {
+   "pliego": "530",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 92153671.93,
+   "total": 92695434.33,
+   "dif": -541762.4
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 106951150.0,
+   "total": 107097642.0,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 86699273.31,
+   "total": 86845765.31,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 81344659.04,
+   "total": 81491151.04,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 78928966.77,
+   "total": 79075458.77,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 78816115.19,
+   "total": 78962607.19,
+   "dif": -146492.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 106798242.0,
+   "total": 107097642.0,
+   "dif": -299400.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 86546365.31,
+   "total": 86845765.31,
+   "dif": -299400.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 81191751.04,
+   "total": 81491151.04,
+   "dif": -299400.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 78780558.77,
+   "total": 79075458.77,
+   "dif": -294900.0
+  },
+  {
+   "pliego": "531",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 78667707.19,
+   "total": 78962607.19,
+   "dif": -294900.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 122066961.0,
+   "total": 122089461.0,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 63063922.0,
+   "total": 63086422.0,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 52209639.23,
+   "total": 52232139.23,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 51649063.09,
+   "total": 51671563.09,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 51619942.84,
+   "total": 51642442.84,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 121846761.0,
+   "total": 122089461.0,
+   "dif": -242700.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 62843722.0,
+   "total": 63086422.0,
+   "dif": -242700.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 51989439.23,
+   "total": 52232139.23,
+   "dif": -242700.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 51433663.09,
+   "total": 51671563.09,
+   "dif": -237900.0
+  },
+  {
+   "pliego": "532",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 51404542.84,
+   "total": 51642442.84,
+   "dif": -237900.0
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 74791638.0,
+   "total": 74900720.0,
+   "dif": -109082.0
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 65015489.15,
+   "total": 65124570.65,
+   "dif": -109081.5
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 64751161.54,
+   "total": 64860243.04,
+   "dif": -109081.5
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 63556474.38,
+   "total": 63665555.88,
+   "dif": -109081.5
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 63515631.02,
+   "total": 63624712.52,
+   "dif": -109081.5
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 74035805.0,
+   "total": 74900720.0,
+   "dif": -864915.0
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 64668391.52,
+   "total": 65124570.65,
+   "dif": -456179.13
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 64404063.91,
+   "total": 64860243.04,
+   "dif": -456179.13
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 63210876.75,
+   "total": 63665555.88,
+   "dif": -454679.13
+  },
+  {
+   "pliego": "533",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 63172432.88,
+   "total": 63624712.52,
+   "dif": -452279.64
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 53484358.0,
+   "total": 53613192.0,
+   "dif": -128834.0
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 48807528.51,
+   "total": 48931217.51,
+   "dif": -123689.0
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 47079595.78,
+   "total": 47203284.78,
+   "dif": -123689.0
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 46970660.2,
+   "total": 47094349.2,
+   "dif": -123689.0
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 46943788.99,
+   "total": 47067477.99,
+   "dif": -123689.0
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 51244651.0,
+   "total": 53613192.0,
+   "dif": -2368541.0
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 46750395.98,
+   "total": 48931217.51,
+   "dif": -2180821.53
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 45028859.75,
+   "total": 47203284.78,
+   "dif": -2174425.03
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 44923124.17,
+   "total": 47094349.2,
+   "dif": -2171225.03
+  },
+  {
+   "pliego": "534",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 44896252.96,
+   "total": 47067477.99,
+   "dif": -2171225.03
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 62267425.0,
+   "total": 62289925.0,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 61028203.15,
+   "total": 61050703.15,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 56086854.48,
+   "total": 56109354.48,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 54078157.35,
+   "total": 54100657.35,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 54071075.04,
+   "total": 54093575.04,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 61832850.0,
+   "total": 62289925.0,
+   "dif": -457075.0
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 60845738.03,
+   "total": 61050703.15,
+   "dif": -204965.12
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 55905931.04,
+   "total": 56109354.48,
+   "dif": -203423.44
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 53911401.41,
+   "total": 54100657.35,
+   "dif": -189255.94
+  },
+  {
+   "pliego": "535",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 53904319.1,
+   "total": 54093575.04,
+   "dif": -189255.94
+  },
+  {
+   "pliego": "536",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 97068248.0,
+   "total": 97090748.0,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "536",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 96940048.0,
+   "total": 97090748.0,
+   "dif": -150700.0
+  },
+  {
+   "pliego": "536",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 50245056.58,
+   "total": 50388656.58,
+   "dif": -143600.0
+  },
+  {
+   "pliego": "536",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 41366310.02,
+   "total": 41509910.02,
+   "dif": -143600.0
+  },
+  {
+   "pliego": "536",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 41347827.14,
+   "total": 41491427.14,
+   "dif": -143600.0
+  },
+  {
+   "pliego": "536",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 41340153.55,
+   "total": 41483753.55,
+   "dif": -143600.0
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 62566521.0,
+   "total": 62699267.0,
+   "dif": -132746.0
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 52172045.12,
+   "total": 52304789.56,
+   "dif": -132744.44
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 42859745.19,
+   "total": 42992489.63,
+   "dif": -132744.44
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 42545014.34,
+   "total": 42677758.78,
+   "dif": -132744.44
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 42467203.08,
+   "total": 42599947.52,
+   "dif": -132744.44
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 59368921.0,
+   "total": 62699267.0,
+   "dif": -3330346.0
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 49337338.75,
+   "total": 52304789.56,
+   "dif": -2967450.81
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 42707963.23,
+   "total": 42992489.63,
+   "dif": -284526.4
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 42397032.38,
+   "total": 42677758.78,
+   "dif": -280726.4
+  },
+  {
+   "pliego": "537",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 42319221.12,
+   "total": 42599947.52,
+   "dif": -280726.4
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 31482268.0,
+   "total": 31500018.0,
+   "dif": -17750.0
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 28365203.97,
+   "total": 28382953.97,
+   "dif": -17750.0
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 28193590.98,
+   "total": 28211340.98,
+   "dif": -17750.0
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 27952963.71,
+   "total": 27970713.71,
+   "dif": -17750.0
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 27887392.08,
+   "total": 27905142.08,
+   "dif": -17750.0
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 31155316.0,
+   "total": 31500018.0,
+   "dif": -344702.0
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 28110581.54,
+   "total": 28382953.97,
+   "dif": -272372.43
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 27940578.55,
+   "total": 28211340.98,
+   "dif": -270762.43
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 27720421.02,
+   "total": 27970713.71,
+   "dif": -250292.69
+  },
+  {
+   "pliego": "538",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 27654849.39,
+   "total": 27905142.08,
+   "dif": -250292.69
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 33596708.0,
+   "total": 33619208.0,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 26374084.55,
+   "total": 26396584.55,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 26182220.6,
+   "total": 26204720.6,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 26181820.6,
+   "total": 26204320.6,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 25965662.72,
+   "total": 25988162.72,
+   "dif": -22500.0
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 33188166.0,
+   "total": 33619208.0,
+   "dif": -431042.0
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 26092526.95,
+   "total": 26396584.55,
+   "dif": -304057.6
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 25900663.0,
+   "total": 26204720.6,
+   "dif": -304057.6
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 25900263.0,
+   "total": 26204320.6,
+   "dif": -304057.6
+  },
+  {
+   "pliego": "539",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 25684105.12,
+   "total": 25988162.72,
+   "dif": -304057.6
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 59497177.0,
+   "total": 59572277.0,
+   "dif": -75100.0
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 51253549.66,
+   "total": 51328648.96,
+   "dif": -75099.3
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 51252929.06,
+   "total": 51328028.36,
+   "dif": -75099.3
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 51242380.85,
+   "total": 51317480.15,
+   "dif": -75099.3
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 51173211.1,
+   "total": 51248310.4,
+   "dif": -75099.3
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pia",
+   "suma": 49172825.0,
+   "total": 49173400.0,
+   "dif": -575.0
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 50210459.0,
+   "total": 59572277.0,
+   "dif": -9361818.0
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 47130717.54,
+   "total": 51328648.96,
+   "dif": -4197931.42
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 47130603.54,
+   "total": 51328028.36,
+   "dif": -4197424.82
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 47125343.17,
+   "total": 51317480.15,
+   "dif": -4192136.98
+  },
+  {
+   "pliego": "541",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 47056774.51,
+   "total": 51248310.4,
+   "dif": -4191535.89
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 23879012.0,
+   "total": 23909012.0,
+   "dif": -30000.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 20782147.97,
+   "total": 20803147.97,
+   "dif": -21000.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 17506146.74,
+   "total": 17524146.74,
+   "dif": -18000.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 16773928.24,
+   "total": 16791928.24,
+   "dif": -18000.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 16773828.24,
+   "total": 16791828.24,
+   "dif": -18000.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 23530888.0,
+   "total": 23909012.0,
+   "dif": -378124.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 20455224.49,
+   "total": 20803147.97,
+   "dif": -347923.48
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 17404611.74,
+   "total": 17524146.74,
+   "dif": -119535.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 16676448.24,
+   "total": 16791928.24,
+   "dif": -115480.0
+  },
+  {
+   "pliego": "542",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 16676348.24,
+   "total": 16791828.24,
+   "dif": -115480.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 25399736.0,
+   "total": 25432736.0,
+   "dif": -33000.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 21108429.61,
+   "total": 21138429.61,
+   "dif": -30000.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 20364130.41,
+   "total": 20394130.41,
+   "dif": -30000.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 20351127.42,
+   "total": 20381127.42,
+   "dif": -30000.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 20349499.11,
+   "total": 20379499.11,
+   "dif": -30000.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 24461494.0,
+   "total": 25432736.0,
+   "dif": -971242.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 20673594.61,
+   "total": 21138429.61,
+   "dif": -464835.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 19936885.41,
+   "total": 20394130.41,
+   "dif": -457245.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 19923882.42,
+   "total": 20381127.42,
+   "dif": -457245.0
+  },
+  {
+   "pliego": "543",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 19922254.11,
+   "total": 20379499.11,
+   "dif": -457245.0
+  },
+  {
+   "pliego": "544",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pia",
+   "suma": 28364744.0,
+   "total": 28395911.0,
+   "dif": -31167.0
+  },
+  {
+   "pliego": "544",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 36497495.0,
+   "total": 36617120.0,
+   "dif": -119625.0
+  },
+  {
+   "pliego": "544",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 30723616.0,
+   "total": 30843183.2,
+   "dif": -119567.2
+  },
+  {
+   "pliego": "544",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 30427202.18,
+   "total": 30545365.38,
+   "dif": -118163.2
+  },
+  {
+   "pliego": "544",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 28277520.23,
+   "total": 28395683.43,
+   "dif": -118163.2
+  },
+  {
+   "pliego": "544",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 28260597.23,
+   "total": 28378760.43,
+   "dif": -118163.2
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 64520118.0,
+   "total": 64936165.0,
+   "dif": -416047.0
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 63586126.53,
+   "total": 64002171.28,
+   "dif": -416044.75
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 63043502.51,
+   "total": 63459547.26,
+   "dif": -416044.75
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 62331051.74,
+   "total": 62747096.49,
+   "dif": -416044.75
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 62310549.22,
+   "total": 62726593.97,
+   "dif": -416044.75
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 64830365.0,
+   "total": 64936165.0,
+   "dif": -105800.0
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 63896371.28,
+   "total": 64002171.28,
+   "dif": -105800.0
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 63382847.26,
+   "total": 63459547.26,
+   "dif": -76700.0
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 62670396.49,
+   "total": 62747096.49,
+   "dif": -76700.0
+  },
+  {
+   "pliego": "545",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 62649893.97,
+   "total": 62726593.97,
+   "dif": -76700.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 31907439.0,
+   "total": 32108183.0,
+   "dif": -200744.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 30418341.05,
+   "total": 30606535.05,
+   "dif": -188194.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 29946700.87,
+   "total": 30134894.87,
+   "dif": -188194.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 21320481.33,
+   "total": 21505675.33,
+   "dif": -185194.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 21314571.53,
+   "total": 21499765.53,
+   "dif": -185194.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 31908888.0,
+   "total": 32108183.0,
+   "dif": -199295.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 30427583.47,
+   "total": 30606535.05,
+   "dif": -178951.58
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 29955943.29,
+   "total": 30134894.87,
+   "dif": -178951.58
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 21331108.46,
+   "total": 21505675.33,
+   "dif": -174566.87
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 21327700.46,
+   "total": 21499765.53,
+   "dif": -172065.07
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 16570179.0,
+   "total": 32108183.0,
+   "dif": -15538004.0
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 15204143.4,
+   "total": 30606535.05,
+   "dif": -15402391.65
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 14754838.67,
+   "total": 30134894.87,
+   "dif": -15380056.2
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 10686559.61,
+   "total": 21505675.33,
+   "dif": -10819115.72
+  },
+  {
+   "pliego": "546",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 10682851.61,
+   "total": 21499765.53,
+   "dif": -10816913.92
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 20005145.0,
+   "total": 20008145.0,
+   "dif": -3000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 15597690.76,
+   "total": 15600690.76,
+   "dif": -3000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 15562838.71,
+   "total": 15565838.71,
+   "dif": -3000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 15484198.17,
+   "total": 15487198.17,
+   "dif": -3000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 15483191.27,
+   "total": 15486191.27,
+   "dif": -3000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 19939645.0,
+   "total": 20008145.0,
+   "dif": -68500.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 15537690.76,
+   "total": 15600690.76,
+   "dif": -63000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 15502838.71,
+   "total": 15565838.71,
+   "dif": -63000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 15424198.17,
+   "total": 15487198.17,
+   "dif": -63000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 15423191.27,
+   "total": 15486191.27,
+   "dif": -63000.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 16566608.0,
+   "total": 20008145.0,
+   "dif": -3441537.0
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 12238239.06,
+   "total": 15600690.76,
+   "dif": -3362451.7
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 12238239.06,
+   "total": 15565838.71,
+   "dif": -3327599.65
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 12159598.52,
+   "total": 15487198.17,
+   "dif": -3327599.65
+  },
+  {
+   "pliego": "547",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 12158591.62,
+   "total": 15486191.27,
+   "dif": -3327599.65
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 58162758.0,
+   "total": 58215182.0,
+   "dif": -52424.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 48156624.3,
+   "total": 48209048.3,
+   "dif": -52424.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 44124567.54,
+   "total": 44176991.54,
+   "dif": -52424.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 43414304.76,
+   "total": 43466728.76,
+   "dif": -52424.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 43411469.16,
+   "total": 43463893.16,
+   "dif": -52424.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 58169982.0,
+   "total": 58215182.0,
+   "dif": -45200.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 48163848.3,
+   "total": 48209048.3,
+   "dif": -45200.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 44131791.54,
+   "total": 44176991.54,
+   "dif": -45200.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 43422128.76,
+   "total": 43466728.76,
+   "dif": -44600.0
+  },
+  {
+   "pliego": "548",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 43419293.16,
+   "total": 43463893.16,
+   "dif": -44600.0
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 33100793.0,
+   "total": 33223096.0,
+   "dif": -122303.0
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 29321826.4,
+   "total": 29406805.18,
+   "dif": -84978.78
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 24756660.57,
+   "total": 24841639.35,
+   "dif": -84978.78
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 19310057.14,
+   "total": 19395035.92,
+   "dif": -84978.78
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 19309149.78,
+   "total": 19394128.56,
+   "dif": -84978.78
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 33129396.0,
+   "total": 33223096.0,
+   "dif": -93700.0
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 29313805.18,
+   "total": 29406805.18,
+   "dif": -93000.0
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 24748639.35,
+   "total": 24841639.35,
+   "dif": -93000.0
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 19302035.92,
+   "total": 19395035.92,
+   "dif": -93000.0
+  },
+  {
+   "pliego": "549",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 19301128.56,
+   "total": 19394128.56,
+   "dif": -93000.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 30233090.0,
+   "total": 30247010.0,
+   "dif": -13920.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 21823039.15,
+   "total": 21836959.15,
+   "dif": -13920.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 21104016.94,
+   "total": 21117936.94,
+   "dif": -13920.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 18381954.8,
+   "total": 18395874.8,
+   "dif": -13920.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 18376538.17,
+   "total": 18390458.17,
+   "dif": -13920.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 30157310.0,
+   "total": 30247010.0,
+   "dif": -89700.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 21747259.15,
+   "total": 21836959.15,
+   "dif": -89700.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 21028236.94,
+   "total": 21117936.94,
+   "dif": -89700.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 18313574.8,
+   "total": 18395874.8,
+   "dif": -82300.0
+  },
+  {
+   "pliego": "550",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 18308158.17,
+   "total": 18390458.17,
+   "dif": -82300.0
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 14242601.0,
+   "total": 14313761.0,
+   "dif": -71160.0
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 13355172.33,
+   "total": 13426331.93,
+   "dif": -71159.6
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 13090255.73,
+   "total": 13161414.79,
+   "dif": -71159.06
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 10988834.62,
+   "total": 11059993.68,
+   "dif": -71159.06
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 10976439.82,
+   "total": 11047598.88,
+   "dif": -71159.06
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 14301161.0,
+   "total": 14313761.0,
+   "dif": -12600.0
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 13413731.93,
+   "total": 13426331.93,
+   "dif": -12600.0
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 13151014.79,
+   "total": 13161414.79,
+   "dif": -10400.0
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 11049593.68,
+   "total": 11059993.68,
+   "dif": -10400.0
+  },
+  {
+   "pliego": "551",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 11037198.88,
+   "total": 11047598.88,
+   "dif": -10400.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 36790684.0,
+   "total": 36858018.0,
+   "dif": -67334.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 31542570.4,
+   "total": 31609904.4,
+   "dif": -67334.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 31084521.16,
+   "total": 31151855.16,
+   "dif": -67334.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 30996957.6,
+   "total": 31064291.6,
+   "dif": -67334.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 30996463.7,
+   "total": 31063797.7,
+   "dif": -67334.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 35622545.0,
+   "total": 36858018.0,
+   "dif": -1235473.0
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 30603799.57,
+   "total": 31609904.4,
+   "dif": -1006104.83
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 30145750.33,
+   "total": 31151855.16,
+   "dif": -1006104.83
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 30088186.77,
+   "total": 31064291.6,
+   "dif": -976104.83
+  },
+  {
+   "pliego": "552",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 30087692.87,
+   "total": 31063797.7,
+   "dif": -976104.83
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 12237810.0,
+   "total": 12251550.0,
+   "dif": -13740.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 12016183.27,
+   "total": 12029923.27,
+   "dif": -13740.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 11224634.48,
+   "total": 11238374.48,
+   "dif": -13740.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 10934727.55,
+   "total": 10948467.55,
+   "dif": -13740.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 10934289.5,
+   "total": 10948029.5,
+   "dif": -13740.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 12232150.0,
+   "total": 12251550.0,
+   "dif": -19400.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 12010523.27,
+   "total": 12029923.27,
+   "dif": -19400.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 11218974.48,
+   "total": 11238374.48,
+   "dif": -19400.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 10929067.55,
+   "total": 10948467.55,
+   "dif": -19400.0
+  },
+  {
+   "pliego": "553",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 10928629.5,
+   "total": 10948029.5,
+   "dif": -19400.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 14461411.0,
+   "total": 14466091.0,
+   "dif": -4680.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 9667847.6,
+   "total": 9672527.6,
+   "dif": -4680.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 9155163.71,
+   "total": 9159843.71,
+   "dif": -4680.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 8387084.35,
+   "total": 8391764.35,
+   "dif": -4680.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 8358020.4,
+   "total": 8362700.4,
+   "dif": -4680.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 14440891.0,
+   "total": 14466091.0,
+   "dif": -25200.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 9647327.6,
+   "total": 9672527.6,
+   "dif": -25200.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 9134643.71,
+   "total": 9159843.71,
+   "dif": -25200.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 8366564.35,
+   "total": 8391764.35,
+   "dif": -25200.0
+  },
+  {
+   "pliego": "554",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 8337500.4,
+   "total": 8362700.4,
+   "dif": -25200.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 17618192.0,
+   "total": 17701692.0,
+   "dif": -83500.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 16668003.26,
+   "total": 16736503.26,
+   "dif": -68500.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 16666027.76,
+   "total": 16734527.76,
+   "dif": -68500.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 14570152.76,
+   "total": 14638652.76,
+   "dif": -68500.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 14563306.93,
+   "total": 14631806.93,
+   "dif": -68500.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 17535712.0,
+   "total": 17701692.0,
+   "dif": -165980.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 16570523.26,
+   "total": 16736503.26,
+   "dif": -165980.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 16568847.76,
+   "total": 16734527.76,
+   "dif": -165680.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 14472972.76,
+   "total": 14638652.76,
+   "dif": -165680.0
+  },
+  {
+   "pliego": "555",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 14466126.93,
+   "total": 14631806.93,
+   "dif": -165680.0
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 24106884.0,
+   "total": 24196052.0,
+   "dif": -89168.0
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 19357144.13,
+   "total": 19446311.63,
+   "dif": -89167.5
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 16715484.77,
+   "total": 16804652.27,
+   "dif": -89167.5
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 16709534.77,
+   "total": 16798702.27,
+   "dif": -89167.5
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 16698676.48,
+   "total": 16787843.98,
+   "dif": -89167.5
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 24167352.0,
+   "total": 24196052.0,
+   "dif": -28700.0
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 19417711.63,
+   "total": 19446311.63,
+   "dif": -28600.0
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 16776052.27,
+   "total": 16804652.27,
+   "dif": -28600.0
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 16770102.27,
+   "total": 16798702.27,
+   "dif": -28600.0
+  },
+  {
+   "pliego": "556",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 16759243.98,
+   "total": 16787843.98,
+   "dif": -28600.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 11272234.0,
+   "total": 11281594.0,
+   "dif": -9360.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 9739827.04,
+   "total": 9749187.04,
+   "dif": -9360.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 9723162.49,
+   "total": 9732522.49,
+   "dif": -9360.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 9685431.29,
+   "total": 9694791.29,
+   "dif": -9360.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 9684213.29,
+   "total": 9693573.29,
+   "dif": -9360.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 11261894.0,
+   "total": 11281594.0,
+   "dif": -19700.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 9729487.04,
+   "total": 9749187.04,
+   "dif": -19700.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 9712822.49,
+   "total": 9732522.49,
+   "dif": -19700.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 9675640.29,
+   "total": 9694791.29,
+   "dif": -19151.0
+  },
+  {
+   "pliego": "557",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 9674422.29,
+   "total": 9693573.29,
+   "dif": -19151.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 20648005.0,
+   "total": 20664685.0,
+   "dif": -16680.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 16723153.19,
+   "total": 16739833.19,
+   "dif": -16680.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 16314287.99,
+   "total": 16330967.99,
+   "dif": -16680.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 12824259.46,
+   "total": 12840939.46,
+   "dif": -16680.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 12824259.46,
+   "total": 12840939.46,
+   "dif": -16680.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 20643685.0,
+   "total": 20664685.0,
+   "dif": -21000.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 16718833.19,
+   "total": 16739833.19,
+   "dif": -21000.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 16309967.99,
+   "total": 16330967.99,
+   "dif": -21000.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 12819939.46,
+   "total": 12840939.46,
+   "dif": -21000.0
+  },
+  {
+   "pliego": "558",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 12819939.46,
+   "total": 12840939.46,
+   "dif": -21000.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 11396748.0,
+   "total": 11420419.0,
+   "dif": -23671.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 7247144.68,
+   "total": 7270765.4,
+   "dif": -23620.72
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 7247144.68,
+   "total": 7270765.4,
+   "dif": -23620.72
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 7247144.68,
+   "total": 7270765.4,
+   "dif": -23620.72
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 7228294.68,
+   "total": 7251915.4,
+   "dif": -23620.72
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 11397019.0,
+   "total": 11420419.0,
+   "dif": -23400.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 7247365.4,
+   "total": 7270765.4,
+   "dif": -23400.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 7247365.4,
+   "total": 7270765.4,
+   "dif": -23400.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 7247365.4,
+   "total": 7270765.4,
+   "dif": -23400.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 7228515.4,
+   "total": 7251915.4,
+   "dif": -23400.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 10202359.0,
+   "total": 11420419.0,
+   "dif": -1218060.0
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 6052707.03,
+   "total": 7270765.4,
+   "dif": -1218058.37
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 6052707.03,
+   "total": 7270765.4,
+   "dif": -1218058.37
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 6052707.03,
+   "total": 7270765.4,
+   "dif": -1218058.37
+  },
+  {
+   "pliego": "559",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 6052707.03,
+   "total": 7251915.4,
+   "dif": -1199208.37
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 41217027.0,
+   "total": 41310707.0,
+   "dif": -93680.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 15013304.26,
+   "total": 15106984.26,
+   "dif": -93680.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 11653679.92,
+   "total": 11747359.92,
+   "dif": -93680.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 11653679.92,
+   "total": 11747359.92,
+   "dif": -93680.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 11653529.92,
+   "total": 11747209.92,
+   "dif": -93680.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 41264407.0,
+   "total": 41310707.0,
+   "dif": -46300.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 15060684.26,
+   "total": 15106984.26,
+   "dif": -46300.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 11705359.92,
+   "total": 11747359.92,
+   "dif": -42000.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 11705359.92,
+   "total": 11747359.92,
+   "dif": -42000.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 11705209.92,
+   "total": 11747209.92,
+   "dif": -42000.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 38874905.0,
+   "total": 41310707.0,
+   "dif": -2435802.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 12671632.4,
+   "total": 15106984.26,
+   "dif": -2435351.86
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 11689609.92,
+   "total": 11747359.92,
+   "dif": -57750.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 11689609.92,
+   "total": 11747359.92,
+   "dif": -57750.0
+  },
+  {
+   "pliego": "560",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 11689459.92,
+   "total": 11747209.92,
+   "dif": -57750.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 18958786.0,
+   "total": 18972466.0,
+   "dif": -13680.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 14739010.52,
+   "total": 14752690.52,
+   "dif": -13680.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 14738529.99,
+   "total": 14752209.99,
+   "dif": -13680.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 14504885.41,
+   "total": 14518565.41,
+   "dif": -13680.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 14504885.41,
+   "total": 14518565.41,
+   "dif": -13680.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pia",
+   "suma": 18764450.0,
+   "total": 18893186.0,
+   "dif": -128736.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 18767330.0,
+   "total": 18972466.0,
+   "dif": -205136.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 14679880.52,
+   "total": 14752690.52,
+   "dif": -72810.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 14679409.99,
+   "total": 14752209.99,
+   "dif": -72800.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 14445765.41,
+   "total": 14518565.41,
+   "dif": -72800.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 14445765.41,
+   "total": 14518565.41,
+   "dif": -72800.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 18112503.0,
+   "total": 18972466.0,
+   "dif": -859963.0
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 14120386.11,
+   "total": 14752690.52,
+   "dif": -632304.41
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 14119905.58,
+   "total": 14752209.99,
+   "dif": -632304.41
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 14016808.65,
+   "total": 14518565.41,
+   "dif": -501756.76
+  },
+  {
+   "pliego": "561",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 14016808.65,
+   "total": 14518565.41,
+   "dif": -501756.76
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "pim",
+   "suma": 6893923.0,
+   "total": 6918012.0,
+   "dif": -24089.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "cert",
+   "suma": 6430469.44,
+   "total": 6454557.97,
+   "dif": -24088.53
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "comp",
+   "suma": 6418785.69,
+   "total": 6442874.22,
+   "dif": -24088.53
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "dev",
+   "suma": 6391274.85,
+   "total": 6415363.38,
+   "dif": -24088.53
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "generica",
+   "monto": "gir",
+   "suma": 6389876.55,
+   "total": 6413965.08,
+   "dif": -24088.53
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "pim",
+   "suma": 6892312.0,
+   "total": 6918012.0,
+   "dif": -25700.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "cert",
+   "suma": 6428857.97,
+   "total": 6454557.97,
+   "dif": -25700.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "comp",
+   "suma": 6418574.22,
+   "total": 6442874.22,
+   "dif": -24300.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "dev",
+   "suma": 6391063.38,
+   "total": 6415363.38,
+   "dif": -24300.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "fuente",
+   "monto": "gir",
+   "suma": 6389665.08,
+   "total": 6413965.08,
+   "dif": -24300.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "pim",
+   "suma": 5433261.0,
+   "total": 6918012.0,
+   "dif": -1484751.0
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "cert",
+   "suma": 4978618.66,
+   "total": 6454557.97,
+   "dif": -1475939.31
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "comp",
+   "suma": 4966934.91,
+   "total": 6442874.22,
+   "dif": -1475939.31
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "dev",
+   "suma": 4939424.07,
+   "total": 6415363.38,
+   "dif": -1475939.31
+  },
+  {
+   "pliego": "562",
+   "anio": "2020",
+   "dim": "categoria",
+   "monto": "gir",
+   "suma": 4938025.77,
+   "total": 6413965.08,
+   "dif": -1475939.31
+  }
+ ],
  "errores": {}
 }

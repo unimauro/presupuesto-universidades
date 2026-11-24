@@ -1,0 +1,1410 @@
+{
+ "_meta": {
+  "descripcion": "Desgloses (genérica, fuente, función, programa, unidad) del último año / año en curso, tal como los publican los observatorios",
+  "unidad": "S/",
+  "generado_por": "etl/inventario_consolidar.py"
+ },
+ "514": {
+  "_fuente": "observatorio-uni/data/presupuesto-uni.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL DE INGENIERIA",
+     "pim": 356729054.0,
+     "dev": 325696849.07
+    },
+    {
+     "nombre": "INICTEL- UNI",
+     "pim": 13859636.0,
+     "dev": 12611465.73
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 320209217.0,
+     "dev": 296821034.22
+    },
+    {
+     "nombre": "PLANEAMIENTO, GESTION Y RESERVA DE CONTINGENCIA",
+     "pim": 20971606.0,
+     "dev": 13380964.45
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 16284109.0,
+     "dev": 16094207.45
+    },
+    {
+     "nombre": "COMUNICACIONES",
+     "pim": 13123758.0,
+     "dev": 12012108.68
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 300500477.0,
+     "dev": 291909582.94
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 70088213.0,
+     "dev": 46398731.86
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 154577170.0,
+     "dev": 153015519.87
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 118508206.0,
+     "dev": 115143962.56
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 70088213.0,
+     "dev": 46398731.86
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 17353609.0,
+     "dev": 17158999.12
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 9941580.0,
+     "dev": 6472456.06
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 119912.0,
+     "dev": 118645.33
+    }
+   ],
+   "por_facultad": [
+    {
+     "nombre": "Ing. Mecanica",
+     "pim": 5935810.0,
+     "dev": 5819215.15
+    },
+    {
+     "nombre": "Escuela De Postgrado",
+     "pim": 4568256.0,
+     "dev": 0.0
+    },
+    {
+     "nombre": "Ing. Economica, Estadistica Y Ciencias Sociales",
+     "pim": 4099929.0,
+     "dev": 4073106.74
+    },
+    {
+     "nombre": "Ing. Civil",
+     "pim": 3563223.0,
+     "dev": 3529804.29
+    },
+    {
+     "nombre": "Ing. Ambiental",
+     "pim": 3214785.0,
+     "dev": 3173032.01
+    },
+    {
+     "nombre": "Ing. Industrial y Sistemas",
+     "pim": 2868716.0,
+     "dev": 2792134.5
+    },
+    {
+     "nombre": "Ing. Geologica, Minera Y Metalurgica",
+     "pim": 2262240.0,
+     "dev": 2161302.57
+    },
+    {
+     "nombre": "Ing. Quimica Y Textil",
+     "pim": 1642310.0,
+     "dev": 1610876.11
+    },
+    {
+     "nombre": "Arquitectura, Urbanismo Y Artes",
+     "pim": 1349504.0,
+     "dev": 1348052.68
+    },
+    {
+     "nombre": "Ciencias",
+     "pim": 970808.0,
+     "dev": 970047.62
+    },
+    {
+     "nombre": "Ing. Electrica Y Electronica",
+     "pim": 836086.0,
+     "dev": 813947.07
+    },
+    {
+     "nombre": "Ing. De Petroleo, Gas Natural Y Petroquimica",
+     "pim": 550731.0,
+     "dev": 525409.37
+    }
+   ]
+  }
+ },
+ "510": {
+  "_fuente": "observatorio-sanmarcos/data/presupuesto-sanmarcos.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL MAYOR DE SAN MARCOS",
+     "pim": 757078825.0,
+     "dev": 716799600.33
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 689382990.0,
+     "dev": 662574068.58
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 43782779.0,
+     "dev": 42627356.66
+    },
+    {
+     "nombre": "PLANEAMIENTO, GESTION Y RESERVA DE CONTINGENCIA",
+     "pim": 23913056.0,
+     "dev": 11598175.09
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 658116181.0,
+     "dev": 640860593.01
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 98962644.0,
+     "dev": 75939007.32
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 358000900.0,
+     "dev": 354509719.94
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 222221178.0,
+     "dev": 212554934.49
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 98962644.0,
+     "dev": 75939007.32
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 43782779.0,
+     "dev": 42627356.66
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 33968154.0,
+     "dev": 31025412.72
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 143170.0,
+     "dev": 143169.2
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "Ejercicio De La Docencia Universitaria",
+     "pim": 188556801.0,
+     "dev": 188243591.09
+    },
+    {
+     "nombre": "Gestion Del Programa",
+     "pim": 119300031.0,
+     "dev": 118013137.01
+    },
+    {
+     "nombre": "Administracion De Los Recursos Humanos, Financieros Y Logisticos",
+     "pim": 117921306.0,
+     "dev": 117467418.5
+    },
+    {
+     "nombre": "Control De La Gestion Administrativa",
+     "pim": 74886578.0,
+     "dev": 73467816.21
+    },
+    {
+     "nombre": "Sistema De Pensiones",
+     "pim": 43782779.0,
+     "dev": 42627356.66
+    },
+    {
+     "nombre": "Investigacion Cientifica Y Tecnologica",
+     "pim": 39007740.0,
+     "dev": 36004945.07
+    },
+    {
+     "nombre": "Subvencion A Proyectos De Investigacion, Desarrollo E Innovacion",
+     "pim": 23913056.0,
+     "dev": 11598175.09
+    },
+    {
+     "nombre": "Mantenimiento Y Operacion De La Infraestructura Y Equipamiento",
+     "pim": 17336590.0,
+     "dev": 16993642.68
+    },
+    {
+     "nombre": "Produccion De Bienes Y Prestacion De Servicios",
+     "pim": 16336962.0,
+     "dev": 15837470.12
+    },
+    {
+     "nombre": "Construccion De Ambientes",
+     "pim": 13421041.0,
+     "dev": 12786572.14
+    },
+    {
+     "nombre": "Ampliacion De La Infraestructura Fisica",
+     "pim": 12887439.0,
+     "dev": 12561186.2
+    },
+    {
+     "nombre": "Desarrollo De Actividades Academicas Escuela De Post-Grado",
+     "pim": 9751329.0,
+     "dev": 9331088.09
+    },
+    {
+     "nombre": "Apoyo A Proyectos De Investigacion En Ciencia, Tecnologia E Innovacion Tecnologica",
+     "pim": 8769273.0,
+     "dev": 748616.23
+    },
+    {
+     "nombre": "Adquisicion De Equipos",
+     "pim": 8665349.0,
+     "dev": 3825082.88
+    },
+    {
+     "nombre": "Mejoramiento De Ambientes",
+     "pim": 8213426.0,
+     "dev": 8115081.97
+    }
+   ]
+  }
+ },
+ "511": {
+  "_fuente": "observatorio-unsaac/data/presupuesto-unsaac.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL SAN ANTONIO ABAD DEL CUSCO",
+     "pim": 415976494.0,
+     "dev": 339574753.11
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 381101454.0,
+     "dev": 305522715.92
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 33327604.0,
+     "dev": 33186455.86
+    },
+    {
+     "nombre": "PLANEAMIENTO, GESTION Y RESERVA DE CONTINGENCIA",
+     "pim": 798999.0,
+     "dev": 789041.18
+    },
+    {
+     "nombre": "SANEAMIENTO",
+     "pim": 696327.0,
+     "dev": 76540.15
+    },
+    {
+     "nombre": "CULTURA Y DEPORTE",
+     "pim": 52110.0,
+     "dev": 0.0
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 276037366.0,
+     "dev": 260595362.88
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 139939128.0,
+     "dev": 78979390.23
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 176187567.0,
+     "dev": 169566627.58
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 139939128.0,
+     "dev": 78979390.23
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 57944589.0,
+     "dev": 49740114.75
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 33437104.0,
+     "dev": 33295955.86
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 8372649.0,
+     "dev": 7897207.69
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 95457.0,
+     "dev": 95457.0
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "Ejercicio De La Docencia Universitaria",
+     "pim": 120524330.0,
+     "dev": 119927113.82
+    },
+    {
+     "nombre": "Construccion De Infraestructura",
+     "pim": 75797836.0,
+     "dev": 53078242.79
+    },
+    {
+     "nombre": "Acciones Administrativas",
+     "pim": 65711569.0,
+     "dev": 59131360.97
+    },
+    {
+     "nombre": "Pago De Pensiones",
+     "pim": 33327604.0,
+     "dev": 33186455.86
+    },
+    {
+     "nombre": "Desarrollo De Investigaciones",
+     "pim": 26847342.0,
+     "dev": 2546001.7
+    },
+    {
+     "nombre": "Adquisicion De Equipos",
+     "pim": 25721509.0,
+     "dev": 20372452.46
+    },
+    {
+     "nombre": "Mantenimiento Y Operacion De La Infraestructura Y Equipamiento",
+     "pim": 10103778.0,
+     "dev": 8363209.27
+    },
+    {
+     "nombre": "Centro De Estudios Pre Universitarios De La Universidad Nacional San Antonio Abad Del Cusco, Distrito De Cusco, Cusco, Cusco",
+     "pim": 7642071.0,
+     "dev": 7249100.48
+    },
+    {
+     "nombre": "Supervision Y Control De Obras",
+     "pim": 6551439.0,
+     "dev": 2261411.39
+    },
+    {
+     "nombre": "Subvenciones Economicas Para El Desarrollo De Actividades Academicas Y De Investigacion Formativa A Favor De Estudiantes De Pregrado",
+     "pim": 5164162.0,
+     "dev": 4890938.87
+    },
+    {
+     "nombre": "Brindar Servicios De Alimentacion En Universidades Publicas",
+     "pim": 4497882.0,
+     "dev": 4098743.55
+    },
+    {
+     "nombre": "Centro De Admision De La Universidad Nacional San Antonio Abad Del Cusco, Distrito De Cusco, Cusco, Cusco",
+     "pim": 3675935.0,
+     "dev": 3529756.6
+    },
+    {
+     "nombre": "Brindar Servicios Bibliograficos A La Comunidad",
+     "pim": 2090143.0,
+     "dev": 2049171.66
+    },
+    {
+     "nombre": "Desarrollo De Cursos De Post Graduacion",
+     "pim": 2050622.0,
+     "dev": 326410.69
+    },
+    {
+     "nombre": "Acreditacion De Carreras Profesionales",
+     "pim": 1908510.0,
+     "dev": 1824165.59
+    }
+   ]
+  }
+ },
+ "513": {
+  "_fuente": "observatorio-unsa/data/presupuesto-unsa.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL DE SAN AGUSTIN",
+     "pim": 447571313.0,
+     "dev": 423420331.66
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 410013360.0,
+     "dev": 386464766.59
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 28758920.0,
+     "dev": 28666301.18
+    },
+    {
+     "nombre": "DEUDA PUBLICA",
+     "pim": 6567981.0,
+     "dev": 6567978.55
+    },
+    {
+     "nombre": "PLANEAMIENTO, GESTION Y RESERVA DE CONTINGENCIA",
+     "pim": 2231052.0,
+     "dev": 1721285.34
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 345778814.0,
+     "dev": 343553477.57
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 95224518.0,
+     "dev": 73298875.54
+    },
+    {
+     "nombre": "SERVICIO DE LA DEUDA",
+     "pim": 6567981.0,
+     "dev": 6567978.55
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 224917275.0,
+     "dev": 224896441.44
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 95224518.0,
+     "dev": 73298875.54
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 89335658.0,
+     "dev": 87442679.31
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 21533668.0,
+     "dev": 21350563.42
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 9885277.0,
+     "dev": 9756857.4
+    },
+    {
+     "nombre": "SERVICIO DE LA DEUDA PUBLICA",
+     "pim": 6567981.0,
+     "dev": 6567978.55
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 106936.0,
+     "dev": 106936.0
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "Ejercicio De La Docencia Universitaria",
+     "pim": 127506113.0,
+     "dev": 127495146.04
+    },
+    {
+     "nombre": "Gestion Administrativa",
+     "pim": 61886026.0,
+     "dev": 61731601.69
+    },
+    {
+     "nombre": "Gestion Del Programa",
+     "pim": 35758792.0,
+     "dev": 33932801.39
+    },
+    {
+     "nombre": "Investigacion Cientifica Y Tecnologica",
+     "pim": 34837424.0,
+     "dev": 34072251.37
+    },
+    {
+     "nombre": "Mejoramiento De Los Servicios De Extension Universitaria Y Formacion Profesional De Las Escuelas De Administracion Y Agronomia En La Sede Pedregal De La U.N.S.A., En La Ciudad De Majes, Distrito De Majes, Provincia Caylloma, Departamento Arequipa",
+     "pim": 24308932.0,
+     "dev": 24298930.92
+    },
+    {
+     "nombre": "Fortalecimiento Institucional De La U. N. San Agustin - Productividad Y Puntualidad",
+     "pim": 23089094.0,
+     "dev": 23084849.18
+    },
+    {
+     "nombre": "Pago De Pensiones Y Beneficios A Cesantes Y Jubilados",
+     "pim": 19027121.0,
+     "dev": 18959221.21
+    },
+    {
+     "nombre": "Formacion Profesional Post-Grado, Maestria",
+     "pim": 13510521.0,
+     "dev": 13422881.27
+    },
+    {
+     "nombre": "Mejoramiento Del Servicio De Formacion Profesional En Ingenieria De Materiales En La Universidad Nacional De San Agustin, Distrito De Arequipa - Arequipa - Arequipa",
+     "pim": 11389423.0,
+     "dev": 9578043.34
+    },
+    {
+     "nombre": "Produccion De Bienes Y Prestacion De Servicios",
+     "pim": 10091352.0,
+     "dev": 10078825.58
+    },
+    {
+     "nombre": "Pago De Deudas Por Sentencias Judiciales",
+     "pim": 9731799.0,
+     "dev": 9707079.97
+    },
+    {
+     "nombre": "Apoyo Academico",
+     "pim": 9464092.0,
+     "dev": 9456610.28
+    },
+    {
+     "nombre": "Servicio De La Deuda",
+     "pim": 6567981.0,
+     "dev": 6567978.55
+    },
+    {
+     "nombre": "Mantenimiento Y Conservacion De Bienes",
+     "pim": 6177007.0,
+     "dev": 5187568.3
+    },
+    {
+     "nombre": "Reparacion De Biblioteca; Adquisicion De Ascensores; En El Biblioteca Del Area De Biomedicas De La Universidad Nacional De San Agustin De Arequipa Del Campus Universitario Del Area De Biomedicas Distrito De Arequipa - Arequipa - Arequipa",
+     "pim": 5018367.0,
+     "dev": 2164411.43
+    }
+   ]
+  }
+ },
+ "524": {
+  "_fuente": "observatorio-villarreal/data/presupuesto-villarreal.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL FEDERICO VILLARREAL",
+     "pim": 272958734.0,
+     "dev": 233595298.44
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 259412659.0,
+     "dev": 220319013.84
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 13546075.0,
+     "dev": 13276284.6
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 247419538.0,
+     "dev": 222170585.72
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 25539196.0,
+     "dev": 11424712.72
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 166839962.0,
+     "dev": 161348392.43
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 62706968.0,
+     "dev": 43898969.96
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 25539196.0,
+     "dev": 11424712.72
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 14372943.0,
+     "dev": 14068152.36
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 3404208.0,
+     "dev": 2759613.97
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 95457.0,
+     "dev": 95457.0
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "Ejercicio De La Docencia Universitaria",
+     "pim": 99609196.0,
+     "dev": 98497353.64
+    },
+    {
+     "nombre": "Apoyo A La Gestion",
+     "pim": 52832606.0,
+     "dev": 42503286.38
+    },
+    {
+     "nombre": "Gestion Del Programa",
+     "pim": 52149699.0,
+     "dev": 38028810.88
+    },
+    {
+     "nombre": "Pago De Pensiones",
+     "pim": 13546075.0,
+     "dev": 13276284.6
+    },
+    {
+     "nombre": "Fortalecimiento De Capacidades",
+     "pim": 11944113.0,
+     "dev": 9587535.19
+    },
+    {
+     "nombre": "Brindar Servicios De Alimentacion En Universidades Publicas",
+     "pim": 6342383.0,
+     "dev": 4655453.03
+    },
+    {
+     "nombre": "Formacion Profesional Post-Grado, Maestria",
+     "pim": 5843701.0,
+     "dev": 4224864.79
+    },
+    {
+     "nombre": "Coordinacion Y Supervision De La Educacion Superior Universitaria",
+     "pim": 4977439.0,
+     "dev": 3934813.74
+    },
+    {
+     "nombre": "Acciones De Asesoramiento Juridico",
+     "pim": 4032358.0,
+     "dev": 3711013.19
+    },
+    {
+     "nombre": "Adquisicion De Maquinarias",
+     "pim": 3506964.0,
+     "dev": 3088649.24
+    },
+    {
+     "nombre": "Mantenimiento Y Operacion De La Infraestructura Y Equipamiento",
+     "pim": 3042311.0,
+     "dev": 1250496.66
+    },
+    {
+     "nombre": "Investigacion Cientifica Y Tecnologica",
+     "pim": 3013133.0,
+     "dev": 2656175.06
+    },
+    {
+     "nombre": "Captacion De Estudiantes",
+     "pim": 2851844.0,
+     "dev": 2090575.22
+    },
+    {
+     "nombre": "Brindar Servicios De Transporte Estudiantil En Universidades Publicas",
+     "pim": 1622971.0,
+     "dev": 1302072.03
+    },
+    {
+     "nombre": "Enseñanza En Idiomas",
+     "pim": 1398705.0,
+     "dev": 1088363.54
+    }
+   ]
+  }
+ },
+ "518": {
+  "_fuente": "observatorio-unalm/data/presupuesto-unalm.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL AGRARIA LA MOLINA",
+     "pim": 245894572.0,
+     "dev": 229427618.0
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 212230525.0,
+     "dev": 198915742.0
+    },
+    {
+     "nombre": "PLANEAMIENTO, GESTION Y RESERVA DE CONTINGENCIA",
+     "pim": 17467299.0,
+     "dev": 14745356.0
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 16196748.0,
+     "dev": 15766520.0
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 153585135.0,
+     "dev": 145909400.0
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 92309437.0,
+     "dev": 83518218.0
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 92309437.0,
+     "dev": 83518218.0
+    },
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 87802477.0,
+     "dev": 86565848.0
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 42976293.0,
+     "dev": 37130425.0
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 16196748.0,
+     "dev": 15766520.0
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 6505169.0,
+     "dev": 6342159.0
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 104448.0,
+     "dev": 104448.0
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "SIN PRODUCTO",
+     "pim": 62140253.0,
+     "dev": 57196131.0
+    },
+    {
+     "nombre": "DOCENTES CON ADECUADAS COMPETENCIAS",
+     "pim": 53397920.0,
+     "dev": 53379761.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS SERVICIOS DEPORTIVOS EN EL CAMPUS I DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 31176424.0,
+     "dev": 30786143.0
+    },
+    {
+     "nombre": "SERVICIOS ADECUADOS DE APOYO AL ESTUDIANTE",
+     "pim": 19245687.0,
+     "dev": 16888883.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS SERVICIOS DE CTI PARA FORTALECER EL SISTEMA NACIONAL DE CIENCIA, TECNOLOGIA E INNOVACION",
+     "pim": 16974676.0,
+     "dev": 14289378.0
+    },
+    {
+     "nombre": "ACCIONES COMUNES",
+     "pim": 13733738.0,
+     "dev": 12407063.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DEL SERVICIO INTEGRAL DE LOS LABORATORIOS A NIVEL DE PRE GRADO DE LA FACULTAD DE PESQUERIA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 7820268.0,
+     "dev": 7796637.0
+    },
+    {
+     "nombre": "PROGRAMAS CURRICULARES ADECUADOS",
+     "pim": 6577053.0,
+     "dev": 6050045.0
+    },
+    {
+     "nombre": "INFRAESTRUCTURA Y EQUIPAMIENTO ADECUADOS",
+     "pim": 6445836.0,
+     "dev": 4657422.0
+    },
+    {
+     "nombre": "CREACION DEL CENTRO DE INVESTIGACION E INNOVACION TECNOLOGICA EN PESCA Y ACUICULTURA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 4640073.0,
+     "dev": 4639312.0
+    },
+    {
+     "nombre": "AMPLIACION Y MEJORAMIENTO DEL SERVICIO DE ENERGIA ELECTRICA DE MEDIA Y BAJA TENSION EN EL CAMPUS UNIVERSITARIO DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA, LA MOLINA, LIMA",
+     "pim": 3954806.0,
+     "dev": 3938274.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS AMBIENTES EDUCATIVOS, LABORATORIOS Y ADMINISTRATIVOS DE LA FACULTAD DE CIENCIAS FORESTALES DE LA UNIVERSIDAD NACIONAL AGRARIA - LA MOLINA",
+     "pim": 3841000.0,
+     "dev": 3832448.0
+    },
+    {
+     "nombre": "FACILIDADES Y DESARROLLO DE LA INVESTIGACION, INNOVACION Y TRANSFERENCIA TECNOLOGICA",
+     "pim": 3363613.0,
+     "dev": 2526770.0
+    },
+    {
+     "nombre": "MEJORAMIENTO DE LOS SERVICIOS ADMINISTRATIVOS FACULTAD DE PESQUERIA DEL DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 3119107.0,
+     "dev": 3103268.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS LABORATORIOS DE INVESTIGACION, MUSEO Y APIARIO DEL DEPARTAMENTO DE ENTOMOLOGIA DE LA UNIVERSIDAD NACIONAL AGRARIA - LA MOLINA LA MOLINA, LIMA Y LIMA",
+     "pim": 2090595.0,
+     "dev": 1919677.0
+    },
+    {
+     "nombre": "MEJORAMIENTO DE LOS SERVICIOS DE LA DIRECCION GENERAL DE ADMINISTRACION (DIGA) DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA",
+     "pim": 1936022.0,
+     "dev": 1930947.0
+    },
+    {
+     "nombre": "CAPACIDADES PARA LA GENERACION DE CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA DESARROLLADAS Y FORTALECIDAS",
+     "pim": 1616710.0,
+     "dev": 1345659.0
+    },
+    {
+     "nombre": "ESTUDIOS DE PRE-INVERSION",
+     "pim": 1335603.0,
+     "dev": 406868.0
+    },
+    {
+     "nombre": "INSTALACION DE LAS AULAS DE ESTUDIO EN EL SEGUNDO PISO DE LAS ETAPAS I,II Y III, Y AUDITORIOS EN EL CAMPUS DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA",
+     "pim": 1129379.0,
+     "dev": 1088123.0
+    },
+    {
+     "nombre": "MEJORAMIENTO DE LOS SERVICIOS ADMINISTRATIVOS DE LA FACULTAD DE INDUSTRIAS ALIMENTARIAS, DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA LA MOLINA - DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - REGION LIMA",
+     "pim": 435218.0,
+     "dev": 435136.0
+    },
+    {
+     "nombre": "AMPLIACION DE LOS SERVICIOS ACADEMICOS Y ADMINISTRATIVOS QUE BRINDA LA FACULTAD DE ECONOMIA Y PLANIFICACION DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 282816.0,
+     "dev": 206741.0
+    },
+    {
+     "nombre": "CREACION DEL CENTRO FACULTATIVO DE ESTUDIOS ECONOMICOS Y SOSTENIBILIDAD DE LA FACULTAD DE ECONOMIA Y PLANIFICACION (CFEES-FEP) EN EL SECTOR II DE LA UNIVERSIDAD AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 248462.0,
+     "dev": 248462.0
+    },
+    {
+     "nombre": "CONSTRUCCION DE ASCENSOR; EN EL(LA) AMPLIACION MARGINAL DE LA EDIFICACION U OBRA CIVIL DE LA FACULTAD DE ZOOTECNIA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA, PROVINCIA LIMA, DEPARTAMENTO LIMA",
+     "pim": 159429.0,
+     "dev": 124586.0
+    },
+    {
+     "nombre": "MEJORAMIENTO DEL SERVICIO DE GESTION INSTITUCIONAL EN EDUCACION SUPERIOR UNIVERSITARIA EN LA SUBDIRECCION DE SERVICIO MEDICO EN EL CAMPUS I DE LA UNALM DISTRITO DE LA MOLINA DE LA PROVINCIA DE LIMA DEL DEPARTAMENTO DE LIMA",
+     "pim": 154884.0,
+     "dev": 154884.0
+    },
+    {
+     "nombre": "MEJORAMIENTO DE LOS SERVICIOS ADMINISTRATIVOS DEL PROGRAMA DE INVESTIGACION Y PROYECCION SOCIAL DE CARNES EN EL SECTOR I DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DEL DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 40000.0,
+     "dev": 40000.0
+    },
+    {
+     "nombre": "MEJORAMIENTO, AMPLIACION Y EQUIPAMIENTO DE LA BIBLIOTECA AGRICOLA NACIONAL DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA",
+     "pim": 20000.0,
+     "dev": 20000.0
+    },
+    {
+     "nombre": "CREACION DE LA UNIDAD EXPERIMENTAL DE NUTRICION Y ALIMENTACION DE RUMIANTES DE LA FACULTAD DE ZOOTECNIA SECTOR I DE LA UNIVERSIDAD AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 15000.0,
+     "dev": 15000.0
+    }
+   ],
+   "por_fuente": [
+    {
+     "nombre": "RECURSOS ORDINARIOS",
+     "pim": 198593928.0,
+     "dev": 192538004.0
+    },
+    {
+     "nombre": "RECURSOS DIRECTAMENTE RECAUDADOS",
+     "pim": 25455559.0,
+     "dev": 18879840.0
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 21631130.0,
+     "dev": 17933305.0
+    },
+    {
+     "nombre": "RECURSOS DETERMINADOS",
+     "pim": 213955.0,
+     "dev": 76469.0
+    }
+   ],
+   "por_cat_presupuestal": [
+    {
+     "nombre": "FORMACION UNIVERSITARIA DE PREGRADO",
+     "pim": 151614397.0,
+     "dev": 144850938.0
+    },
+    {
+     "nombre": "ASIGNACIONES PRESUPUESTARIAS QUE NO RESULTAN EN PRODUCTOS",
+     "pim": 58085519.0,
+     "dev": 51669220.0
+    },
+    {
+     "nombre": "ACCIONES CENTRALES",
+     "pim": 31214333.0,
+     "dev": 29035032.0
+    },
+    {
+     "nombre": "DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA",
+     "pim": 4980323.0,
+     "dev": 3872429.0
+    }
+   ],
+   "consultado": "2026-11-16"
+  },
+  "2026": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL AGRARIA LA MOLINA",
+     "pim": 202503991.0,
+     "dev": 147475153.0
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 165397974.0,
+     "dev": 123997604.0
+    },
+    {
+     "nombre": "PLANEAMIENTO, GESTION Y RESERVA DE CONTINGENCIA",
+     "pim": 20215777.0,
+     "dev": 9386088.0
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 16890240.0,
+     "dev": 14091462.0
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 151527104.0,
+     "dev": 118655840.0
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 50976887.0,
+     "dev": 28819314.0
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 93010564.0,
+     "dev": 75323733.0
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 50976887.0,
+     "dev": 28819314.0
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 37298951.0,
+     "dev": 25544509.0
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 16890240.0,
+     "dev": 14091462.0
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 4236725.0,
+     "dev": 3605512.0
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 90624.0,
+     "dev": 90624.0
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "SIN PRODUCTO",
+     "pim": 58415437.0,
+     "dev": 45617582.0
+    },
+    {
+     "nombre": "DOCENTES CON ADECUADAS COMPETENCIAS",
+     "pim": 54341584.0,
+     "dev": 47161607.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS SERVICIOS DE CTI PARA FORTALECER EL SISTEMA NACIONAL DE CIENCIA, TECNOLOGIA E INNOVACION",
+     "pim": 19802813.0,
+     "dev": 9134365.0
+    },
+    {
+     "nombre": "SERVICIOS ADECUADOS DE APOYO AL ESTUDIANTE",
+     "pim": 16292462.0,
+     "dev": 10800675.0
+    },
+    {
+     "nombre": "ACCIONES COMUNES",
+     "pim": 12612327.0,
+     "dev": 8567627.0
+    },
+    {
+     "nombre": "MEJORAMIENTO DE LOS SERVICIOS ADMINISTRATIVOS FACULTAD DE PESQUERIA DEL DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 7369184.0,
+     "dev": 7002555.0
+    },
+    {
+     "nombre": "FACILIDADES Y DESARROLLO DE LA INVESTIGACION, INNOVACION Y TRANSFERENCIA TECNOLOGICA",
+     "pim": 6971817.0,
+     "dev": 2989525.0
+    },
+    {
+     "nombre": "AMPLIACION Y MEJORAMIENTO DE LOS SERVICIOS DE LA UNIDAD EXPERIMENTAL DE ZOOTECNIA DE LA FACULTAD DE ZOOTECNIA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA - LA MOLINA",
+     "pim": 4310447.0,
+     "dev": 1917178.0
+    },
+    {
+     "nombre": "PROGRAMAS CURRICULARES ADECUADOS",
+     "pim": 3856745.0,
+     "dev": 3213994.0
+    },
+    {
+     "nombre": "INSTALACION DE LAS AULAS DE ESTUDIO EN EL SEGUNDO PISO DE LAS ETAPAS I,II Y III, Y AUDITORIOS EN EL CAMPUS DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA",
+     "pim": 2917504.0,
+     "dev": 982019.0
+    },
+    {
+     "nombre": "INFRAESTRUCTURA Y EQUIPAMIENTO ADECUADOS",
+     "pim": 2726906.0,
+     "dev": 2132053.0
+    },
+    {
+     "nombre": "AMPLIACION Y MEJORAMIENTO DEL SERVICIO DE ENERGIA ELECTRICA DE MEDIA Y BAJA TENSION EN EL CAMPUS UNIVERSITARIO DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA, LA MOLINA, LIMA",
+     "pim": 2157020.0,
+     "dev": 1386517.0
+    },
+    {
+     "nombre": "RENOVACION DE CERCO PERIMETRICO; EN EL(LA) INSTALACION DE SERVICIOS BASICOS Y URBANISTICOS DEL CAMPUS UNIVERSITARIO DISTRITO DE LA MOLINA, PROVINCIA LIMA, DEPARTAMENTO LIMA",
+     "pim": 2155428.0,
+     "dev": 771263.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS AMBIENTES EDUCATIVOS, LABORATORIOS Y ADMINISTRATIVOS DE LA FACULTAD DE CIENCIAS FORESTALES DE LA UNIVERSIDAD NACIONAL AGRARIA - LA MOLINA",
+     "pim": 2020083.0,
+     "dev": 2019953.0
+    },
+    {
+     "nombre": "CAPACIDADES PARA LA GENERACION DE CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA DESARROLLADAS Y FORTALECIDAS",
+     "pim": 1780732.0,
+     "dev": 836688.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DEL SERVICIO INTEGRAL DE LOS LABORATORIOS A NIVEL DE PRE GRADO DE LA FACULTAD DE PESQUERIA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 1709823.0,
+     "dev": 1265056.0
+    },
+    {
+     "nombre": "CREACION DEL CENTRO DE INVESTIGACION E INNOVACION TECNOLOGICA EN PESCA Y ACUICULTURA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 779895.0,
+     "dev": 494801.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS SERVICIOS DEPORTIVOS EN EL CAMPUS I DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA - PROVINCIA DE LIMA - DEPARTAMENTO DE LIMA",
+     "pim": 640466.0,
+     "dev": 558455.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DEL SERVICIO DE FORMACION DE PREGRADO EN EDUCACION SUPERIOR UNIVERSITARIA EN LAS ESCUELAS PROFESIONALES DE BIOLOGIA, INGENIERIA AMBIENTAL E INGENIERIA METEOROLOGICA Y GESTION DE RIESGOS CLIMATICOS DE LA FACULTAD DE CIENCIAS DE LA UNALM DISTRITO DE LA MOLINA DE LA PROVINCIA DE LIMA DEL DEPARTAMENTO DE LIMA",
+     "pim": 505360.0,
+     "dev": 58144.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DEL SERVICIO DE FORMACION DE PREGRADO EN EDUCACION SUPERIOR UNIVERSITARIA EN LA ESCUELA PROFESIONAL DE AGRONOMIA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA DE LA PROVINCIA DE LIMA DEL DEPARTAMENTO DE LIMA",
+     "pim": 408360.0,
+     "dev": 0.0
+    },
+    {
+     "nombre": "ESTUDIOS DE PRE-INVERSION",
+     "pim": 396275.0,
+     "dev": 231775.0
+    },
+    {
+     "nombre": "MEJORAMIENTO Y AMPLIACION DE LOS LABORATORIOS DE INVESTIGACION, MUSEO Y APIARIO DEL DEPARTAMENTO DE ENTOMOLOGIA DE LA UNIVERSIDAD NACIONAL AGRARIA - LA MOLINA LA MOLINA, LIMA Y LIMA",
+     "pim": 163370.0,
+     "dev": 163370.0
+    },
+    {
+     "nombre": "CONSTRUCCION DE ASCENSOR; EN EL(LA) AMPLIACION MARGINAL DE LA EDIFICACION U OBRA CIVIL DE LA FACULTAD DE ZOOTECNIA DE LA UNIVERSIDAD NACIONAL AGRARIA LA MOLINA DISTRITO DE LA MOLINA, PROVINCIA LIMA, DEPARTAMENTO LIMA",
+     "pim": 161953.0,
+     "dev": 161952.0
+    },
+    {
+     "nombre": "CREACION DEL SISTEMA DE GESTION DE LA CALIDAD PARA LA CARRERA DE INGENIERIA FORESTAL DE LA UNALM LA MOLINA,LIMA Y LIMA",
+     "pim": 8000.0,
+     "dev": 8000.0
+    }
+   ],
+   "por_fuente": [
+    {
+     "nombre": "RECURSOS ORDINARIOS",
+     "pim": 154607171.0,
+     "dev": 121808866.0
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 27702483.0,
+     "dev": 12713756.0
+    },
+    {
+     "nombre": "RECURSOS DIRECTAMENTE RECAUDADOS",
+     "pim": 19980789.0,
+     "dev": 12919419.0
+    },
+    {
+     "nombre": "RECURSOS DETERMINADOS",
+     "pim": 213548.0,
+     "dev": 33112.0
+    }
+   ],
+   "por_cat_presupuestal": [
+    {
+     "nombre": "FORMACION UNIVERSITARIA DE PREGRADO",
+     "pim": 103455285.0,
+     "dev": 79504884.0
+    },
+    {
+     "nombre": "ASIGNACIONES PRESUPUESTARIAS QUE NO RESULTAN EN PRODUCTOS",
+     "pim": 62098704.0,
+     "dev": 42149252.0
+    },
+    {
+     "nombre": "ACCIONES CENTRALES",
+     "pim": 28197453.0,
+     "dev": 21994805.0
+    },
+    {
+     "nombre": "DESARROLLO DE LA CIENCIA, TECNOLOGIA E INNOVACION TECNOLOGICA",
+     "pim": 8752549.0,
+     "dev": 3826213.0
+    }
+   ],
+   "consultado": "2026-11-16",
+   "parcial": true
+  }
+ },
+ "528": {
+  "_fuente": "observatorio-cantuta/data/presupuesto-cantuta.json",
+  "2025": {
+   "por_unidad": [
+    {
+     "nombre": "UNIVERSIDAD NACIONAL DE EDUCACION ENRIQUE GUZMAN Y VALLE",
+     "pim": 205642726.0,
+     "dev": 180976348.83
+    }
+   ],
+   "por_funcion": [
+    {
+     "nombre": "EDUCACION",
+     "pim": 197710541.0,
+     "dev": 173338663.28
+    },
+    {
+     "nombre": "PREVISION SOCIAL",
+     "pim": 7932185.0,
+     "dev": 7637685.55
+    }
+   ],
+   "por_categoria": [
+    {
+     "nombre": "GASTO CORRIENTE",
+     "pim": 175710252.0,
+     "dev": 158479954.03
+    },
+    {
+     "nombre": "GASTO DE CAPITAL",
+     "pim": 29932474.0,
+     "dev": 22496394.8
+    }
+   ],
+   "por_generica": [
+    {
+     "nombre": "PERSONAL Y OBLIGACIONES SOCIALES",
+     "pim": 104521026.0,
+     "dev": 93398043.28
+    },
+    {
+     "nombre": "BIENES Y SERVICIOS",
+     "pim": 60750443.0,
+     "dev": 55014483.01
+    },
+    {
+     "nombre": "ADQUISICION DE ACTIVOS NO FINANCIEROS",
+     "pim": 29932474.0,
+     "dev": 22496394.8
+    },
+    {
+     "nombre": "PENSIONES Y OTRAS PRESTACIONES SOCIALES",
+     "pim": 7932185.0,
+     "dev": 7637685.55
+    },
+    {
+     "nombre": "OTROS GASTOS",
+     "pim": 2370058.0,
+     "dev": 2293202.19
+    },
+    {
+     "nombre": "DONACIONES Y TRANSFERENCIAS",
+     "pim": 136540.0,
+     "dev": 136540.0
+    }
+   ],
+   "por_programa": [
+    {
+     "nombre": "Ejercicio De La Docencia Universitaria",
+     "pim": 74759700.0,
+     "dev": 68107784.52
+    },
+    {
+     "nombre": "Acciones Administrativas",
+     "pim": 23864244.0,
+     "dev": 21894470.98
+    },
+    {
+     "nombre": "Mejoramiento Y Ampliacion De Infraestructura",
+     "pim": 16333601.0,
+     "dev": 16224343.93
+    },
+    {
+     "nombre": "Desarrollo De Centros De Produccion",
+     "pim": 14539820.0,
+     "dev": 9269302.96
+    },
+    {
+     "nombre": "Mantenimiento Y Operacion De La Infraestructura Y Equipamiento",
+     "pim": 12720903.0,
+     "dev": 12011263.41
+    },
+    {
+     "nombre": "Capacitacion A Docentes",
+     "pim": 11074033.0,
+     "dev": 11017250.11
+    },
+    {
+     "nombre": "Brindar Servicios De Alimentacion En Universidades Publicas",
+     "pim": 8501275.0,
+     "dev": 7508004.31
+    },
+    {
+     "nombre": "Acciones De La Alta Direccion",
+     "pim": 5056969.0,
+     "dev": 4698683.25
+    },
+    {
+     "nombre": "Fomento De La Investigacion Formativa",
+     "pim": 5000776.0,
+     "dev": 4458478.83
+    },
+    {
+     "nombre": "Acreditacion De Carreras Profesionales",
+     "pim": 4595273.0,
+     "dev": 4249963.53
+    },
+    {
+     "nombre": "Desarrollo De Actividades Academicas Escuela De Post-Grado",
+     "pim": 4272911.0,
+     "dev": 3591112.91
+    },
+    {
+     "nombre": "Desarrollo Y Mantenimiento De Los Sistemas Informaticos",
+     "pim": 4116958.0,
+     "dev": 3867770.85
+    },
+    {
+     "nombre": "Brindar Servicios De Transporte Estudiantil En Universidades Publicas",
+     "pim": 3189265.0,
+     "dev": 2285740.04
+    },
+    {
+     "nombre": "Asesoramiento En Presupuesto Y Planificacion",
+     "pim": 2647802.0,
+     "dev": 895952.83
+    },
+    {
+     "nombre": "Brindar Servicios De Asistencia Social En Universidades Publicas",
+     "pim": 2497501.0,
+     "dev": 2362256.78
+    }
+   ]
+  }
+ }
+}

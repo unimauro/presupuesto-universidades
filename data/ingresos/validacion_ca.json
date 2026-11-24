@@ -1,0 +1,58 @@
+{
+ "generado": "2026-11-23 23:14",
+ "fuente": "https://apps5.mineco.gob.pe/TransparenciaIngresos/Navegador/",
+ "anios": {
+  "2012": {
+   "pliegos_ca": 43,
+   "coinciden_±1sol": 42,
+   "diferencias": [
+    {
+     "pliego": "540",
+     "motivo": "falta en CSV",
+     "ca": {
+      "nombre": "ASAMBLEA NACIONAL DE RECTORES",
+      "pia": 11500000.0,
+      "pim": 22148636.0,
+      "recaudado": 41718072.0
+     }
+    }
+   ],
+   "en_csv_no_en_ca": []
+  },
+  "2016": {
+   "pliegos_ca": 49,
+   "coinciden_±1sol": 48,
+   "diferencias": [
+    {
+     "pliego": "540",
+     "motivo": "falta en CSV",
+     "ca": {
+      "nombre": "ASAMBLEA NACIONAL DE RECTORES",
+      "pia": 0.0,
+      "pim": 0.0,
+      "recaudado": 0.0
+     }
+    }
+   ],
+   "en_csv_no_en_ca": []
+  },
+  "2020": {
+   "pliegos_ca": 52,
+   "coinciden_±1sol": 52,
+   "diferencias": [],
+   "en_csv_no_en_ca": []
+  },
+  "2024": {
+   "pliegos_ca": 54,
+   "coinciden_±1sol": 54,
+   "diferencias": [],
+   "en_csv_no_en_ca": []
+  },
+  "2026": {
+   "pliegos_ca": 69,
+   "coinciden_±1sol": 69,
+   "diferencias": [],
+   "en_csv_no_en_ca": []
+  }
+ }
+}

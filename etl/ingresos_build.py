@@ -9,7 +9,8 @@ universidades[pliego].anios[año] = {
   generica:{"1.3 NOMBRE":{pia,pim,recaudado}},
   rdr_detalle:{"1.3.2.3.1.2 NOMBRE ESPECIFICA DETALLE":{pia,pim,recaudado}},   # solo fuente RDR
   rdr_categoria:{"Admisión":{pia,pim,recaudado}, ...},                         # agrupación propia de rdr_detalle
-  rdr_sin_saldos:{pia,pim,recaudado}                                            # RDR excluyendo 1.9 Saldos de balance
+  rdr_sin_saldos:{pia,pim,recaudado},                                           # RDR excluyendo 1.9 Saldos de balance
+  total_sin_saldos:{pia,pim,recaudado}                                          # todas las fuentes sin 1.9
 }
 Montos en soles, redondeados a 2 decimales. Se omiten partidas con pia=pim=recaudado=0.
 
@@ -99,7 +100,7 @@ def main():
         year = os.path.basename(path)[:4]
         acc = defaultdict(lambda: {"total": z(), "fuente": defaultdict(z), "generica": defaultdict(z),
                                    "rdr_detalle": defaultdict(z), "rdr_categoria": defaultdict(z),
-                                   "rdr_sin_saldos": z()})
+                                   "rdr_sin_saldos": z(), "total_sin_saldos": z()})
         with open(path, encoding="utf-8") as fh:
             for r in csv.DictReader(fh):
                 pl = r["PLIEGO"].strip().zfill(3)
@@ -107,6 +108,8 @@ def main():
                 v = {"pia": f(r["MONTO_PIA"]), "pim": f(r["MONTO_PIM"]), "recaudado": f(r["MONTO_RECAUDADO"])}
                 a = acc[pl]
                 add(a["total"], v)
+                if r["GENERICA"] != "9":
+                    add(a["total_sin_saldos"], v)
                 add(a["fuente"][r["FUENTE_FINANCIAMIENTO_NOMBRE"].strip()], v)
                 add(a["generica"][f"1.{r['GENERICA']} {r['GENERICA_NOMBRE'].strip()}"], v)
                 if r["FUENTE_FINANCIAMIENTO"].strip() == "2":
@@ -121,7 +124,8 @@ def main():
             u["anios"][year] = {"total": rnd(a["total"]), "fuente": limpio(a["fuente"]),
                                 "generica": limpio(a["generica"]), "rdr_detalle": limpio(a["rdr_detalle"]),
                                 "rdr_categoria": limpio(a["rdr_categoria"]),
-                                "rdr_sin_saldos": rnd(a["rdr_sin_saldos"])}
+                                "rdr_sin_saldos": rnd(a["rdr_sin_saldos"]),
+                                "total_sin_saldos": rnd(a["total_sin_saldos"])}
         print(f"{year}: {len(acc)} universidades", flush=True)
     for pl, u in unis.items():
         u["nombre"] = nombres[pl][1]
@@ -142,7 +146,12 @@ def main():
             "Recaudado puede superar al PIM: típico en Recursos Determinados (canon/sobrecanon transferido por el MEF "
             "sin incorporarse al PIM en el año) y en Saldos de balance.",
             "'1.9 SALDOS DE BALANCE' no es ingreso nuevo: es caja no gastada de años anteriores que se reincorpora. "
-            "rdr_sin_saldos = RDR excluyendo saldos de balance (mejor medida de la recaudación propia del año).",
+            "rdr_sin_saldos = RDR excluyendo saldos de balance (mejor medida de la recaudación propia del año); "
+            "total_sin_saldos = idem para todas las fuentes.",
+            "OJO con 'recaudado' de 1.9 Saldos de balance: refleja la caja acumulada completa (p. ej. canon no gastado "
+            "de años previos), no solo lo incorporado al PIM. Ej.: U.N. Intercultural de Quillabamba 2024 registra "
+            "S/ 580 M de saldos de balance en Recursos Determinados frente a ~S/ 58 M de canon anual. Para comparar "
+            "universidades usar *_sin_saldos.",
             "rdr_detalle usa el clasificador de ingresos a nivel específica-detalle (código 1.G.SG.SGD.E.ED); "
             "rdr_categoria es una agrupación propia (no oficial) de ese detalle.",
             f"El año {years[-1]} es parcial (archivo diario del MEF al día de generación).",
