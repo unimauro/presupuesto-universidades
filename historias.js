@@ -163,7 +163,9 @@
   }
   const WIN = 6;
   const winYears = (Y) => S.closed.filter((y) => y <= Y).slice(-WIN);
+  function loadA27() { if (!S.a27P) S.a27P = getJSON('data/analisis2027.json').then((j) => { S.a27 = j; }).catch(() => { S.a27 = null; }); return S.a27P; }
   async function prepStory(st, Y) {
+    if (st.need === 'a27') { await loadA27(); return; }
     if (st.need === 'p2027') { if (S.p27 === undefined) S.p27 = await getJSON('data/p2027.json').catch(() => null); return; }
     if (st.need === 'base') return;
     await ensureYear(Y);
@@ -334,7 +336,7 @@
       const isTu = !!S.hl && r.key === S.hl, xv = x(r.v), bx = Math.min(x0, xv), bwid = Math.max(1, Math.abs(xv - x0));
       if (isTu) g += `<rect class="tu-bg" x="0" y="${y + 4}" width="${Math.min(labW - 6, cw(r.ax, 7.9) + 10)}" height="${rowH - 8}" rx="2"/>`;
       g += `<text ${isTu ? 'class="t-tu" ' : r.key && r.key === o.hiKey ? 'class="t-ink" ' : ''}x="${isTu ? 5 : 0}" y="${y + 21}">${esc(r.ax)}</text>`;
-      g += `<rect class="growx" style="--d:${(k * 0.04).toFixed(2)}s;${r.v < 0 ? 'transform-origin:right center' : ''}" x="${bx.toFixed(1)}" y="${y + 6}" width="${bwid.toFixed(1)}" height="${rowH - 12}" fill="${isTu ? C.tu : r.key && r.key === o.hiKey ? o.hiColor : (r.v < 0 ? o.colorNeg || o.color : o.color)}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''} data-tip="${esc(r.full + ': ' + o.fmt(r.v))}"/>`;
+      g += `<rect class="growx" style="--d:${(k * 0.04).toFixed(2)}s;${r.v < 0 ? 'transform-origin:right center' : ''}" x="${bx.toFixed(1)}" y="${y + 6}" width="${bwid.toFixed(1)}" height="${rowH - 12}" fill="${isTu ? C.tu : r.color ? r.color : r.key && r.key === o.hiKey ? o.hiColor : (r.v < 0 ? o.colorNeg || o.color : o.color)}"${isTu ? ` stroke="${C.tuB}" stroke-width="2"` : ''} data-tip="${esc(r.full + ': ' + o.fmt(r.v))}"/>`;
       g += r.v < 0 ? `<text class="t-ink" x="${xv - 5}" y="${y + 21}" text-anchor="end">${esc(o.fmt(r.v))}</text>` : `<text class="t-ink" x="${xv + 5}" y="${y + 21}">${esc(o.fmt(r.v))}</text>`;
     });
     g += `<line class="axis" x1="${x0}" x2="${x0}" y1="0" y2="${H}"/>`;
@@ -939,6 +941,74 @@
         };
       },
     },
+    // 12. ¿A quién le dieron más? (data/analisis2027.json)
+    {
+      id: 'a-quien', need: 'a27', col: 'chicha', sec: 'ley2027', toc: '¿A quién le dieron más?', sk: 'del aumento de 2027 se lo llevan 5 universidades',
+      build() {
+        const A = S.a27;
+        if (!A || !A.total || !Array.isArray(A.universidades)) return { cifra: SD, titulo: '¿a quién le dieron más en 2027?', html: '<p class="empty">Aún no hay análisis del presupuesto 2027 por universidad.</p>' };
+        const T = A.total, G = A.por_generica || {}, F = A.por_fuente || {};
+        const us = A.universidades.filter((u) => isNum(u.delta));
+        const byP = new Map(S.d.universidades.map((u) => [String(u.pliego), u]));
+        const nm = (x) => { const u = byP.get(String(x.pliego)); return u ? axisLabel(u) : String(x.uni || x.pliego); };
+        const fullOf = (x) => { const u = byP.get(String(x.pliego)); return u ? label(u) + ', ' + fullName(u) : String(x.nombre || x.uni); };
+        const sorted = us.slice().sort((a, b) => b.delta - a.delta);
+        const top5 = sorted.slice(0, 5);
+        const h = hlUni(); const hx = h && us.find((x) => String(x.pliego) === String(h.pliego));
+        const TOP = 8, BOT = 5;
+        const row = (x) => ({ key: String(x.pliego), ax: nm(x), full: fullOf(x), v: x.delta });
+        let rows = [...sorted.slice(0, TOP).map(row), { sep: true }, ...sorted.slice(-BOT).map(row)];
+        const k = hx ? sorted.indexOf(hx) : -1;
+        if (k >= TOP && k < sorted.length - BOT) rows.splice(TOP + 1, 0, row(hx), { sep: true });
+        const sF = (v) => (v >= 0 ? '+' : '−') + solesF(Math.abs(v)).replace('S/ ', 'S/ ');
+        const share = (v) => (isNum(v) && T.delta ? v / T.delta : null);
+        const GN = [['inversion', 'Obras y equipos', '--color-inversion'], ['personal', 'Sueldos', '--color-personal'], ['bys', 'Bienes y servicios', '--color-bys'], ['otros', 'Otros', '--color-otros'], ['pensiones', 'Pensiones', '--color-pensiones']]
+          .filter(([key]) => isNum(G[key])).map(([key, n, c]) => ({ key, ax: n, full: n, v: G[key], c }));
+        const FN = [['rdr', 'Lo que cobra (RDR)', '--color-rdr'], ['rd', 'Canon y regalías (RD)', '--color-canon'], ['ro', 'Tesoro público (RO)', '--color-ro'], ['dyt', 'Donaciones y transf.', '--color-dyt']]
+          .filter(([key]) => isNum(F[key])).map(([key, n, c]) => ({ key, ax: n, full: n, v: F[key], c }));
+        const dep = (A.por_departamento || []).filter((d) => isNum(d.delta)).sort((a, b) => a.delta - b.delta)[0];
+        const depUnis = dep ? us.filter((x) => x.departamento === dep.departamento && x.delta < 0).map(nmP) : [];
+        const rdTop = div(sum(top5.map((x) => x.f_rd)), sum(top5.map((x) => x.delta)));
+        const nmP = (x) => { const u = byP.get(String(x.pliego)); return u ? label(u) : String(x.uni || x.pliego); };
+        const lista = (arr) => (arr.length > 1 ? arr.slice(0, -1).join(', ') + ' y ' + arr[arr.length - 1] : arr.join(''));
+        const rho = A.rho_ejecucion_vs_aumento;
+        // Explicación para tu universidad: genérica y fuente que más pesan en su cambio.
+        let tu = '';
+        if (h) {
+          if (hx) {
+            const gk = [['d_inversion', 'inversión'], ['d_personal', 'sueldos'], ['d_bys', 'bienes y servicios'], ['d_pensiones', 'pensiones'], ['d_otros', 'otros gastos']].filter(([f]) => isNum(hx[f])).sort((a, b) => (Math.sign(hx.delta) * hx[b[0]]) - (Math.sign(hx.delta) * hx[a[0]]))[0];
+            const fk = [['f_rd', 'canon y regalías'], ['f_rdr', 'lo que cobra la universidad'], ['f_ro', 'el Tesoro público'], ['f_dyt', 'transferencias']].filter(([f]) => isNum(hx[f])).sort((a, b) => (Math.sign(hx.delta) * hx[b[0]]) - (Math.sign(hx.delta) * hx[a[0]]))[0];
+            const mm = hx.delta >= 0 ? 'más' : 'menos';
+            tu = `<p class="tu">A la <mark>${esc(label(h))}</mark> le asignan ${esc(sF(hx.delta))} en 2027 (${esc(pctSigned(hx.var_pct, 1))})${gk && fk ? `, sobre todo por ${mm} ${esc(gk[1])} pagad${gk[1] === 'inversión' ? 'a' : 'os'} con ${esc(fk[1])}` : ''}. Es el puesto ${esc(sorted.indexOf(hx) + 1)} de ${esc(sorted.length)} en aumento.</p>`;
+          } else tu = tuNo(h, 'no tiene un monto propio en el proyecto 2027.');
+        }
+        return {
+          cifra: esc(pct(T.top5_pct_del_aumento)),
+          titulo: `de los ${esc(solesF(T.delta))} extra que propone el presupuesto 2027 se lo llevan solo 5 universidades`,
+          html: `<p class="lead">El aumento para 2027 no se reparte parejo. ${esc(T.n_suben)} universidades suben y ${esc(T.n_bajan)} bajan, pero cinco concentran más de la mitad de la plata nueva: ${esc(lista(top5.map((x) => `${nmP(x)} (${sF(x.delta)})`)))}.</p>
+            <p>¿Por qué ellas? ${isNum(rdTop) && rdTop >= 0.5 ? `En esas cinco, el ${esc(pct(rdTop))} del aumento viene del canon y las regalías: la plata que llega a algunas regiones por la minería y el gas. Depende de cuánto se extrae y a qué precio, no de un premio a la universidad.` : 'Por obras puntuales y por la fuente de financiamiento de cada una (ver abajo).'} En el total, en cambio, el aumento se reparte entre lo que cobran las universidades, el canon y el Tesoro.${dep && dep.delta < 0 ? ` ${esc(titleCase(dep.departamento))} es el departamento que más pierde (${esc(sF(dep.delta))}${depUnis.length ? `: ${esc(lista(depUnis))}` : ''}).` : ''}</p>
+            ${isNum(rho) ? `<p>¿Reciben más las que mejor gastan lo que tienen? No se ve esa relación: la correlación entre ejecución 2025 y aumento 2027 es prácticamente cero (ρ = ${esc(new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(rho).replace('-', '−'))}${Math.abs(rho) < 0.05 ? ', o sea, ninguna' : ''}).</p>` : ''}
+            ${tu}
+            <figure class="fig anim"><p class="fig-t">Cuánto sube o baja cada universidad, PIA 2027 propuesto frente a PIA 2026</p><p class="fig-s">Las 8 que más suben y las 5 que más bajan.</p><div data-fig="d"></div>
+              ${tableHTML(['Universidad', 'PIA 2026', 'PIA 2027', 'Cambio'], sorted.map((x) => ({ key: String(x.pliego), cells: [nm(x), soles(x.pia_2026), soles(x.pia_2027), sF(x.delta)] })), S.hl)}</figure>
+            <figure class="fig anim"><p class="fig-t">¿En qué se va el aumento? ${esc(pct(share(G.inversion)))} es para obras y equipos</p><div data-fig="g"></div></figure>
+            <figure class="fig anim"><p class="fig-t">¿Con qué plata?</p><div data-fig="f"></div></figure>
+            ${caveat([
+              'Es el proyecto de presupuesto: el detalle por universidad de la ley aprobada aún no se publica y los montos pueden cambiar.',
+              'El canon depende de la producción y los precios de la minería y el gas en cada región; no es un premio ni un castigo a la universidad.',
+              'La correlación describe asociación, no causa. Se calculó con universidades de PIA 2026 de S/ 10 M o más.',
+              'Montos nominales: compara el presupuesto con el que arranca cada año (PIA), no lo que se termina gastando.',
+            ])}<p class="src">Fuente: ${esc(A.fuente || 'Proyecto de Presupuesto 2027 y SIAF')}.</p>`,
+          mount(el) {
+            return [
+              [$('[data-fig="d"]', el), (b, C = colors()) => hbars(b, { rows, color: C.ink, colorNeg: C.dev, vW: 84, fmt: sF, aria: 'Cambio del presupuesto de apertura 2027 frente a 2026 por universidad' })],
+              [$('[data-fig="g"]', el), (b) => hbars(b, { rows: GN.map((r) => ({ ...r, color: getComputedStyle(document.documentElement).getPropertyValue(r.c).trim() })), labW: 140, vW: 84, color: '#888', fmt: sF, aria: 'Aumento 2027 por tipo de gasto' })],
+              [$('[data-fig="f"]', el), (b) => hbars(b, { rows: FN.map((r) => ({ ...r, color: getComputedStyle(document.documentElement).getPropertyValue(r.c).trim() })), labW: 160, vW: 84, color: '#888', fmt: sF, aria: 'Aumento 2027 por fuente de financiamiento' })],
+            ];
+          },
+        };
+      },
+    },
   ];
 
   // ---------- render ----------
@@ -1020,7 +1090,7 @@
     }
     tresNumeros(Y, h, U);
     flash27(h);
-    $('#uni-hint').innerHTML = h ? `Mostrando <strong>${esc(fullName(h))}</strong>. <a href="${esc(fichaHref(h))}">Ver su ficha completa</a>` : 'Las once historias se personalizan con la tuya.';
+    $('#uni-hint').innerHTML = h ? `Mostrando <strong>${esc(fullName(h))}</strong>. <a href="${esc(fichaHref(h))}">Ver su ficha completa</a>` : 'Las doce historias se personalizan con la tuya.';
     $('#year-note').textContent = isPartial() ? `${Y} está en curso: cifras parciales.` : `Último año cerrado: ${S.closed[S.closed.length - 1]}.`;
   }
 
@@ -1036,7 +1106,8 @@
       el.innerHTML = `<span>2027 para la <mark>${esc(label(h))}</mark>:</span><b class="${d < 0 ? 'baja' : ''}">${arrow(d)} ${esc(pctSigned(he.var_pct / 100, Math.abs(he.var_pct) >= 100 ? 0 : 1))} (${d >= 0 ? '+' : '−'}${esc(solesF(Math.abs(d)))})</b><span>en el proyecto de presupuesto</span><span class="ir">Ver capítulo 11</span>`;
     } else {
       const its = S.d.universidades.map((u) => u.expectativa_2027).filter((e) => e && isNum(e.var_pct));
-      const up = its.filter((e) => e.var_pct > 0).length, down = its.filter((e) => e.var_pct < 0).length;
+      const A = S.a27 && S.a27.total;
+      const up = A && isNum(A.n_suben) ? A.n_suben : its.filter((e) => e.var_pct > 0).length, down = A && isNum(A.n_bajan) ? A.n_bajan : its.filter((e) => e.var_pct < 0).length;
       const d = isNum(T.pia_2027) && isNum(T.pia_2026) ? T.pia_2027 - T.pia_2026 : null;
       el.innerHTML = `<span>2027:</span><b class="${d < 0 ? 'baja' : ''}">${arrow(d)} ${esc(pctSigned(T.var_pct / 100, 1))} (${d >= 0 ? '+' : '−'}${esc(solesF(Math.abs(d)))})</b><span>para las universidades públicas. ${esc(up)} suben, ${esc(down)} bajan.${h ? ` La ${esc(label(h))} no tiene monto propio.` : ''}</span><span class="ir">Ver capítulo 11</span>`;
     }
@@ -1263,6 +1334,7 @@
       $('#hero-dek').textContent = 'No se pudieron cargar los datos. Revisa tu conexión y recarga la página.';
       return;
     }
+    loadA27().then(() => { if (S.d) flash27(hlUni()); });
     getJSON('u/slugs.json').then((j) => { S.slugs = (j && j.slugs) || null; if (S.hl) { heroText(); shareLinks(); } }).catch(() => {});
     setupYears(S.d);
     setupControls();

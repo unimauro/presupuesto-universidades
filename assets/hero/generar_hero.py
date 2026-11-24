@@ -179,12 +179,13 @@ ESTILO = """<style>
 
 def hero_escritorio(serie):
     W, H = 600, 640
+    CIELO = 380          # cielo extra arriba: el arte se recorta con object-fit: cover desde abajo
     cx = 300
     sol_y = 232
-    o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" aria-hidden="true" focusable="false">',
-         ESTILO]
+    o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {-CIELO} {W} {H + CIELO}" width="{W}" height="{H + CIELO}" '
+         f'preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">', ESTILO]
     # rayos del sol
-    o.append(rayos(cx, sol_y, 36, 520, MAIZ, ".55"))
+    o.append(rayos(cx, sol_y, 40, 640, MAIZ, ".55"))
     # sol Inti escalonado
     o.append(disco_escalonado(cx, sol_y, 112, 8, AJI))
     o.append(disco_escalonado(cx, sol_y, 84, 8, ROCOTO))

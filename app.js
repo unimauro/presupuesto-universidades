@@ -1573,8 +1573,12 @@
   const linkOrText = (url, txt) => { const u = safeUrl(url); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(txt)}</a>` : esc(txt); };
   function versionBox(x) {
     const v = String(x.version || '').toLowerCase();
-    const [badge, text] = EXP_VERSION[v] || [x.version || 'Documento', 'Versión del documento no identificada: trata las cifras como referenciales.'];
-    return `<div class="version${v === 'ley' ? ' v-ley' : ''}" role="note"><span class="v-badge">${esc(badge)}</span><div><p><strong>${linkOrText(x.url, x.norma || 'Presupuesto del Sector Público 2027')}</strong>${x.fecha ? ` · ${esc(x.fecha)}` : ''}</p><p class="v-sub">${esc(text)}</p></div></div>`;
+    let [badge, text] = EXP_VERSION[v] || [x.version || 'Documento', 'Versión del documento no identificada: trata las cifras como referenciales.'];
+    const et = x.estado_tramite || {};
+    if (v !== 'ley' && !(et.ley_publicada && et.ley_publicada.fecha) && et.autografa && et.autografa.fecha) {
+      text = `El Pleno del Congreso aprobó la ley el ${fmtFecha(et.autografa.fecha)}; está pendiente de publicación. Los montos por universidad son los del ${v === 'dictamen' ? 'dictamen' : 'proyecto'} y pueden variar en la versión final.`;
+    }
+    return `<div class="version${v === 'ley' ? ' v-ley' : ''}" role="note"><span class="v-badge">${esc(badge)}</span><div><p><strong>${linkOrText(x.url, x.norma || 'Presupuesto del Sector Público 2027')}</strong>${x.fecha ? ` · ${esc(fmtFecha(x.fecha))}` : ''}</p><p class="v-sub">${esc(text)}</p></div></div>`;
   }
   function renderExpectativa() {
     const el = $('#body-expectativa'); const x = S.data.expectativa_2027;
@@ -1594,6 +1598,11 @@
     const notas = Array.isArray(x.notas) ? x.notas : [];
     el.innerHTML = `
       ${versionBox(x)}
+      <div class="card">
+        <h3>¿El presupuesto total de las universidades sube o baja en 2027?</h3>
+        <p class="sub">Presupuesto de apertura (PIA) del total de universidades; la línea punteada es el PIM, lo que terminaron teniendo tras las modificaciones del año.</p>
+        <div class="chart"><canvas id="ch-exp-tot"></canvas></div>
+      </div>
       <div class="kpis">
         ${kpiBox('PIA 2027 (universidades)', fmtM(p27), rows.length + ' universidades', 'accent')}
         ${kpiBox('PIA 2026', fmtM(p26), 'apertura del año en curso')}
@@ -1644,6 +1653,7 @@
       $('#ex-temas', el).addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; S.exp.tema = b.dataset.t; drawDisp(); });
     }
     renderP2027($('#p27', el));
+    exp2027TotalChart('ch-exp-tot');
     const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
     makeTable($('#ex-host', el), {
       rowClass: r => (num(r.p26) !== null && r.p26 < BASE_CHICA) ? 'row-dim' : '',
@@ -1797,6 +1807,76 @@
     });
   }
 
+  // ================================================================== HERO 2027 (primero que se ve)
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'];
+  const fmtFecha = f => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || '')); return m ? `${+m[3]}-${MESES[+m[2] - 1]}-${m[1]}` : String(f || ''); };
+  function fuente2027(x) {
+    const v = String(x.version || '').toLowerCase(), et = x.estado_tramite || {};
+    const pub = et.ley_publicada && et.ley_publicada.fecha;
+    if (v === 'ley' || pub) return `Ley de Presupuesto 2027${pub ? ` (publicada el ${fmtFecha(pub)})` : ''}`;
+    const base = { proyecto: 'proyecto de Ley de Presupuesto 2027', dictamen: 'dictamen del Presupuesto 2027', autografa: 'autógrafa de la Ley de Presupuesto 2027' }[v] || 'Presupuesto 2027';
+    const extra = [];
+    if (x.fecha) extra.push(fmtFecha(x.fecha));
+    if (v !== 'autografa' && et.autografa && et.autografa.fecha) extra.push(`aprobado por el Pleno el ${fmtFecha(et.autografa.fecha)}, pendiente de publicación`);
+    else if (v === 'autografa') extra.push('pendiente de publicación');
+    return `${base}${extra.length ? ` (${extra.join('; ')})` : ''}`;
+  }
+  function stats2027() {
+    const x = S.data.expectativa_2027; if (!x) return null;
+    const t = x.total_universidades || {};
+    let up = 0, down = 0, nuevas = 0;
+    S.unis.forEach(u => { const e = expOf(u); if (!e) return; const a = num(e.pia_2027), b = num(e.pia_2026);
+      if (a !== null && b) { if (a > b) up++; else if (a < b) down++; } else if (a && !b) nuevas++; });
+    const p27 = num(t.pia_2027) ?? sum(S.unis.map(u => num((expOf(u) || {}).pia_2027)));
+    const p26 = num(t.pia_2026) ?? sum(S.unis.map(u => num((expOf(u) || {}).pia_2026)));
+    const vSame = num(t.var_pct_mismos_pliegos);
+    return { x, p27, p26, d: (num(p27) !== null && num(p26) !== null) ? p27 - p26 : null, v: pctChg(p26, p27), vSame: vSame === null ? null : vSame / 100, up, down, nuevas, pim26: nacional(2026).pim };
+  }
+  function renderHero2027() {
+    const box = $('#hero-2027'); const st = stats2027();
+    if (!box) return;
+    if (!st || num(st.p27) === null) { box.hidden = true; return; }
+    box.hidden = false;
+    const upDown = st.d > 0 ? 'up' : st.d < 0 ? 'down' : '';
+    box.className = 'h27 ' + upDown;
+    $('.h27-arrow', box).textContent = st.d > 0 ? '▲' : st.d < 0 ? '▼' : '＝';
+    $('#h27-total').textContent = soles(st.p27);
+    $('#h27-delta').textContent = `${st.d >= 0 ? '+' : '−'}${soles(Math.abs(st.d))} (${fmtChg(st.v)}) frente al PIA 2026`;
+    $('#h27-count').textContent = `${st.up} universidades suben${st.nuevas ? ` (+${st.nuevas} nuevas)` : ''} · ${st.down} bajan`;
+    const pimTxt = num(st.pim26) !== null ? (st.p27 > st.pim26 ? ` Supera incluso el PIM 2026 (${soles(st.pim26)}).` : ` Queda por debajo del PIM 2026 (${soles(st.pim26)}).`) : '';
+    $('#h27-fine').textContent = `${st.vSame !== null ? `Con las mismas universidades: ${fmtChg(st.vSame)}.` : ''}${pimTxt} Fuente: ${fuente2027(st.x)}.`;
+  }
+  // Barras del total: PIA 2025 · PIA 2026 · PIA 2027 (y PIM 2025/2026 como referencia punteada)
+  function exp2027TotalChart(id) {
+    const st = stats2027(); if (!st) return;
+    const pia25 = nacional(2025).pia, pim25 = nacional(2025).pim, pia26 = st.p26, pim26 = st.pim26, pia27 = st.p27;
+    const pias = [pia25, pia26, pia27];
+    const labels = ['2025', `2026 (${fmtChg(pctChg(pia25, pia26))})`, `2027 propuesta (${fmtChg(pctChg(pia26, pia27))})`];
+    mkChart(id, {
+      type: 'bar',
+      data: { labels, datasets: [
+        { type: 'line', label: 'PIM (modificado durante el año)', data: [mill(pim25), mill(pim26), null], borderColor: cssVar('--c-pim'), backgroundColor: cssVar('--c-pim'), borderDash: [6, 5], borderWidth: 2.5, pointRadius: 5, pointStyle: 'rectRot', tension: 0, order: 0,
+        },
+        { label: 'PIA (apertura)', data: pias.map(mill), order: 1, borderRadius: 0, maxBarThickness: 90,
+          backgroundColor: [cssVar('--c-pia'), cssVar('--c-pia'), cssVar('--tu')], borderColor: [cssVar('--c-pia'), cssVar('--c-pia'), cssVar('--tu-borde')], borderWidth: [0, 0, 3],
+          valueLabel: v => soles(v * 1e6) },
+      ] },
+      options: {
+        layout: { padding: { top: 28 } },
+        plugins: { legend: { display: true }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${soles(ctx.raw * 1e6)}` } } },
+        scales: { y: { beginAtZero: true, ticks: { callback: tickM } }, x: { ticks: { font: { weight: 700, size: 13 } } } },
+      },
+    }, 'Presupuesto de apertura de las universidades 2025, 2026 y propuesta 2027');
+  }
+  // Chip 2027 para la ficha
+  function ficha2027Chip(u) {
+    const e = expOf(u); if (!e) return '';
+    const a = num(e.pia_2027), b = num(e.pia_2026);
+    if (a === null) return '<span class="tag">2027: sin PIA propio en la propuesta</span>';
+    const v = pctChg(b, a);
+    return `<a class="h27-chip ${v > 0 ? 'up' : v < 0 ? 'down' : ''}" href="#expectativa"><b>2027 ${v > 0 ? '▲' : v < 0 ? '▼' : '＝'} ${esc(v === null ? 'nueva' : fmtChg(v))}</b> · ${esc(soles(a))}${b ? ` (PIA 2026: ${esc(soles(b))})` : ''}</a>`;
+  }
+
   // ================================================================== 8. FICHA + COMPARADOR
   const IDX_LBL = { ejecucion: 'Ejecución', inversion: 'Inversión', investigacion: 'Investigación', prioridad_idi: 'Prioridad I+D', autonomia_rdr: 'Autonomía (RDR)', eficiencia: 'Eficiencia I+D' };
   const idxComp = () => {
@@ -1826,6 +1906,7 @@
       <div class="ficha-head">
         <div>
           <h3>${esc(u.nombre || uName(u))}</h3>
+          ${ficha2027Chip(u)}
           <div class="tags">
             <span class="tag">${esc(uName(u))}</span>
             <span class="tag">Pliego ${esc(u.pliego)}</span>
@@ -2358,6 +2439,7 @@
     const nLast = S.unis.filter(u => num(tot(u, S.lastClosed, 'pim')) !== null).length;
     $('#hero-meta').textContent = `${nLast} universidades con presupuesto en ${S.lastClosed} (${S.unis.length} en el padrón ${S.years[0]}–${S.years[S.years.length - 1]}) · último año cerrado: ${S.lastClosed}${d.generado ? ' · actualizado: ' + String(d.generado).slice(0, 10) : ''}`;
     updateHero();
+    renderHero2027();
     setupHeroSearch();
 
     // Re-dibujo en cambios de ancho que alteran alturas (móvil ↔ escritorio)
