@@ -558,3 +558,9 @@ tbody tr:hover { background: var(--surface-2); }
 .note.warn { background: var(--warn-bg); border-left: 6px solid var(--color-aji); color: var(--ink); }
 .seg button { border-radius: 0; }
 .kpi .k-val { font-size: clamp(26px, 7vw, 40px); }
+
+/* Base pequeña: chip y fila atenuada */
+.tag.chica { background: var(--surface-2); color: var(--muted); border: 1.5px dashed var(--line-strong); font-size: 11px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
+tr.row-dim td { opacity: .62; }
+tr.row-dim td.sticky-col { opacity: 1; }
+tr.row-dim td.sticky-col .uni-link { opacity: .7; }

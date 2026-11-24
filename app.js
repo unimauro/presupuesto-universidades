@@ -21,11 +21,32 @@
   const div = (a, b) => (num(a) !== null && num(b)) ? a / b : null;
   const sum = arr => { let t = 0, ok = false; for (const v of arr) { if (num(v) !== null) { t += v; ok = true; } } return ok ? t : null; };
 
-  const fmtM = v => num(v) === null ? SD : 'S/ ' + (v / 1e6).toLocaleString(LOC, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' M';
-  const fmtS = v => num(v) === null ? SD : 'S/ ' + Math.round(v).toLocaleString(LOC);
+  // ---- Formateador adaptativo de montos (único para todo el sitio)
+  //  ≥ 1 000 M → "S/ 7.7 mil M" · ≥ 1 M → "S/ 53.4 M" (sin decimal si ≥ 100 M) · ≥ 1 000 → "S/ 850 mil" · menor → "S/ 850"
+  const nf = (x, d) => x.toLocaleString(LOC, { minimumFractionDigits: d, maximumFractionDigits: d });
+  function soles(v) {
+    if (num(v) === null) return SD;
+    const a = Math.abs(v), sg = v < 0 ? '−' : '';
+    if (a >= 1e9) return `${sg}S/ ${nf(a / 1e9, a >= 1e11 ? 0 : 1)} mil M`;
+    if (a >= 1e6) return `${sg}S/ ${nf(a / 1e6, a >= 1e8 ? 0 : 1)} M`;
+    if (a >= 1e3) return `${sg}S/ ${nf(a / 1e3, a >= 1e5 ? 0 : 1)} mil`;
+    return `${sg}S/ ${nf(a, 0)}`;
+  }
+  const fmtM = soles;
+  const fmtS = soles; // costos unitarios: "S/ 20.4 mil"
+  const BASE_CHICA = 10e6; // base < S/ 10 M → "base pequeña"
   const fmtN = v => num(v) === null ? SD : Math.round(v).toLocaleString(LOC);
-  const fmtP = (v, d = 1) => num(v) === null ? SD : (v * 100).toLocaleString(LOC, { minimumFractionDigits: d, maximumFractionDigits: d }) + ' %';
+  // Porcentajes: ≥ 100 % sin decimales; < 100 % con d decimales (1 por defecto)
+  const fmtP = (v, d = 1) => { if (num(v) === null) return SD; const x = v * 100; return nf(x, Math.abs(x) >= 100 ? 0 : d) + ' %'; };
+  // Variaciones: ≥ +1 000 % se expresa en veces ("×11.5"); ≥ 100 % sin decimales; < 100 % un decimal
+  const fmtChg = v => {
+    if (num(v) === null) return SD;
+    if (v >= 10) return '×' + nf(1 + v, (1 + v) >= 100 ? 0 : 1);
+    const x = v * 100, sg = x > 0 ? '+' : x < 0 ? '−' : '';
+    return sg + nf(Math.abs(x), Math.abs(x) >= 100 ? 0 : 1) + ' %';
+  };
   const fmtSigned = v => num(v) === null ? SD : (v >= 0 ? '+' : '−') + fmtM(Math.abs(v));
+  const baseChip = '<span class="tag chica" title="Base menor a S/ 10 M en el año inicial: los porcentajes exageran">base pequeña</span>';
   const mill = v => num(v) === null ? null : v / 1e6;
   const fmtScore = v => num(v) === null ? SD : v.toLocaleString(LOC, { maximumFractionDigits: 1 });
 
@@ -209,10 +230,10 @@
     S.charts.set(id, ch);
     return ch;
   }
-  const tickM = v => 'S/ ' + Number(v).toLocaleString(LOC) + ' M';
+  const tickM = v => soles(Number(v) * 1e6);
   const tickP = v => v + ' %';
   const ttM = ctx => `${ctx.dataset.label}: ${fmtM(num(ctx.raw) === null ? null : ctx.raw * 1e6)}`;
-  const ttP = ctx => `${ctx.dataset.label}: ${num(ctx.raw) === null ? SD : ctx.raw.toLocaleString(LOC, { maximumFractionDigits: 1 }) + ' %'}`;
+  const ttP = ctx => `${ctx.dataset.label}: ${num(ctx.raw) === null ? SD : fmtP(ctx.raw / 100)}`;
   const isMobile = () => window.matchMedia('(max-width: 559px)').matches;
 
   // Barras horizontales con alto según cantidad de categorías
@@ -366,7 +387,7 @@
         const cls = [(c.txt || c.sticky) ? 'txt' : '', c.sticky ? 'sticky-col' : ''].join(' ').trim() + hideM(c);
         return `<th scope="col" class="${cls}"${c.nosort ? '' : ` aria-sort="${so}"`}>${c.nosort ? esc(c.lbl) : `<button type="button" class="sort" data-k="${esc(c.k)}">${esc(c.lbl)}</button>`}</th>`;
       }).join('') + '</tr>';
-      $(`#${id}-t tbody`, host).innerHTML = shown.length ? shown.map((r, i) => '<tr>' + o.cols.map(c => {
+      $(`#${id}-t tbody`, host).innerHTML = shown.length ? shown.map((r, i) => `<tr${o.rowClass && o.rowClass(r) ? ` class="${esc(o.rowClass(r))}"` : ''}>` + o.cols.map(c => {
         const cls = [(c.txt || c.sticky) ? 'txt' : '', c.sticky ? 'sticky-col' : '', c.wrap ? 'wrap' : ''].join(' ').trim() + hideM(c);
         const inner = c.html ? c.html(r) : esc(c.fmt ? c.fmt(c.get(r)) : c.get(r));
         return `<td class="${cls}">${c.sticky && o.rank ? `<span class="rk-n">${i + 1}</span>` : ''}${inner}</td>`;
@@ -495,7 +516,7 @@
     const verbo = v => v === null ? 'varió' : v > 0.0005 ? 'subió' : v < -0.0005 ? 'bajó' : 'se mantuvo';
     const what = { pia: 'el presupuesto de apertura (PIA)', pim: 'el presupuesto modificado (PIM)', dev: 'el gasto ejecutado (devengado)' }[m];
     const frase = dT === null ? 'No hay datos suficientes para comparar esos años.'
-      : `${real ? 'En términos reales' : 'En soles corrientes'}, ${what} de las universidades públicas ${verbo(dT)}${Math.abs(dT) > 0.0005 ? ' ' + fmtP(Math.abs(dT)) : ''} entre ${a} y ${b}.`;
+      : `${real ? 'En términos reales' : 'En soles corrientes'}, ${what} de las universidades públicas ${verbo(dT)}${Math.abs(dT) > 0.0005 ? ' ' + (dT >= 10 ? fmtChg(dT).replace('×', '') + ' veces' : fmtP(Math.abs(dT))) : ''} entre ${a} y ${b}.`;
     const yOpts = sel => S.years.map(y => `<option value="${esc(y)}"${String(y) === String(sel) ? ' selected' : ''}>${esc(yearLbl(y))}</option>`).join('');
     const compCats = S.vr.comp === 'fuente' ? COMP_FUE : COMP_GEN;
     const field = S.vr.comp === 'fuente' ? 'fuente' : 'generica';
@@ -538,11 +559,11 @@
       ${a === b ? '<p class="note warn">Elige dos años distintos.</p>' : ''}
       <div class="card">
         <div class="big-var ${dT > 0.0005 ? 'up' : dT < -0.0005 ? 'down' : ''}">
-          <div class="bv-row"><span class="bv-arrow" aria-hidden="true">${arrow(dT)}</span><div><div class="bv-pct">${dT === null ? SD : (dT > 0 ? '+' : dT < 0 ? '−' : '') + esc(fmtP(Math.abs(dT)))}</div><div class="bv-abs">${esc(fmtDelta(TB, TA))} · ${esc(METRIC_LBL[m])}, ${esc(modeLbl)}</div></div></div>
+          <div class="bv-row"><span class="bv-arrow" aria-hidden="true">${arrow(dT)}</span><div><div class="bv-pct">${esc(fmtChg(dT))}</div><div class="bv-abs">${esc(fmtDelta(TB, TA))} · ${esc(METRIC_LBL[m])}, ${esc(modeLbl)}</div></div></div>
           <div>
             <p class="bv-ab">${esc(a)}: <b>${esc(fmtM(TA))}</b> (${unisA.length} univ.) → ${esc(b)}: <b>${esc(fmtM(TB))}</b> (${unisB.length} univ.)</p>
             <p class="sentence">${esc(frase)}</p>
-            ${nuevas.length ? `<p class="note">${esc(b)} incluye ${nuevas.length} universidades sin datos en ${esc(a)} (nuevas o sin presupuesto propio). Solo con las ${both.length} presentes en ambos años, la variación es <strong>${dC === null ? SD : (dC >= 0 ? '+' : '−') + esc(fmtP(Math.abs(dC)))}</strong>.</p>` : ''}
+            ${nuevas.length ? `<p class="note">${esc(b)} incluye ${nuevas.length} universidades sin datos en ${esc(a)} (nuevas o sin presupuesto propio). Solo con las ${both.length} presentes en ambos años, la variación es <strong>${esc(fmtChg(dC))}</strong>.</p>` : ''}
           </div>
         </div>
       </div>
@@ -572,12 +593,13 @@
 
     const hasPer = rows.some(r => r.pb !== null);
     makeTable($('#vr-host', el), {
+      rowClass: r => (!r.nueva && num(r.va) !== null && r.va < BASE_CHICA) ? 'row-dim' : '',
       id: 'vrt', caption: `${METRIC_LBL[m]} ${a} vs ${b}, ${modeLbl}.`, rows, sort: { k: 'dv', dir: -1 }, limit: 25,
       mobilePick: ['va', 'vb', 'dabs', 'dv'].concat(real ? [] : ['dr']).concat(hasPer ? ['pb', 'dp'] : []), mdef: 'dabs',
       filters: [depFilter(r => r.u, rows),
         { k: 'sent', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Solo las que suben'], ['down', 'Solo las que bajan'], ['nueva', 'Solo nuevas']], test: (r, v) => v === 'nueva' ? r.nueva : v === 'up' ? r.dv > 0 : r.dv < 0 }],
       cols: [
-        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') },
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : (num(r.va) !== null && r.va < BASE_CHICA ? baseChip : '')) },
         { k: 'va', lbl: String(a), get: r => r.va, fmt: fmtM },
         { k: 'vb', lbl: String(b), get: r => r.vb, fmt: fmtM },
         { k: 'dabs', lbl: 'Δ S/', get: r => r.dabs, fmt: v => num(v) === null ? SD : fmtSigned(v) },
@@ -620,7 +642,7 @@
     const moverChart = (cid, list, color) => {
       if (!list.length) return;
       const vals = list.map(r => byAbs ? +(r.dabs / 1e6).toFixed(1) : +(r.dv * 100).toFixed(1));
-      const lbl = v => byAbs ? `${v > 0 ? '+' : v < 0 ? '−' : ''}S/ ${Math.abs(v).toLocaleString(LOC, { maximumFractionDigits: 1 })} M` : `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString(LOC, { maximumFractionDigits: 1 })} %`;
+      const lbl = v => byAbs ? (v > 0 ? '+' : v < 0 ? '−' : '') + soles(Math.abs(v) * 1e6) : fmtChg(v / 100);
       const maxAbs = Math.max(...vals.map(Math.abs), 1);
       sizeFor(cid, list.length, isMobile() ? 30 : 26, 140);
       mkChart(cid, {
@@ -775,6 +797,7 @@
       return { u, pia, pim, d, dp: div(d, pia), dev: tot(u, y, 'dev'), ej: kpi(u, y).ejec, ntr: tr.length, mtr: sum(tr.map(t => num(t.monto))), nueva: isNueva(u) };
     });
     makeTable($('#tr-table', el), {
+      rowClass: r => (num(r.pia) !== null && r.pia < BASE_CHICA) ? 'row-dim' : '',
       id: 'trt', caption: `Universidades públicas, ${yearLbl(y)}. Montos en soles.`, rows: trRows,
       sort: { k: 'pim', dir: -1 }, limit: 25, mobilePick: ['pia', 'pim', 'd', 'dp', 'dev', 'ntr'], mdef: 'd',
       filters: [
@@ -784,7 +807,7 @@
         { k: 'nv', lbl: 'Antigüedad', opts: [['', 'Todas'], ['nueva', 'Solo nuevas (desde 2000)'], ['antigua', 'Solo antiguas']], test: (r, v) => (v === 'nueva') === r.nueva },
       ],
       cols: [
-        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') },
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, (r.nueva ? '<span class="tag new">nueva</span>' : '') + (num(r.pia) !== null && r.pia < BASE_CHICA ? baseChip : '')) },
         { k: 'pia', lbl: 'PIA', get: r => r.pia, fmt: fmtM },
         { k: 'pim', lbl: 'PIM', get: r => r.pim, fmt: fmtM },
         { k: 'd', lbl: 'Δ PIM − PIA', get: r => r.d, fmt: v => num(v) === null ? SD : fmtSigned(v) },
@@ -1168,8 +1191,8 @@
     const p = num(e.var_pct);
     return p === null ? null : (Math.abs(p) > 1.5 ? p / 100 : p);
   }
-  const fmtVar = v => num(v) === null ? SD : `<span class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : v < 0 ? '−' : ''}${esc(fmtP(Math.abs(v)))}</span>`;
-  const fmtVarTxt = v => num(v) === null ? SD : `${v > 0 ? '+' : v < 0 ? '−' : ''}${fmtP(Math.abs(v))}`;
+  const fmtVar = v => num(v) === null ? SD : `<span class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${esc(fmtChg(v))}</span>`;
+  const fmtVarTxt = fmtChg;
   const fmtDelta = (a, b) => (num(a) === null || num(b) === null) ? SD : fmtSigned(a - b);
   const linkOrText = (url, txt) => { const u = safeUrl(url); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(txt)}</a>` : esc(txt); };
   function versionBox(x) {
@@ -1198,7 +1221,7 @@
       <div class="kpis">
         ${kpiBox('PIA 2027 (universidades)', fmtM(p27), rows.length + ' universidades', 'accent')}
         ${kpiBox('PIA 2026', fmtM(p26), 'apertura del año en curso')}
-        ${kpiBox('Variación', vT === null ? SD : (vT >= 0 ? '+' : '−') + fmtP(Math.abs(vT)), fmtDelta(p27, p26), 'ochre')}
+        ${kpiBox('Variación', fmtChg(vT), fmtDelta(p27, p26), 'ochre')}
         ${kpiBox('Suben', fmtN(withVar.length ? nUp : null), 'universidades con más PIA')}
         ${kpiBox('Bajan', fmtN(withVar.length ? nDown : null), 'universidades con menos PIA')}
         ${kpiBox('Sin PIA 2027', fmtN(S.unis.filter(u => num((expOf(u) || {}).pia_2027) === null).length), 'de ' + S.unis.length + ' universidades')}
@@ -1221,11 +1244,12 @@
       </div>`;
     const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
     makeTable($('#ex-host', el), {
+      rowClass: r => (num(r.p26) !== null && r.p26 < BASE_CHICA) ? 'row-dim' : '',
       id: 'ext', caption: 'PIA 2027 vs PIA 2026 por universidad. Montos en soles.', rows: exRows, sort: { k: 'v', dir: -1 }, limit: 25,
       mobilePick: ['p26', 'p27', 'd'], mdef: 'p27',
       filters: [depFilter(r => r.u, exRows), { k: 'dir', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Suben'], ['down', 'Bajan']], test: (r, v) => num(r.v) !== null && ((v === 'up') === (r.v > 0)) }],
       cols: [
-        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u) },
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, num(r.p26) !== null && r.p26 < BASE_CHICA ? baseChip : '') },
         { k: 'p26', lbl: 'PIA 2026', get: r => r.p26, fmt: fmtM },
         { k: 'p27', lbl: 'PIA 2027', get: r => r.p27, html: r => `<strong>${esc(fmtM(r.p27))}</strong>` },
         { k: 'd', lbl: 'Δ S/', get: r => r.d, fmt: v => num(v) === null ? SD : fmtSigned(v) },
@@ -1236,12 +1260,12 @@
     sizeFor('ch-exp', chartList.length, isMobile() ? 26 : 22);
     mkChart('ch-exp', {
       type: 'bar',
-      data: { labels: chartList.map(uName), datasets: [{ label: 'Variación PIA 2027 vs 2026', data: vals, borderRadius: 6, valueLabel: v => (v > 0 ? '+' : '') + v.toLocaleString(LOC, { maximumFractionDigits: 1 }) + ' %', backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
+      data: { labels: chartList.map(uName), datasets: [{ label: 'Variación PIA 2027 vs 2026', data: vals, borderRadius: 6, valueLabel: v => fmtChg(v / 100), backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
       options: {
         indexAxis: 'y',
         plugins: { legend: { display: false }, tooltip: { callbacks: {
           title: it => (chartList[it[0].dataIndex] || {}).nombre || it[0].label,
-          label: ctx => { const e = expOf(chartList[ctx.dataIndex]); return [`Variación: ${ctx.raw > 0 ? '+' : ''}${ctx.raw.toLocaleString(LOC)} %`, `PIA 2026: ${fmtM(num(e.pia_2026))}`, `PIA 2027: ${fmtM(num(e.pia_2027))}`]; },
+          label: ctx => { const e = expOf(chartList[ctx.dataIndex]); return [`Variación: ${fmtChg(ctx.raw / 100)}`, `PIA 2026: ${fmtM(num(e.pia_2026))}`, `PIA 2027: ${fmtM(num(e.pia_2027))}`]; },
         } } },
         scales: { x: { ticks: { callback: tickP } }, y: { ticks: { autoSkip: false } } },
       },
@@ -1698,6 +1722,7 @@
       const dark = document.documentElement.getAttribute('data-theme') === 'dark';
       btn.setAttribute('aria-pressed', String(dark));
       btn.setAttribute('aria-label', dark ? 'Activar tema claro' : 'Activar tema oscuro');
+      const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', dark ? '#16101D' : '#2B3FA8');
     };
     sync();
     btn.addEventListener('click', () => {
@@ -1745,7 +1770,7 @@
     const ej = div(n.dev, n.pim);
     const nU = S.unis.filter(u => num(tot(u, y, 'pim')) !== null).length;
     if (num(n.pim) === null) return;
-    $('#hero-finding').innerHTML = `En ${esc(y)}, las ${esc(nU)} universidades públicas con presupuesto propio tuvieron <strong>${esc(fmtM(n.pim).replace(/\.\d M$/, ' M'))}</strong> (PIM); gastaron el <strong>${esc(fmtP(ej))}</strong>${per !== null ? `, y <strong>${esc(Math.round(per * 100))} céntimos</strong> de cada sol gastado fueron a planilla de personal` : ''}.`;
+    $('#hero-finding').innerHTML = `En ${esc(y)}, las ${esc(nU)} universidades públicas con presupuesto propio tuvieron <strong>${esc(fmtM(n.pim))}</strong> (PIM); gastaron el <strong>${esc(fmtP(ej))}</strong>${per !== null ? `, y <strong>${esc(Math.round(per * 100))} céntimos</strong> de cada sol gastado fueron a planilla de personal` : ''}.`;
   }
   function setupHeroSearch() {
     const f = $('#hero-search'), inp = $('#hs-input'), msg = $('#hs-msg');
