@@ -32,6 +32,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="preload" href="data/resumen.json" as="fetch" crossorigin>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="assets/hero/hero.css">
 <script>
   // Tema antes del primer pintado (evita parpadeo)
   (function () {
@@ -89,32 +90,43 @@
 <div id="data-banner" class="banner loading" role="status"><span class="spinner" aria-hidden="true"></span> Cargando datos del MEF…</div>
 
 <main id="main" tabindex="-1">
-  <section class="hero" aria-labelledby="h-title">
-    <div class="h27" id="hero-2027" aria-labelledby="h27-k">
-      <p class="h27-k" id="h27-k">Presupuesto 2027 · universidades públicas</p>
-      <div class="h27-row">
-        <span class="h27-arrow" aria-hidden="true">▲</span>
-        <div>
-          <p class="h27-total" id="h27-total">S/ 7.6 mil M</p>
-          <p class="h27-delta" id="h27-delta">+S/ 852 M (+12.7 %) frente al PIA 2026</p>
+  <section class="hero hero-v3" aria-labelledby="h-title">
+    <div class="hero-txt">
+      <div class="h27" id="hero-2027" aria-labelledby="h27-k">
+        <p class="h27-k" id="h27-k">Presupuesto 2027 · universidades públicas</p>
+        <div class="h27-row">
+          <span class="h27-arrow" aria-hidden="true">▲</span>
+          <div>
+            <p class="h27-total" id="h27-total">S/ 7.6 mil M</p>
+            <p class="h27-delta" id="h27-delta">+S/ 852 M (+12.7 %) frente al PIA 2026</p>
+          </div>
         </div>
+        <p class="h27-count" id="h27-count">47 universidades suben (+4 nuevas) · 16 bajan</p>
+        <p class="h27-fine" id="h27-fine">Con las mismas universidades: +12.3 %. Supera incluso el PIM 2026 (S/ 7.4 mil M). Fuente: dictamen del Presupuesto 2027 (5-nov-2026; aprobado por el Pleno el 20-nov-2026, pendiente de publicación).</p>
+        <a class="btn h27-btn" href="#expectativa">Ver el detalle 2027</a>
       </div>
-      <p class="h27-count" id="h27-count">47 universidades suben (+4 nuevas) · 16 bajan</p>
-      <p class="h27-fine" id="h27-fine">Con las mismas universidades: +12.3 %. Supera incluso el PIM 2026 (S/ 7.4 mil M). Fuente: dictamen del Presupuesto 2027 (5-nov-2026; aprobado por el Pleno el 20-nov-2026, pendiente de publicación).</p>
-      <a class="btn h27-btn" href="#expectativa">Ver el detalle 2027</a>
+      <p class="kicker">Observatorio cívico · Datos del MEF (SIAF)</p>
+      <h1 id="h-title">Radiografía Presupuestal de las Universidades Públicas del Perú</h1>
+      <p class="lede">Cuánto se les asignó al inicio del año (<abbr title="Presupuesto Institucional de Apertura">PIA</abbr>), cuánto terminaron teniendo (<abbr title="Presupuesto Institucional Modificado">PIM</abbr>), cuánto gastaron realmente (<abbr title="Gasto reconocido como obligación de pago">devengado</abbr>), en qué y con qué dinero.</p>
+      <p class="hero-finding" id="hero-finding">En 2025, las 65 universidades públicas con presupuesto propio tuvieron <strong>S/ 7.7 mil M</strong> (PIM); gastaron el <strong>90.1 %</strong>, y <strong>47 céntimos</strong> de cada sol gastado fueron a planilla de personal.</p>
+      <form class="hero-search" id="hero-search" role="search" autocomplete="off">
+        <div class="hs-row">
+          <div id="hs-picker" class="up-host grow"></div>
+          <button type="submit" class="btn">Ver ficha</button>
+        </div>
+        <p id="hs-msg" class="note" aria-live="polite"></p>
+      </form>
+      <p class="hero-meta" id="hero-meta"></p>
     </div>
-    <p class="kicker">Observatorio cívico · Datos del MEF (SIAF)</p>
-    <h1 id="h-title">Radiografía Presupuestal de las Universidades Públicas del Perú</h1>
-    <p class="lede">Cuánto se les asignó al inicio del año (<abbr title="Presupuesto Institucional de Apertura">PIA</abbr>), cuánto terminaron teniendo (<abbr title="Presupuesto Institucional Modificado">PIM</abbr>), cuánto gastaron realmente (<abbr title="Gasto reconocido como obligación de pago">devengado</abbr>), en qué y con qué dinero.</p>
-    <p class="hero-finding" id="hero-finding">En 2025, las 65 universidades públicas con presupuesto propio tuvieron <strong>S/ 7.7 mil M</strong> (PIM); gastaron el <strong>90.1 %</strong>, y <strong>47 céntimos</strong> de cada sol gastado fueron a planilla de personal.</p>
-    <form class="hero-search" id="hero-search" role="search" autocomplete="off">
-      <div class="hs-row">
-        <div id="hs-picker" class="up-host grow"></div>
-        <button type="submit" class="btn">Ver ficha</button>
-      </div>
-      <p id="hs-msg" class="note" aria-live="polite"></p>
-    </form>
-    <p class="hero-meta" id="hero-meta"></p>
+    <div class="hero-arte" aria-hidden="true">
+      <picture>
+        <source media="(min-width: 1024px)" srcset="assets/hero/hero.svg" width="600" height="640">
+        <img src="assets/hero/hero-movil.svg" alt="" width="375" height="150" decoding="async">
+      </picture>
+      <p class="hc hc-pim"><b id="hc-pim">S/ 7.7 mil M</b><span>presupuesto <span id="hc-anio">2025</span> (PIM)</span></p>
+      <p class="hc hc-ej"><b id="hc-ej">90.1 %</b><span>se llegó a gastar</span></p>
+      <p class="hc hc-per"><b id="hc-per">47 céntimos</b><span>de cada sol gastado, a planilla</span></p>
+    </div>
   </section>
 
   <section id="resumen" class="sec" data-sec aria-labelledby="h-resumen">

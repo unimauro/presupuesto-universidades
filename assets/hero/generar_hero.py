@@ -25,15 +25,22 @@ def f(v):
     return f"{v:.1f}".rstrip("0").rstrip(".")
 
 
-def pim_serie():
+def pia_serie():
+    """PIA nacional de universidades 2012-2026 + PIA 2027 (dictamen/ley, expectativa_2027)."""
     try:
         d = json.loads((ROOT / "data" / "resumen.json").read_text(encoding="utf-8"))
-        nac = d["nacional"]; parcial = set((d.get("parcial") or {}).keys())
-        anios = sorted(int(a) for a in nac if a not in parcial and nac[a].get("pim"))
-        return [(a, nac[str(a)]["pim"]) for a in anios]
+        nac = d["nacional"]
+        serie = [(int(a), nac[a]["pia"]) for a in sorted(nac) if nac[a].get("pia")]
+        t = ((d.get("expectativa_2027") or {}).get("total_universidades") or {})
+        if t.get("pia_2027"):
+            serie.append((2027, t["pia_2027"]))
+        return serie
     except Exception:
-        return [(2012 + i, v * 1e9) for i, v in enumerate(
-            [3.81, 4.39, 4.55, 4.56, 4.55, 4.77, 5.0, 5.51, 5.12, 5.35, 5.73, 6.42, 7.46, 7.73])]
+        return [(2012 + i, v * 1e6) for i, v in enumerate(
+            [2906, 3331, 3411, 3526, 3497, 3534, 4039, 4554, 4588, 4598, 4697, 5641, 6969, 6955, 6700, 7552])]
+
+
+CENTROS = {}   # x de cada columna (para las etiquetas HTML de años en hero.css)
 
 
 def rombo(cx, cy, u, n, fill):
@@ -130,12 +137,16 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
         x = x0 + i * (w + gap)
         ult = i == n - 1
         fill = AJI if ult else PAPEL
+        CENTROS.setdefault(s, []).append((a, x + w / 2, base_y - h))
         cap = (f'<rect x="{f(x - 2 * s)}" y="{f(base_y - h)}" width="{f(w + 4 * s)}" height="{f(5 * s)}" fill="{fill}"/>')
         fuste = f'<rect x="{f(x)}" y="{f(base_y - h)}" width="{f(w)}" height="{f(h)}" fill="{fill}"/>'
         estria = (f'<rect x="{f(x + w / 2 - 1 * s)}" y="{f(base_y - h + 10 * s)}" width="{f(2 * s)}" height="{f(max(h - 14 * s, 0))}" '
                   f'fill="{TINTA}" opacity="{.55 if ult else .16}"/>')
-        style = f' style="animation-delay:{i * 45}ms"' if animar else ""
-        cols.append(f'<g class="col"{style}>{fuste}{estria}{cap}</g>')
+        # la última (2027) aún no es ley: borde punteado de tinta = "pendiente"
+        pend = (f'<rect x="{f(x + 1.25 * s)}" y="{f(base_y - h + 1.25 * s)}" width="{f(w - 2.5 * s)}" height="{f(h - 2.5 * s)}" '
+                f'fill="none" stroke="{TINTA}" stroke-width="{f(2.5 * s)}" stroke-dasharray="{f(6 * s)} {f(4 * s)}"/>') if ult else ""
+        style = f' style="animation-delay:{i * 45 + (250 if ult else 0)}ms"' if animar else ""
+        cols.append(f'<g class="col{" col-27" if ult else ""}"{style}>{fuste}{estria if not ult else ""}{pend}{cap}</g>')
     out.append(f'<g class="cols">{"".join(cols)}</g>')
     # arquitrabe = friso de pallay
     ax0 = x0 - ala; ax1 = x0 + ancho + ala
@@ -172,20 +183,21 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
 ESTILO = """<style>
 @media (prefers-reduced-motion: no-preference) {
   .col { transform-box: fill-box; transform-origin: 50% 100%; animation: crece .9s cubic-bezier(.2,.8,.2,1) both; }
+  .col-27 { animation-duration: 1.4s; }
   @keyframes crece { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 }
 </style>"""
 
 
 def hero_escritorio(serie):
-    W, H = 600, 640
-    CIELO = 380          # cielo extra arriba: el arte se recorta con object-fit: cover desde abajo
+    W, H = 600, 664
+    CIELO = 1000         # cielo extra arriba: el arte se recorta con object-fit: cover desde abajo
     cx = 300
     sol_y = 232
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {-CIELO} {W} {H + CIELO}" width="{W}" height="{H + CIELO}" '
          f'preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">', ESTILO]
     # rayos del sol
-    o.append(rayos(cx, sol_y, 40, 640, MAIZ, ".55"))
+    o.append(rayos(cx, sol_y, 48, 1400, MAIZ, ".55"))
     # sol Inti escalonado
     o.append(disco_escalonado(cx, sol_y, 112, 8, AJI))
     o.append(disco_escalonado(cx, sol_y, 84, 8, ROCOTO))
@@ -264,13 +276,15 @@ def guarda_tile():
 
 
 def main():
-    serie = pim_serie()
+    serie = pia_serie()
     (AQUI / "hero.svg").write_text(hero_escritorio(serie), encoding="utf-8")
     (AQUI / "hero-movil.svg").write_text(hero_movil(serie), encoding="utf-8")
     (AQUI / "guarda.svg").write_text(guarda_tile(), encoding="utf-8")
     for n in ("hero.svg", "hero-movil.svg", "guarda.svg"):
         print(n, (AQUI / n).stat().st_size, "bytes")
     print("columnas:", serie[0][0], "-", serie[-1][0])
+    for esc_, cs in CENTROS.items():
+        print("escala", esc_, [(a, round(x, 1), round(y, 1)) for a, x, y in (cs[0], cs[-2], cs[-1])])
 
 
 if __name__ == "__main__":

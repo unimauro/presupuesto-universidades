@@ -1042,10 +1042,25 @@
     heroText();
     shareLinks();
     const go = (sec) => {
+      if (sec.dataset.go) return sec._p;
+      sec.dataset.go = '1';
+      if (io) io.unobserve(sec);
       const i = Number(sec.dataset.i), st = STORIES[i];
-      prepStory(st, S.Y).then(() => { if (myGen === gen) fillStory(sec, st, i); });
+      sec._p = prepStory(st, S.Y).then(() => { if (myGen === gen) fillStory(sec, st, i); });
+      return sec._p;
     };
     const secs = [...host.querySelectorAll('.cap')];
+    // Saltar a un capítulo (índice, franja 2027, #hash): se cargan antes todos los capítulos previos
+    // para que el alto de la página no cambie durante el salto y se llegue al lugar correcto.
+    S.goTo = (id) => {
+      const k = secs.findIndex((x) => x.id === id);
+      if (k < 0) return false;
+      Promise.all(secs.slice(0, k + 1).map(go)).then(() => {
+        if (myGen !== gen) return;
+        requestAnimationFrame(() => { secs[k].scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }); try { history.replaceState(null, '', '#' + id); } catch (e) { /* */ } });
+      });
+      return true;
+    };
     if ('IntersectionObserver' in window) {
       io = new IntersectionObserver((ents) => ents.forEach((e) => {
         if (e.isIntersecting) { io.unobserve(e.target); go(e.target); }
@@ -1357,7 +1372,14 @@
       lastW = window.innerWidth; clearTimeout(t);
       t = setTimeout(() => { redrawAll(); document.querySelectorAll('.anim').forEach((f) => f.classList.add('in')); }, 180);
     });
-    if (location.hash) { const tg = document.getElementById(location.hash.slice(1)); if (tg) tg.scrollIntoView(); }
+    if (location.hash && S.goTo) S.goTo(decodeURIComponent(location.hash.slice(1)));
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+      const id = a.getAttribute('href').slice(1);
+      const tg = document.getElementById(id);
+      if (tg && tg.classList.contains('cap') && S.goTo) { e.preventDefault(); S.goTo(id); tg.setAttribute('tabindex', '-1'); setTimeout(() => tg.focus({ preventScroll: true }), 50); }
+    });
     window.addEventListener('storage', (e) => {
       if (e.key !== 'rp-theme' || (e.newValue !== 'dark' && e.newValue !== 'light')) return;
       document.documentElement.setAttribute('data-theme', e.newValue); syncTheme(); redrawAll();

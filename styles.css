@@ -691,3 +691,6 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 .a27-tit { font: 800 clamp(20px, 5.4vw, 28px)/1.2 var(--font-cifras); font-stretch: 85%; margin: 0 0 6px; }
 .a27-tit mark { background: var(--tu); color: #1E1428; padding: 0 .15em; }
 .src-dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border: 1.5px solid var(--ink); vertical-align: 0; }
+/* Hero 2027 dentro del hero v3: la cifra no debe partirse */
+.h27-total { overflow-wrap: normal; white-space: nowrap; }
+@media (min-width: 1024px) { .h27-total { font-size: clamp(56px, 5.2vw, 88px); } .h27-arrow { font-size: clamp(56px, 5.6vw, 104px); } }

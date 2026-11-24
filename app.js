@@ -1601,6 +1601,7 @@
       <div class="card">
         <h3>¿El presupuesto total de las universidades sube o baja en 2027?</h3>
         <p class="sub">Presupuesto de apertura (PIA) del total de universidades; la línea punteada es el PIM, lo que terminaron teniendo tras las modificaciones del año.</p>
+        <p class="sentence" id="exp-tot-frase"></p>
         <div class="chart"><canvas id="ch-exp-tot"></canvas></div>
       </div>
       <div id="a27" style="margin-top:16px"></div>
@@ -1865,6 +1866,13 @@
     const st = stats2027(); if (!st) return;
     const pia25 = nacional(2025).pia, pim25 = nacional(2025).pim, pia26 = st.p26, pim26 = st.pim26, pia27 = st.p27;
     const pias = [pia25, pia26, pia27];
+    const fr = $('#exp-tot-frase');
+    if (fr && num(pia25) !== null && num(pia26) !== null && num(pia27) !== null) {
+      const d1 = pctChg(pia25, pia26), d2 = pctChg(pia26, pia27);
+      fr.textContent = (d1 < 0
+        ? `El PIA 2026 (${soles(pia26)}) fue menor que el de 2025 (${soles(pia25)}): bajó ${fmtChg(d1).replace('−', '')}. La propuesta 2027 lo recupera y ${pia27 > pia25 ? 'supera' : 'no alcanza'} el nivel de 2025 (${fmtChg(d2)} frente a 2026).`
+        : `El PIA subió de ${soles(pia25)} en 2025 a ${soles(pia26)} en 2026 (${fmtChg(d1)}); la propuesta 2027 ${d2 >= 0 ? 'sube' : 'baja'} ${fmtChg(d2)} más.`);
+    }
     const labels = ['2025', `2026 (${fmtChg(pctChg(pia25, pia26))})`, `2027 propuesta (${fmtChg(pctChg(pia26, pia27))})`];
     mkChart(id, {
       type: 'bar',
@@ -2473,6 +2481,11 @@
     const nU = S.unis.filter(u => num(tot(u, y, 'pim')) !== null).length;
     if (num(n.pim) === null) return;
     $('#hero-finding').innerHTML = `En ${esc(y)}, las ${esc(nU)} universidades públicas con presupuesto propio tuvieron <strong>${esc(fmtM(n.pim))}</strong> (PIM); gastaron el <strong>${esc(fmtP(ej))}</strong>${per !== null ? `, y <strong>${esc(Math.round(per * 100))} céntimos</strong> de cada sol gastado fueron a planilla de personal` : ''}.`;
+    // Hero v3: cifras colgadas del arte (assets/hero/)
+    const hc = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    hc('hc-anio', y); hc('hc-pim', fmtM(n.pim)); hc('hc-ej', fmtP(ej));
+    if (per !== null) hc('hc-per', `${Math.round(per * 100)} céntimos`);
+    const tPer = document.querySelector('.hc-per'); if (tPer) tPer.hidden = per === null;
   }
   function setupHeroSearch() {
     const f = $('#hero-search');
