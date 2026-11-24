@@ -94,13 +94,16 @@ def parse_anexo4(f):
     with pdfplumber.open(str(f)) as pdf:
         for page in pdf.pages:
             words = page.extract_words(keep_blank_chars=True)
-            rows = {}
-            for w in words:
-                key = round(w["top"] / 3)
-                rows.setdefault(key, []).append(w)
-            # unir filas vecinas (±1) por tolerancia
+            # agrupar palabras en filas: misma línea si |top - top_fila| <= 3.5 pt
+            filas = []
+            for w in sorted(words, key=lambda w: w["top"]):
+                if filas and abs(w["top"] - filas[-1][0]) <= 3.5:
+                    filas[-1][1].append(w)
+                else:
+                    filas.append([w["top"], [w]])
+            rows = {i: f[1] for i, f in enumerate(filas)}
             for key in sorted(rows):
-                ws = sorted(rows[key] + rows.get(key + 1, []) if False else rows[key], key=lambda w: w["x0"])
+                ws = sorted(rows[key], key=lambda w: w["x0"])
                 if not ws:
                     continue
                 first = ws[0]["text"].strip()

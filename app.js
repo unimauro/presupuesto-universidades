@@ -44,20 +44,20 @@
 
   // ------------------------------------------------------------------ catálogos
   const GENERICAS = [
-    { frag: '2.1', lbl: 'Personal y obligaciones sociales', c: '--k1' },
-    { frag: '2.2', lbl: 'Pensiones y prestaciones', c: '--k2' },
-    { frag: '2.3', lbl: 'Bienes y servicios', c: '--k3' },
-    { frag: '2.4', lbl: 'Donaciones y transferencias', c: '--k6' },
-    { frag: '2.5', lbl: 'Otros gastos', c: '--k4' },
-    { frag: '2.6', lbl: 'Activos no financieros (inversión)', c: '--k5' },
-    { frag: '2.8', lbl: 'Servicio de la deuda', c: '--k7' },
+    { frag: '2.1', lbl: 'Personal y obligaciones sociales', c: '--g1' },
+    { frag: '2.2', lbl: 'Pensiones y prestaciones', c: '--g2' },
+    { frag: '2.3', lbl: 'Bienes y servicios', c: '--g3' },
+    { frag: '2.4', lbl: 'Donaciones y transferencias', c: '--g6' },
+    { frag: '2.5', lbl: 'Otros gastos', c: '--g4' },
+    { frag: '2.6', lbl: 'Activos no financieros (inversión)', c: '--g5' },
+    { frag: '2.8', lbl: 'Servicio de la deuda', c: '--g7' },
   ];
   const FUENTES = [
-    { frag: 'ORDINARIOS', lbl: 'Recursos ordinarios (RO)', c: '--k1' },
-    { frag: 'DIRECTAMENTE', lbl: 'Recursos directamente recaudados (RDR)', c: '--k3' },
-    { frag: 'DETERMINADOS', lbl: 'Recursos determinados (canon, regalías)', c: '--k5' },
-    { frag: 'DONACIONES', lbl: 'Donaciones y transferencias', c: '--k6' },
-    { frag: 'OPERACIONES OFICIALES', lbl: 'Operaciones oficiales de crédito', c: '--k2' },
+    { frag: 'ORDINARIOS', lbl: 'Recursos ordinarios (RO)', c: '--f1' },
+    { frag: 'DIRECTAMENTE', lbl: 'Recursos directamente recaudados (RDR)', c: '--f2' },
+    { frag: 'DETERMINADOS', lbl: 'Recursos determinados (canon, regalías)', c: '--f3' },
+    { frag: 'DONACIONES', lbl: 'Donaciones y transferencias', c: '--f4' },
+    { frag: 'OPERACIONES OFICIALES', lbl: 'Operaciones oficiales de crédito', c: '--f5' },
   ];
 
   // ------------------------------------------------------------------ estado
@@ -77,7 +77,12 @@
   const kpiCache = new Map();
 
   const isPartial = y => Object.prototype.hasOwnProperty.call(S.partial, String(y));
-  const yearLbl = y => isPartial(y) ? `${y} (parcial, ${S.partial[String(y)]})` : String(y);
+  const yearLbl = y => { y = String(y).replace(/\D/g, ''); return isPartial(y) ? `${y} (parcial, ${S.partial[String(y)]})` : y; };
+  // Etiqueta de eje con * para el año parcial, y color atenuado para sus barras
+  const yTick = y => String(y) + (isPartial(y) ? '*' : '');
+  const fadeFor = (yrs, color) => yrs.map(y => isPartial(y) ? color + '73' : color);
+  const titleCase = s => String(s || '').toLowerCase().replace(/(^|[\s(“"'.-])([a-záéíóúñü])/g, (m, p, c) => p + c.toUpperCase())
+    .replace(/\b(De|Del|La|Las|Los|Y|E|En|Para|Por)\b/g, w => w.toLowerCase()).replace(/^./, c => c.toUpperCase());
   const A = (u, y) => (u && u.anios && u.anios[String(y)]) || null;
   const uniBy = p => S.unis.find(u => String(u.pliego) === String(p)) || null;
   const uName = u => u ? (u.corto || u.nombre || ('Pliego ' + u.pliego)) : SD;
@@ -186,7 +191,7 @@
     `<option value="${esc(y)}"${String(y) === String(sel) ? ' selected' : ''}>${esc(yearLbl(y))}</option>`).join('');
   const uniOptions = (sel, allLabel) => (allLabel ? `<option value="">${esc(allLabel)}</option>` : '') +
     S.unis.slice().sort((a, b) => uName(a).localeCompare(uName(b), LOC)).map(u =>
-      `<option value="${esc(u.pliego)}"${String(u.pliego) === String(sel) ? ' selected' : ''}>${esc(uName(u))} — ${esc(u.nombre || '')}</option>`).join('');
+      `<option value="${esc(u.pliego)}"${String(u.pliego) === String(sel) ? ' selected' : ''}>${esc(uName(u))} · ${esc(titleCase(u.nombre || ''))}</option>`).join('');
   const kpiBox = (lbl, val, note, cls = '') => `<div class="kpi ${cls}"><span class="k-lbl">${esc(lbl)}</span><span class="k-val">${esc(val)}</span>${note ? `<span class="k-note">${esc(note)}</span>` : ''}</div>`;
   const partialNote = y => isPartial(y) ? `<p class="note warn"><strong>${esc(y)} es un año en curso</strong> (${esc(S.partial[String(y)])}): el devengado y la ejecución son parciales y no comparables con años cerrados.</p>` : '';
   const seg = (name, opts, cur) => `<div class="seg" role="group" aria-label="${esc(name)}">${opts.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${String(v) === String(cur)}">${esc(l)}</button>`).join('')}</div>`;
@@ -228,7 +233,9 @@
         ${kpiBox('PIM ' + y, fmtM(n.pim), varPim !== null ? (varPim >= 0 ? '+' : '') + fmtP(varPim) + ' vs ' + yPrev : 'presupuesto modificado', 'accent')}
         ${kpiBox('Devengado ' + y, fmtM(n.dev), 'gasto ejecutado', 'ochre')}
         ${kpiBox('% ejecución', fmtP(div(n.dev, n.pim)), 'devengado / PIM', 'ochre')}
-        ${kpiBox('% a I+D (PP 0137)', fmtP(div(idiDev, n.dev), 2), 'inversión: ' + fmtP(div(inv, n.dev)))}
+        ${div(idiDev, n.dev) !== null && idiDev > 0
+          ? kpiBox('% a I+D (PP 0137)', fmtP(div(idiDev, n.dev), 2), 'inversión: ' + fmtP(div(inv, n.dev)))
+          : kpiBox('% a personal', fmtP(div(sum(S.unis.map(u => (pick((A(u, y) || {}).generica, '2.1') || {}).dev)), n.dev)), 'inversión: ' + fmtP(div(inv, n.dev)))}
       </div>
       <div class="grid two">
         <div class="card">
@@ -268,7 +275,7 @@
     mkChart('ch-nac-ejec', {
       type: 'bar',
       data: {
-        labels: yrs.map(String),
+        labels: yrs.map(yTick),
         datasets: [{ label: 'Ejecución', data: ej, borderRadius: 4,
           backgroundColor: yrs.map((yy, i) => isPartial(yy) ? cssVar('--line-strong') : cssVar('--' + ({ good: 'good', warn: 'warn', bad: 'bad', na: 'line' })[semaforo(ej[i] / 100)])) }],
       },
@@ -286,17 +293,17 @@
   const ipcBase = () => (S.data && S.data.ipc && S.data.ipc.base) || '2025';
   const METRIC_LBL = { pia: 'PIA', pim: 'PIM', dev: 'Devengado' };
   const COMP_GEN = [
-    { lbl: 'Personal y obligaciones sociales', frags: ['2.1'], c: '--k1' },
-    { lbl: 'Pensiones', frags: ['2.2'], c: '--k2' },
-    { lbl: 'Bienes y servicios', frags: ['2.3'], c: '--k3' },
-    { lbl: 'Infraestructura y equipos (2.6)', frags: ['2.6'], c: '--k5' },
-    { lbl: 'Otros (2.4, 2.5, 2.8)', frags: ['2.4', '2.5', '2.7', '2.8'], c: '--k4' },
+    { lbl: 'Personal y obligaciones sociales', frags: ['2.1'], c: '--g1' },
+    { lbl: 'Pensiones', frags: ['2.2'], c: '--g2' },
+    { lbl: 'Bienes y servicios', frags: ['2.3'], c: '--g3' },
+    { lbl: 'Infraestructura y equipos (2.6)', frags: ['2.6'], c: '--g5' },
+    { lbl: 'Otros (2.4, 2.5, 2.8)', frags: ['2.4', '2.5', '2.7', '2.8'], c: '--g4' },
   ];
   const COMP_FUE = [
-    { lbl: 'Recursos ordinarios (RO)', frags: ['ORDINARIOS'], c: '--k1' },
-    { lbl: 'Recursos directamente recaudados (RDR)', frags: ['DIRECTAMENTE'], c: '--k3' },
-    { lbl: 'Recursos determinados (canon)', frags: ['DETERMINADOS'], c: '--k5' },
-    { lbl: 'Donaciones, transferencias y crédito', frags: ['DONACIONES', 'OPERACIONES OFICIALES'], c: '--k6' },
+    { lbl: 'Recursos ordinarios (RO)', frags: ['ORDINARIOS'], c: '--f1' },
+    { lbl: 'Recursos directamente recaudados (RDR)', frags: ['DIRECTAMENTE'], c: '--f2' },
+    { lbl: 'Recursos determinados (canon)', frags: ['DETERMINADOS'], c: '--f3' },
+    { lbl: 'Donaciones, transferencias y crédito', frags: ['DONACIONES', 'OPERACIONES OFICIALES'], c: '--f4' },
   ];
   function vrDefaults() {
     const closed = S.years.filter(y => !isPartial(y) && S.unis.some(u => A(u, y)));
@@ -688,11 +695,11 @@
     mkChart('ch-tray-uni', {
       type: 'bar',
       data: {
-        labels: yrs.map(String),
+        labels: yrs.map(yTick),
         datasets: [
           { type: 'line', label: 'PIA', data: yrs.map(yy => mill(tot(tUni, yy, 'pia'))), borderColor: cssVar('--c-pia'), backgroundColor: cssVar('--c-pia'), borderDash: [4, 3], pointRadius: 2, tension: .2, order: 0 },
-          { label: 'PIM', data: yrs.map(yy => mill(tot(tUni, yy, 'pim'))), backgroundColor: cssVar('--c-pim'), borderRadius: 3, order: 2 },
-          { label: 'Devengado', data: yrs.map(yy => mill(tot(tUni, yy, 'dev'))), backgroundColor: cssVar('--c-dev'), borderRadius: 3, order: 1 },
+          { label: 'PIM', data: yrs.map(yy => mill(tot(tUni, yy, 'pim'))), backgroundColor: fadeFor(yrs, cssVar('--c-pim')), borderRadius: 3, order: 2 },
+          { label: 'Devengado', data: yrs.map(yy => mill(tot(tUni, yy, 'dev'))), backgroundColor: fadeFor(yrs, cssVar('--c-dev')), borderRadius: 3, order: 1 },
         ],
       },
       options: {
@@ -724,7 +731,7 @@
     const yrs = S.years; const u = st.uni ? uniBy(st.uni) : null; const pool = u ? [u] : S.unis;
     mkChart(cfg.key + '-evo', {
       type: 'bar',
-      data: { labels: yrs.map(String), datasets: presentCats.map(c => ({ label: c.lbl, data: yrs.map(yy => mill(sum(pool.map(x => (pick((A(x, yy) || {})[field], c.frag) || {})[st.metric])))), backgroundColor: cssVar(c.c) })) },
+      data: { labels: yrs.map(yTick), datasets: presentCats.map(c => ({ label: c.lbl, data: yrs.map(yy => mill(sum(pool.map(x => (pick((A(x, yy) || {})[field], c.frag) || {})[st.metric])))), backgroundColor: fadeFor(yrs, cssVar(c.c)) })) },
       options: {
         interaction: { mode: 'index', intersect: false },
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttM, title: it => yearLbl(it[0].label) } } },
@@ -791,7 +798,7 @@
       catTot[k] = (catTot[k] || 0) + (num(v && v.recaudado) || 0);
     }));
     const topCats = Object.keys(catTot).sort((a, b) => catTot[b] - catTot[a]).slice(0, 6);
-    const RCOL = ['--k1', '--k3', '--k5', '--k6', '--k2', '--k7', '--k4'];
+    const RCOL = ['--f2', '--g1', '--g3', '--g5', '--g2', '--g7', '--g4'];
     const rcats = topCats.map((k, i) => ({ k, lbl: k, c: RCOL[i] }));
     if (Object.keys(catTot).length > topCats.length) rcats.push({ k: '__otros', lbl: 'Otros conceptos', c: RCOL[6] });
     const catShare = (u, c) => {
@@ -827,7 +834,7 @@
         type: 'bar',
         data: { labels: all.map(uName), datasets: [
           { label: 'PIM ingresos RDR', data: all.map(u => mill(num(rdr(u).pim))), backgroundColor: cssVar('--c-pia'), borderRadius: 3 },
-          { label: 'Recaudado', data: all.map(u => mill(num(rdr(u).recaudado))), backgroundColor: cssVar('--k3'), borderRadius: 3 },
+          { label: 'Recaudado', data: all.map(u => mill(num(rdr(u).recaudado))), backgroundColor: cssVar('--f2'), borderRadius: 3 },
         ] },
         options: {
           indexAxis: 'y', interaction: { mode: 'index', intersect: false },
@@ -883,7 +890,7 @@
       ${top.length ? `<div class="table-wrap"><table><caption>Proyectos ordenados por saldo (PIM − devengado), ${esc(yearLbl(y))}</caption>
         <thead><tr><th class="txt" scope="col">Universidad</th><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Saldo</th><th scope="col">Avance</th></tr></thead>
         <tbody>${top.map(p => `<tr><td class="txt"><a class="uni-link" href="#u=${encodeURIComponent(p.u.pliego)}">${esc(uName(p.u))}</a></td><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td><strong>${esc(fmtM(p.saldo))}</strong></td><td><span class="score"><b>${esc(fmtP(p.av, 0))}</b><span class="bar"><span style="width:${Math.max(0, Math.min(100, (p.av || 0) * 100))}%"></span></span></span></td></tr>`).join('')}</tbody></table></div>`
-        : '<p class="empty">Aún no hay datos de proyectos de inversión para este año.</p>'}`;
+        : hayProy ? '<p class="empty">El MEF no registra proyectos con saldo para este año.</p>' : '<p class="empty">Aún no tenemos el detalle de proyectos de inversión; la inversión total (genérica 2.6) sí se muestra arriba.</p>'}`;
     $('#in-year', el).addEventListener('change', e => setYear(e.target.value));
     const vals = ordered.map(u => { const v = kpi(u, y).ejec_inversion; return v === null || v === undefined ? null : +(v * 100).toFixed(1); });
     sizeFor('ch-inv', ordered.length, isMobile() ? 26 : 22);
@@ -1152,7 +1159,7 @@
         ${kpiBox('S/ por estudiante', fmtS(k.gasto_por_estudiante), fmtN(a.estudiantes) + ' estudiantes')}
         ${kpiBox('Docentes', fmtN(a.docentes), num(a.estudiantes) && num(a.docentes) ? (a.estudiantes / a.docentes).toLocaleString(LOC, { maximumFractionDigits: 1 }) + ' est. por docente' : '')}
         ${kpiBox('Publicaciones', fmtN(a.pubs), 'S/ por pub. ' + fmtS(k.idi_por_pub))}
-        ${kpiBox('Índice (referencial)', fmtScore(num(idx.score)), num(idx.rank) ? `puesto ${idx.rank} de ${S.unis.length}` : '', 'ochre')}
+        ${kpiBox('Índice (referencial)', fmtScore(num(idx.score)), num(idx.rank) ? `puesto ${idx.rank} de ${S.unis.filter(x => num(x.indice && x.indice.score) !== null).length} con índice` : '', 'ochre')}
       </div>
       <div class="grid two">
         <div class="card"><h3>PIA, PIM y devengado</h3><p class="sub">Millones de soles por año.</p><div class="chart"><canvas id="ch-fi-ser"></canvas></div></div>
@@ -1162,12 +1169,12 @@
       </div>
       <div class="grid two" style="margin-top:12px">
         <div class="card"><h3>Programas presupuestales, ${esc(y)}</h3>
-          ${progs.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Programa</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Ejec.</th></tr></thead><tbody>${progs.map(([n, v]) => `<tr><td class="wrap">${esc(n)}</td><td>${esc(fmtM(num(v && v.pim)))}</td><td>${esc(fmtM(num(v && v.dev)))}</td><td>${pill(div(v && v.dev, v && v.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin datos por programa.</p>'}
+          ${a.programa === undefined || a.programa === null ? '<p class="empty">Aún no tenemos el detalle por programa presupuestal para esta universidad.</p>' : progs.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Programa</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Ejec.</th></tr></thead><tbody>${progs.map(([n, v]) => `<tr><td class="wrap">${esc(n)}</td><td>${esc(fmtM(num(v && v.pim)))}</td><td>${esc(fmtM(num(v && v.dev)))}</td><td>${pill(div(v && v.dev, v && v.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin datos por programa.</p>'}
         </div>
         <div class="card"><h3>Transferencias y normas, ${esc(y)}</h3>${transfersHtml(a.transferencias)}</div>
       </div>
       <div class="card" style="margin-top:12px"><h3>Proyectos de inversión, ${esc(y)}</h3>
-        ${proys.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Avance</th></tr></thead><tbody>${proys.slice().sort((p, q) => (num(q.pim) || 0) - (num(p.pim) || 0)).map(p => `<tr><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pia)))}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td>${pill(div(p.dev, p.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin proyectos de inversión registrados este año.</p>'}
+        ${!Array.isArray(a.proyectos) ? `<p class="empty">Aún no tenemos el detalle de proyectos de esta universidad. La inversión total (genérica 2.6) sí está: PIM ${esc(fmtM(num((pick(a.generica, '2.6') || {}).pim)))}, devengado ${esc(fmtM(num((pick(a.generica, '2.6') || {}).dev)))}.</p>` : proys.length ? `<div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Avance</th></tr></thead><tbody>${proys.slice().sort((p, q) => (num(q.pim) || 0) - (num(p.pim) || 0)).map(p => `<tr><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pia)))}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td>${pill(div(p.dev, p.pim))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Sin proyectos de inversión registrados este año.</p>'}
       </div>
 
       ${fichaVrHtml(u)}
@@ -1216,18 +1223,18 @@
       type: 'line',
       data: { labels: yrs.map(String), datasets: [
         { label: 'Total', data: pctSer('ejec'), borderColor: cssVar('--c-pim'), backgroundColor: cssVar('--c-pim'), borderWidth: 2.5, tension: .25, pointRadius: 2 },
-        { label: 'Inversión', data: pctSer('ejec_inversion'), borderColor: cssVar('--k5'), backgroundColor: cssVar('--k5'), tension: .25, pointRadius: 2 },
+        { label: 'Inversión', data: pctSer('ejec_inversion'), borderColor: cssVar('--g5'), backgroundColor: cssVar('--g5'), tension: .25, pointRadius: 2 },
         { label: 'I+D (0137)', data: pctSer('ejec_idi'), borderColor: cssVar('--c-dev'), backgroundColor: cssVar('--c-dev'), tension: .25, pointRadius: 2 },
       ] },
       options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ttP, title: it => yearLbl(it[0].label) } } }, scales: { y: { min: 0, max: 100, ticks: { callback: tickP } } } },
     }, `Ejecución anual de ${uName(u)}`);
-    const stackSer = (field, cats, m) => cats.map(c => ({ label: c.lbl, backgroundColor: cssVar(c.c), data: yrs.map(yy => mill(num((pick((A(u, yy) || {})[field], c.frag) || {})[m]))) }));
+    const stackSer = (field, cats, m) => cats.map(c => ({ label: c.lbl, backgroundColor: fadeFor(yrs, cssVar(c.c)), data: yrs.map(yy => mill(num((pick((A(u, yy) || {})[field], c.frag) || {})[m]))) }));
     const stackOpts = { interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: tt }, scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: tickM } } } };
-    mkChart('ch-fi-gen', { type: 'bar', data: { labels: yrs.map(String), datasets: stackSer('generica', GENERICAS, 'dev') }, options: stackOpts }, `Gasto por genérica de ${uName(u)}`);
-    mkChart('ch-fi-fue', { type: 'bar', data: { labels: yrs.map(String), datasets: stackSer('fuente', FUENTES.filter(c => yrs.some(yy => pick((A(u, yy) || {}).fuente, c.frag))), 'pim') }, options: stackOpts }, `Fuentes de financiamiento de ${uName(u)}`);
+    mkChart('ch-fi-gen', { type: 'bar', data: { labels: yrs.map(yTick), datasets: stackSer('generica', GENERICAS, 'dev') }, options: stackOpts }, `Gasto por genérica de ${uName(u)}`);
+    mkChart('ch-fi-fue', { type: 'bar', data: { labels: yrs.map(yTick), datasets: stackSer('fuente', FUENTES.filter(c => yrs.some(yy => pick((A(u, yy) || {}).fuente, c.frag))), 'pim') }, options: stackOpts }, `Fuentes de financiamiento de ${uName(u)}`);
 
     fichaVrChart(u);
-    const pal = ['--c-pim', '--c-dev', '--k5'];
+    const pal = ['--c-pim', '--c-dev', '--g3'];
     mkChart('ch-radar', {
       type: 'radar',
       data: { labels: idxComp().map(c => c[1]), datasets: cmpList.map((x, i) => {
@@ -1388,6 +1395,7 @@
     if (!S.years.map(String).includes(y)) return;
     S.year = y;
     $('#year-global').value = y;
+    updateHero();
     YEAR_DEPENDENT.forEach(id => { if (S.rendered.has(id)) safeRender(id); });
   }
   function rerenderAll() {
@@ -1441,13 +1449,58 @@
     if (!uniBy(p)) return;
     S.ficha.uni = p;
     if (!S.rendered.has('ficha')) renderSection('ficha'); else renderFicha();
-    const sec = $('#ficha');
-    if (sec) requestAnimationFrame(() => sec.scrollIntoView({ behavior: 'auto' }));
+    pinTo('ficha');
+  }
+  // Mantiene una sección en pantalla mientras las de arriba se dibujan (lazy render cambia alturas)
+  let unpin = null;
+  function pinTo(id) {
+    const sec = document.getElementById(id); if (!sec) return;
+    if (unpin) unpin();
+    const pin = () => sec.scrollIntoView({ behavior: 'instant', block: 'start' });
+    pin(); requestAnimationFrame(pin);
+    const ro = new ResizeObserver(pin);
+    ro.observe($('#main'));
+    const stop = () => { ro.disconnect(); ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(ev => window.removeEventListener(ev, stop, true)); clearTimeout(t); unpin = null; };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(ev => window.addEventListener(ev, stop, { capture: true, passive: true }));
+    const t = setTimeout(stop, 3000);
+    unpin = stop;
+  }
+  // Hero: hallazgo con cifras del año seleccionado (último cerrado por defecto)
+  function updateHero() {
+    const y = isPartial(S.year) ? S.lastClosed : S.year;
+    const n = nacional(y);
+    const per = div(sum(S.unis.map(u => (pick((A(u, y) || {}).generica, '2.1') || {}).dev)), n.dev);
+    const ej = div(n.dev, n.pim);
+    const nU = S.unis.filter(u => num(tot(u, y, 'pim')) !== null).length;
+    if (num(n.pim) === null) return;
+    $('#hero-finding').innerHTML = `En ${esc(y)}, las ${esc(nU)} universidades públicas con presupuesto propio tuvieron <strong>${esc(fmtM(n.pim).replace(/\.\d M$/, ' M'))}</strong> (PIM); gastaron el <strong>${esc(fmtP(ej))}</strong>${per !== null ? `, y <strong>${esc(Math.round(per * 100))} céntimos</strong> de cada sol gastado fueron a planilla de personal` : ''}.`;
+  }
+  function setupHeroSearch() {
+    const f = $('#hero-search'), inp = $('#hs-input'), msg = $('#hs-msg');
+    const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    $('#hs-list').innerHTML = S.unis.slice().sort((a, b) => uName(a).localeCompare(uName(b), LOC))
+      .map(u => `<option value="${esc(uName(u))} · ${esc(titleCase(u.nombre || ''))}"></option>`).join('');
+    const find = q => {
+      const n = norm(q); if (!n) return null;
+      const sig = n.split(' · ')[0];
+      return S.unis.find(u => norm(uName(u)) === sig || norm(u.pliego) === n)
+        || S.unis.find(u => norm(uName(u) + ' · ' + titleCase(u.nombre || '')) === n)
+        || S.unis.find(u => norm(u.nombre).includes(n) || norm(uName(u)).includes(n));
+    };
+    const go = () => {
+      const u = find(inp.value);
+      if (!u) { msg.textContent = 'No encontramos esa universidad. Prueba con la sigla o parte del nombre.'; return; }
+      msg.textContent = '';
+      const h = '#u=' + encodeURIComponent(u.pliego);
+      if (location.hash === h) handleHash(); else location.hash = h;
+    };
+    f.addEventListener('submit', e => { e.preventDefault(); go(); });
+    inp.addEventListener('change', () => { if (find(inp.value) && inp.value.includes(' · ')) go(); });
   }
 
   // ------------------------------------------------------------------ carga de datos
   async function fetchJson(url) {
-    const r = await fetch(url, { cache: 'no-cache' });
+    const r = await fetch(url);
     if (!r.ok) throw new Error(url + ' HTTP ' + r.status);
     return r.json();
   }
@@ -1493,7 +1546,10 @@
     const ysel = $('#year-global');
     ysel.innerHTML = yearOptions(S.year);
     ysel.addEventListener('change', e => setYear(e.target.value));
-    $('#hero-meta').textContent = `${S.unis.length} universidades · ${S.years[0]}–${S.years[S.years.length - 1]} · último año cerrado: ${S.lastClosed}${d.generado ? ' · actualizado: ' + String(d.generado).slice(0, 10) : ''}`;
+    const nLast = S.unis.filter(u => num(tot(u, S.lastClosed, 'pim')) !== null).length;
+    $('#hero-meta').textContent = `${nLast} universidades con presupuesto en ${S.lastClosed} (${S.unis.length} en el padrón ${S.years[0]}–${S.years[S.years.length - 1]}) · último año cerrado: ${S.lastClosed}${d.generado ? ' · actualizado: ' + String(d.generado).slice(0, 10) : ''}`;
+    updateHero();
+    setupHeroSearch();
 
     // Re-dibujo en cambios de ancho que alteran alturas (móvil ↔ escritorio)
     let wasMobile = isMobile();
@@ -1520,7 +1576,7 @@
     const renderAll = () => Object.keys(SECTIONS).forEach(id => { if (!S.rendered.has(id)) renderSection(id); });
     window.addEventListener('beforeprint', renderAll);
     if (/[?&]completo\b/.test(location.search)) renderAll();
-    if (vrLinked && !location.hash) { renderSection('variacion'); requestAnimationFrame(() => $('#variacion').scrollIntoView({ behavior: 'auto' })); }
+    if (vrLinked && !location.hash) { renderSection('variacion'); pinTo('variacion'); }
     handleHash();
   }
 

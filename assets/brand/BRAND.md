@@ -35,15 +35,18 @@ Fuente de verdad: `styles.css` (`:root` y `:root[data-theme="dark"]`). Si cambia
 | Bien / alerta / mal | `--good` `--warn` `--bad` | `#2C7A4B` `#B7860B` `#B23A3A` | `#5CBF83` `#E2B440` `#EC7570` |
 
 Series fijas (iguales en app.js e historias.js): **PIA** `--c-pia` `#8B94A6` / `#6F7889` · **PIM** `--c-pim` `#26346F` / `#8F9CF0` · **Devengado** `--c-dev` `#B0741A` / `#E0A447`.
-Categóricas `--k1…--k7` (claro): `#26346F` `#8791C9` `#B0741A` `#B8B0A0` `#55753A` `#8E4A68` `#6E5B46`.
-Genéricas: 2.1→k1, 2.2→k2, 2.3→k3, 2.5→k4, 2.6→k5. Fuentes: RO→k1, RDR→k3.
-Resaltado de una universidad en historias: `#8E4A68` (claro) / `#D48AAB` (oscuro).
+Categóricas `--k1…--k7` (UX P1-4: no repiten los tonos de PIA/PIM/Devengado).
+Claro: `#3D5A80` `#98C1D9` `#C06C3E` `#9A917F` `#55753A` `#8E4A68` `#6E5B46` · Oscuro: `#7FA3CF` `#B9DCEF` `#E08F63` `#7D7769` `#93B86F` `#D48AAB` `#B79E82`.
+Genéricas: 2.1→k1, 2.2→k2, 2.3→k5, 2.4→k7, 2.5→k4, 2.6→k6. Fuentes: RO→k1, RDR→k3, RD→k5, DyT→k6.
+Texto ocre pequeño (kickers): `--ochre-text` `#8F5D12` (claro, 4.5:1+) / `#E0A447` (oscuro); `--ochre` solo para barras y bordes.
+Cifras: Plex Sans con `tabular-nums` (no mono) y formato `S/ 6,954.6 M`, igual que index.
+Resaltado de una universidad en historias: `#C2185B` (claro) / `#F07FB0` (oscuro).
 
 Colores del logo/OG: fondo del símbolo `#26346F`, trazos `#E6E8F3`, barra ocre `#E0A447`, línea de escaneo blanca.
 OG: fondo `#1B2230`, rejilla `#2B323E`, edificio `#C6CCF5`/`#8F9CF0`, ocre `#E0A447`.
 (Se descartó el teal `#0E7C86` de la versión inicial para no confundirse con otro observatorio.)
 
-Tema: atributo `data-theme="light|dark"` en `<html>`, persistido en `localStorage["rp-theme"]`, forzable con `?tema=oscuro|claro`. Por defecto claro.
+Tema: atributo `data-theme="light|dark"` en `<html>`: `localStorage["rp-theme"]` → `?tema=oscuro|claro` → `prefers-color-scheme`. Botón `#theme-toggle` (luna/sol) en ambas páginas.
 
 ## Tipografías (Google Fonts)
 - Títulos: **Source Serif 4** (600/700)

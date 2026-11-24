@@ -15,11 +15,10 @@
   const SD = 's/d';
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Mismo formato que index.html (fmtM): "S/ 6,954.6 M"; montos menores a 1 M en soles enteros.
   function soles(v) {
     if (!isNum(v)) return SD;
-    const a = Math.abs(v);
-    if (a >= 1e9) return 'S/ ' + nf1.format(v / 1e9) + ' mil millones';
-    if (a >= 1e6) return 'S/ ' + nf1.format(v / 1e6) + ' millones';
+    if (Math.abs(v) >= 1e6) return 'S/ ' + nf1.format(v / 1e6) + ' M';
     return 'S/ ' + nf0.format(v);
   }
   function solesAxis(v) {
@@ -55,7 +54,22 @@
   const programa = (a, code) => pick(a && a.programa, (k) => k.trim().startsWith(code));
   const fuenteRDR = (a) => pick(a && a.fuente, (k) => /DIRECTAMENTE\s+RECAUDADOS/i.test(k));
   const ingresoRDR = (a) => pick(a && a.ingresos && a.ingresos.fuente, (k) => /DIRECTAMENTE\s+RECAUDADOS/i.test(k));
-  const label = (u) => { const t = String(u.corto || u.nombre || u.pliego); return t.length > 24 ? t.slice(0, 23) + '…' : t; };
+  const label = (u) => String(u.corto || u.nombre || u.pliego);
+  // Etiqueta corta para ejes (P1-13): la sigla; si "corto" es un nombre largo ("U.N. DE SECHURA"),
+  // se abrevia desde el inicio: "UN Sechura", "UN Tecnológica d…". El nombre completo va en el tooltip.
+  const SMALL = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'e']);
+  function titleCase(t) {
+    return t.toLowerCase().split(/\s+/).map((w, i) => (i > 0 && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
+  }
+  function axisLabel(u) {
+    const c = String(u.corto || '').trim();
+    if (c && c.length <= 12) return c;
+    let t = (c || String(u.nombre || u.pliego)).trim();
+    t = t.replace(/^(U\.\s?N\.|UNIVERSIDAD\s+NACIONAL)\s+/i, '').replace(/^UNIVERSIDAD\s+/i, '')
+      .replace(/^AUT[OÓ]NOMA\s+/i, '').replace(/^(DE\s+|DEL\s+)/i, '');
+    t = 'UN ' + titleCase(t);
+    return t.length > 16 ? t.slice(0, 15).trimEnd() + '…' : t;
+  }
 
   // ---------- estado ----------
   const S = { d: null, isSample: false, Y: null, hl: '', closed: [], partial: [], charts: [] };
@@ -66,7 +80,7 @@
     return {
       ink: v('--ink'), ink2: v('--ink-2'), line: v('--line'), card: v('--card'),
       pia: v('--c-pia'), pim: v('--c-pim'), dev: v('--c-dev'), hl: v('--c-hl'),
-      accent: v('--accent'), amber: v('--amber'), k1: v('--k1'), k2: v('--k2'), k3: v('--k3'), k4: v('--k4'), k5: v('--k5'),
+      accent: v('--accent'), amber: v('--amber'), k1: v('--k1'), k2: v('--k2'), k3: v('--k3'), k4: v('--k4'), k5: v('--k5'), k6: v('--k6'),
     };
   }
 
@@ -125,7 +139,7 @@
       chart = new Chart(canvas, {
         type: 'bar',
         data: {
-          labels: shown.map((i) => i.label),
+          labels: shown.map((i) => i.ax || i.label),
           datasets: series.map((s, si) => ({
             label: s.name,
             data: shown.map((i) => (isNum(i.vals[si]) ? i.vals[si] : null)),
@@ -138,7 +152,7 @@
           animation: reduced ? false : { duration: 450 },
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmt(c.raw)}` } },
+            tooltip: { callbacks: { title: (c) => (c[0] && shown[c[0].dataIndex] ? (shown[c[0].dataIndex].full || shown[c[0].dataIndex].label) : ''), label: (c) => `${c.dataset.label}: ${fmt(c.raw)}` } },
           },
           scales: {
             x: { stacked, max, beginAtZero: true, grid: { color: C.line }, ticks: { color: C.ink2, maxTicksLimit: 5, callback: (v) => axis(v) } },
@@ -166,7 +180,7 @@
 
   // ---------- plantillas ----------
   const stat = (v, l) => `<div class="stat"><span class="v">${esc(v)}</span><span class="l">${esc(l)}</span></div>`;
-  const caveat = (items) => `<details class="caveat"><summary>Qué no dice este dato</summary><ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></details>`;
+  const caveat = (items, open) => `<details class="caveat"${open ? ' open' : ''}><summary>Qué no dice este dato</summary><ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></details>`;
   const SRC_MEF = 'Fuente: MEF — Consulta Amigable / SIAF (gasto por pliego).';
   const src = (extra) => `<p class="src">${esc(SRC_MEF)}${extra ? ' ' + esc(extra) : ''} Año ${esc(S.Y)}${S.partial.includes(S.Y) ? ' (parcial)' : ''}.</p>`;
   // Fuente de contexto (matrícula / publicaciones) leída en vivo de d.fuentes.
@@ -196,7 +210,7 @@
   const STORIES = [
     // 1. PIA → PIM
     {
-      id: 'salto', kicker: 'Empiezan y terminan', toc: 'El salto del PIA al PIM',
+      id: 'salto', sec: 'variacion', kicker: 'Empiezan y terminan', toc: 'El salto del PIA al PIM',
       build(Y) {
         const U = unisY(Y);
         const pia = sum(U.map((u) => val(u.anios[Y].total, 'pia')));
@@ -204,7 +218,7 @@
         const dev = sum(U.map((u) => val(u.anios[Y].total, 'dev')));
         const items = U.map((u) => {
           const t = u.anios[Y].total; const r = div(val(t, 'pim'), val(t, 'pia'));
-          return { key: String(u.pliego), label: label(u), vals: [isNum(r) ? r - 1 : null] };
+          return { key: String(u.pliego), label: label(u), ax: axisLabel(u), full: u.nombre, vals: [isNum(r) ? r - 1 : null] };
         }).filter((i) => isNum(i.vals[0])).sort((a, b) => b.vals[0] - a.vals[0]);
         const h = hlUni(); let hl = '';
         if (h && h.anios[Y]) { const t = h.anios[Y].total; hl = `${esc(label(h))}: PIA ${esc(soles(val(t, 'pia')))} → PIM ${esc(soles(val(t, 'pim')))} (${esc(pctSigned(isNum(div(val(t, 'pim'), val(t, 'pia'))) ? div(val(t, 'pim'), val(t, 'pia')) - 1 : null))}); devengó ${esc(pct(div(val(t, 'dev'), val(t, 'pim'))))} del PIM.`; }
@@ -219,7 +233,7 @@
               'El PIM crece por créditos suplementarios, transferencias de otras entidades y saldos de balance incorporados durante el año. Un salto alto no es, por sí mismo, una irregularidad.',
               'Parte del PIM no devengado puede corresponder a recursos que llegaron tarde en el año o a obras plurianuales.',
               'Montos nominales; no se ajustan por inflación.',
-            ])}${src()}`,
+            ], true)}${src()}`,
           mount(el) {
             const C = colors();
             const yrs = S.closed.filter((y) => S.d.universidades.some((u) => u.anios && u.anios[y]));
@@ -251,7 +265,7 @@
 
     // 2. Planilla
     {
-      id: 'planilla', kicker: 'En qué se gasta', toc: '¿Cuánto de cada sol va a planilla?',
+      id: 'planilla', sec: 'gasto', kicker: 'En qué se gasta', toc: '¿Cuánto de cada sol va a planilla?',
       build(Y) {
         const U = unisY(Y);
         const parts = (a) => {
@@ -264,7 +278,7 @@
         const T = sum(all.map((r) => r.x.tot));
         const sh = (f) => div(sum(all.map((r) => r.x[f])), T);
         const personal = sh('p'), pens = sh('pe');
-        const items = all.map((r) => ({ key: String(r.u.pliego), label: label(r.u), vals: [div(r.x.p, r.x.tot), div(r.x.pe, r.x.tot), div(r.x.b, r.x.tot), div(r.x.ac, r.x.tot), div(r.x.otros, r.x.tot)] }))
+        const items = all.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [div(r.x.p, r.x.tot), div(r.x.pe, r.x.tot), div(r.x.b, r.x.tot), div(r.x.ac, r.x.tot), div(r.x.otros, r.x.tot)] }))
           .sort((a, b) => b.vals[0] - a.vals[0]);
         const cents = isNum(personal) ? Math.round(personal * 100) : null;
         const hi = items[0], lo = items[items.length - 1];
@@ -284,7 +298,7 @@
             const C = colors();
             hbar($('[data-fig="mix"]', el), {
               items, stacked: true, max: 1, fmt: (v) => pct(v), axis: (v) => pct(v),
-              series: [{ name: 'Personal (2.1)', color: C.k1 }, { name: 'Pensiones (2.2)', color: C.k2 }, { name: 'Bienes y servicios (2.3)', color: C.k3 }, { name: 'Activos no fin. (2.6)', color: C.k5 }, { name: 'Otros', color: C.k4 }],
+              series: [{ name: 'Personal (2.1)', color: C.k1 }, { name: 'Pensiones (2.2)', color: C.k2 }, { name: 'Bienes y servicios (2.3)', color: C.k5 }, { name: 'Activos no fin. (2.6)', color: C.k6 }, { name: 'Otros', color: C.k4 }],
               aria: 'Composición del gasto devengado por genérica y universidad',
             });
           },
@@ -294,12 +308,12 @@
 
     // 3. Investigación PP 0137
     {
-      id: 'idi', kicker: 'Investigación', toc: 'La plata de investigación que no se gasta',
+      id: 'idi', sec: 'idi', kicker: 'Investigación', toc: 'La plata de investigación que no se gasta',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => ({ u, p: programa(u.anios[Y], '0137') })).filter((r) => r.p && isNum(val(r.p, 'pim')) && val(r.p, 'pim') > 0);
         const pim = sum(rows.map((r) => val(r.p, 'pim'))), dev = sum(rows.map((r) => val(r.p, 'dev')));
-        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), vals: [val(r.p, 'pim'), val(r.p, 'dev')], ej: div(val(r.p, 'dev'), val(r.p, 'pim')) }))
+        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [val(r.p, 'pim'), val(r.p, 'dev')], ej: div(val(r.p, 'dev'), val(r.p, 'pim')) }))
           .sort((a, b) => b.vals[0] - a.vals[0]);
         const low = items.filter((i) => isNum(i.ej) && i.ej < 0.5).length;
         const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
@@ -325,7 +339,7 @@
 
     // 4. Obras
     {
-      id: 'obras', kicker: 'Inversión', toc: 'Obras que no avanzan',
+      id: 'obras', sec: 'infra', kicker: 'Inversión', toc: 'Obras que no avanzan',
       build(Y) {
         const U = unisY(Y);
         const all = [];
@@ -371,12 +385,12 @@
 
     // 5. RDR
     {
-      id: 'rdr', kicker: 'De dónde sale la plata', toc: 'Quién vive de sus propios ingresos',
+      id: 'rdr', sec: 'fuentes', kicker: 'De dónde sale la plata', toc: 'Quién vive de sus propios ingresos',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => { const a = u.anios[Y]; return { u, r: val(fuenteRDR(a), 'dev'), t: val(a.total, 'dev'), ing: ingresoRDR(a) }; }).filter((x) => isNum(x.t) && x.t > 0 && isNum(x.r));
         const share = div(sum(rows.map((x) => x.r)), sum(rows.map((x) => x.t)));
-        const items = rows.map((x) => ({ key: String(x.u.pliego), label: label(x.u), vals: [x.r / x.t] })).sort((a, b) => b.vals[0] - a.vals[0]);
+        const items = rows.map((x) => ({ key: String(x.u.pliego), label: label(x.u), ax: axisLabel(x.u), full: x.u.nombre, vals: [x.r / x.t] })).sort((a, b) => b.vals[0] - a.vals[0]);
         const ingRows = rows.filter((x) => x.ing && isNum(val(x.ing, 'pim')) && isNum(val(x.ing, 'recaudado')));
         const recVsPim = div(sum(ingRows.map((x) => val(x.ing, 'recaudado'))), sum(ingRows.map((x) => val(x.ing, 'pim'))));
         const hi = items[0], lo = items[items.length - 1];
@@ -403,14 +417,14 @@
 
     // 6. Costo por publicación
     {
-      id: 'pubs', kicker: 'Investigación y resultados', toc: 'El costo de una publicación',
+      id: 'pubs', sec: 'idi', kicker: 'Investigación y resultados', toc: 'El costo de una publicación',
       build(Y) {
         const MINP = 10;
         const U = unisY(Y);
         const rows = U.map((u) => { const a = u.anios[Y]; return { u, idi: val(programa(a, '0137'), 'dev'), pubs: isNum(a.pubs) ? a.pubs : null }; });
         const ok = rows.filter((r) => isNum(r.idi) && r.idi > 0 && isNum(r.pubs) && r.pubs >= MINP);
         const excl = rows.length - ok.length;
-        const items = ok.map((r) => ({ key: String(r.u.pliego), label: label(r.u), vals: [r.idi / r.pubs], pubs: r.pubs })).sort((a, b) => b.vals[0] - a.vals[0]);
+        const items = ok.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [r.idi / r.pubs], pubs: r.pubs })).sort((a, b) => b.vals[0] - a.vals[0]);
         const med = median(items.map((i) => i.vals[0]));
         const pooled = div(sum(ok.map((r) => r.idi)), sum(ok.map((r) => r.pubs)));
         const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
@@ -430,7 +444,7 @@
             ])}${srcCtx('pubs', 'Publicaciones')}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.k2 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
+            hbar($('[data-fig="pubs"]', el), { items, series: [{ name: 'Soles por publicación', color: C.k1 }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado en I+D por publicación' });
           },
         };
       },
@@ -438,14 +452,14 @@
 
     // 7. Crecimiento
     {
-      id: 'crecimiento', kicker: 'Evolución', toc: 'Las que más crecieron',
+      id: 'crecimiento', sec: 'trayectoria', kicker: 'Evolución', toc: 'Las que más crecieron',
       build(Y) {
         const Y0 = S.closed.find((y) => y < Y);
         if (!Y0) return { h2: 'Las que más crecieron', html: `<p class="empty">Se necesita al menos un año anterior a ${esc(Y)}.</p>` };
         const rows = S.d.universidades.map((u) => ({ u, a: val(u.anios && u.anios[Y0] && u.anios[Y0].total, 'dev'), b: val(u.anios && u.anios[Y] && u.anios[Y].total, 'dev') }))
           .filter((r) => isNum(r.a) && r.a > 0 && isNum(r.b));
         const A = sum(rows.map((r) => r.a)), B = sum(rows.map((r) => r.b));
-        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), vals: [r.b / r.a - 1] })).sort((a, b) => b.vals[0] - a.vals[0]);
+        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [r.b / r.a - 1] })).sort((a, b) => b.vals[0] - a.vals[0]);
         const missing = unisY(Y).length - rows.length;
         const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
         return {
@@ -469,13 +483,13 @@
 
     // 8. Gasto por estudiante
     {
-      id: 'estudiante', kicker: 'Por estudiante', toc: 'Cuánto se gasta por estudiante',
+      id: 'estudiante', sec: 'ranking', kicker: 'Por estudiante', toc: 'Cuánto se gasta por estudiante',
       build(Y) {
         const U = unisY(Y);
         const rows = U.map((u) => { const a = u.anios[Y]; const e = isNum(a.estudiantes) && a.estudiantes > 0 ? a.estudiantes : null; return { u, e, v: e ? div(val(a.total, 'dev'), e) : null }; }).filter((r) => isNum(r.v));
         const eYears = [...new Set(rows.map((r) => r.u.anios[Y].estudiantes_anio).filter((x) => x != null && String(x) !== String(Y)).map(String))].sort();
         const eNote = eYears.length ? ` La matrícula disponible corresponde a ${eYears.length > 1 ? 'los años ' + eYears.join(', ') : 'el año ' + eYears[0]} (no a ${Y}): se usa el último dato publicado.` : '';
-        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), vals: [r.v], e: r.e })).sort((a, b) => b.vals[0] - a.vals[0]);
+        const items = rows.map((r) => ({ key: String(r.u.pliego), label: label(r.u), ax: axisLabel(r.u), full: r.u.nombre, vals: [r.v], e: r.e })).sort((a, b) => b.vals[0] - a.vals[0]);
         const excl = U.length - rows.length;
         const h = hlUni(); const hr = h && items.find((i) => i.key === String(h.pliego));
         if (!items.length) return { h2: 'Cuánto se gasta por estudiante', html: `<p class="empty">No hay datos de matrícula para ${esc(Y)}.</p>${src()}` };
@@ -493,7 +507,7 @@
             ])}${srcCtx('estudiantes', 'Estudiantes')}`,
           mount(el) {
             const C = colors();
-            hbar($('[data-fig="est"]', el), { items, series: [{ name: 'Soles por estudiante', color: C.pim }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado por estudiante' });
+            hbar($('[data-fig="est"]', el), { items, series: [{ name: 'Soles por estudiante', color: C.dev }], fmt: soles, axis: solesAxis, aria: 'Gasto devengado por estudiante' });
           },
         };
       },
@@ -515,9 +529,15 @@
       try { out = st.build(Y); } catch (e) { console.error(e); out = { h2: esc(st.toc), html: '<p class="empty">No se pudo calcular esta historia con los datos disponibles.</p>' }; }
       sec.innerHTML = `<p class="kicker"><b>${String(i + 1).padStart(2, '0')}</b>${esc(st.kicker)}</p><h2>${out.h2}</h2>` +
         (partial ? `<p class="note">${esc(Y)} es un año en curso (${esc((S.d.parcial || {})[Y] || 'parcial')}): el devengado es parcial y no es comparable con años cerrados.</p>` : '') + out.html;
+      if (st.sec) sec.insertAdjacentHTML('beforeend', `<p><a class="explore" href="index.html#${esc(st.sec)}">Explorar en el observatorio →</a></p>`);
       host.appendChild(sec);
       if (out.mount) { try { out.mount(sec); } catch (e) { console.error(e); } }
     });
+    const fl = $('#uni-ficha'), hu = hlUni();
+    if (fl) {
+      fl.hidden = !hu;
+      fl.innerHTML = hu ? `<a href="index.html#u=${encodeURIComponent(hu.pliego)}">Ver ficha completa de ${esc(label(hu))} →</a>` : '';
+    }
     $('#toc').innerHTML = STORIES.map((st) => `<li><a href="#${esc(st.id)}">${esc(st.toc)}</a></li>`).join('');
     reveal();
     syncURL();
@@ -552,8 +572,8 @@
     ys.addEventListener('change', () => { S.Y = ys.value; render(); });
 
     const us = $('#sel-uni');
-    const unis = [...S.d.universidades].sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es'));
-    us.innerHTML = '<option value="">— ninguna —</option>' + unis.map((u) => `<option value="${esc(u.pliego)}">${esc(u.corto ? u.corto + ' — ' : '')}${esc(u.nombre || u.pliego)}</option>`).join('');
+    const unis = [...S.d.universidades].sort((a, b) => label(a).localeCompare(label(b), 'es'));
+    us.innerHTML = '<option value="">— ninguna —</option>' + unis.map((u) => `<option value="${esc(u.pliego)}">${esc(u.corto && u.corto.length <= 12 ? u.corto + ' — ' : '')}${esc(titleCase(String(u.nombre || u.pliego)))}</option>`).join('');
     const wantU = p.get('u');
     if (wantU && unis.some((u) => String(u.pliego) === wantU)) { S.hl = wantU; us.value = wantU; }
     us.addEventListener('change', () => { S.hl = us.value; render(); });
@@ -592,7 +612,25 @@
     Chart.defaults.color = colors().ink2;
   }
 
+  function setupTheme() {
+    const btn = $('#theme-toggle');
+    const sync = () => {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (btn) { btn.setAttribute('aria-pressed', String(dark)); btn.setAttribute('aria-label', dark ? 'Activar tema claro' : 'Activar tema oscuro'); }
+    };
+    sync();
+    if (btn) btn.addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      try { localStorage.setItem('rp-theme', t); } catch (e) { /* sin almacenamiento */ }
+      sync();
+      if (S.d) { chartDefaults(); render(); }
+    });
+    return sync;
+  }
+
   async function init() {
+    const syncTheme = setupTheme();
     progress();
     try {
       const { d, isSample } = await load();
@@ -609,7 +647,7 @@
     if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     window.addEventListener('storage', (e) => {
       if (e.key !== 'rp-theme' || (e.newValue !== 'dark' && e.newValue !== 'light')) return;
-      document.documentElement.setAttribute('data-theme', e.newValue); chartDefaults(); render();
+      document.documentElement.setAttribute('data-theme', e.newValue); syncTheme(); chartDefaults(); render();
     });
   }
 
