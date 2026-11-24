@@ -239,8 +239,46 @@ def main():
     obs = rnd(obs)
     with open(D("observatorio.json"), "w", encoding="utf-8") as f:
         json.dump(obs, f, ensure_ascii=False, separators=(",", ":"))
+    partir(obs)
     print(f"OK data/observatorio.json: {len(unis)} universidades, años {anios[0]}–{anios[-1]}, "
           f"rankeadas {len(ranked)}, {os.path.getsize(D('observatorio.json'))/1e6:.1f} MB")
+
+
+LIGERO = ("total", "kpi", "estudiantes", "docentes", "pubs", "estudiantes_anio", "docentes_anio", "pia_ley", "canon")
+
+
+def partir(obs):
+    """Carga por capas para la web:
+    data/resumen.json      todo lo de la raíz + por universidad y año solo total/kpi/contexto (carga inicial)
+    data/anio/{año}.json   desglose completo de ese año para todas las universidades (al elegir el año)
+    data/u/{pliego}.json   la universidad completa, todos los años (al abrir su ficha)"""
+    import shutil
+    for sub in ("anio", "u"):
+        shutil.rmtree(D(sub), ignore_errors=True)
+        os.makedirs(D(sub))
+    dump = lambda path, obj: json.dump(obj, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    res = {k: v for k, v in obs.items() if k != "universidades"}
+    res["universidades"] = []
+    for u in obs["universidades"]:
+        lu = {k: v for k, v in u.items() if k != "anios"}
+        lu["anios"] = {}
+        for y, a in u["anios"].items():
+            la = {k: a[k] for k in LIGERO if k in a}
+            ing = a.get("ingresos") or {}
+            if ing:
+                la["ingresos"] = {k: ing[k] for k in ("total", "total_sin_saldos", "rdr_sin_saldos") if k in ing}
+            lu["anios"][y] = la
+        res["universidades"].append(lu)
+        dump(D("u", f"{u['pliego']}.json"), u)
+    res["capas"] = {"anio": "data/anio/{anio}.json", "u": "data/u/{pliego}.json"}
+    dump(D("resumen.json"), res)
+    for y in obs["anios"]:
+        ys = str(y)
+        dump(D("anio", f"{ys}.json"), {"anio": y, "universidades": {u["pliego"]: u["anios"][ys]
+                                                                     for u in obs["universidades"] if ys in u["anios"]}})
+    tam = lambda f: os.path.getsize(f) / 1e3
+    print(f"  capas: resumen {tam(D('resumen.json')):.0f} KB · anio/{obs['anios'][-2]} "
+          f"{tam(D('anio', str(obs['anios'][-2]) + '.json')):.0f} KB · u/514 {tam(D('u', '514.json')) if os.path.exists(D('u', '514.json')) else 0:.0f} KB")
 
 
 if __name__ == "__main__":
