@@ -120,6 +120,7 @@ details.caveat ul{padding-left:18px;margin:6px 0}
 .method h2{font:800 24px/1.25 var(--font-head);margin:0 0 10px}
 .method li{margin:0 0 6px}
 .meta{font-size:12px;color:var(--ink-2)}
+.method .src a{display:inline-block;padding:12px 0;margin:-8px 0}
 
 .foot{background:var(--card);color:var(--ink-2);border-top:1px solid var(--line);padding:28px 16px;text-align:center;font-size:14px}
 .foot a{color:var(--accent);display:inline-block;padding-block:12px}

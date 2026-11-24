@@ -719,6 +719,8 @@
     setupControls();
     setupMeta();
     render();
+    // Los gráficos (canvas) se dibujan antes de que llegue la fuente web: se repintan al cargarla.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => S.charts.forEach((c) => { try { c.update('none'); } catch (e) { /* destruido */ } }));
     if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
     window.addEventListener('storage', (e) => {
       if (e.key !== 'rp-theme' || (e.newValue !== 'dark' && e.newValue !== 'light')) return;
