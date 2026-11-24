@@ -595,9 +595,10 @@ def page_index(unis, obs, slugs, by_dep):
         for x in sorted(by_dep[d], key=lambda z: z.nombre):
             y = x.ult or (x.parciales[-1] if x.parciales else None)
             par = "*" if y in x.parciales else ""
-            li.append(f'<li><a href="{E(slugs[x.pliego])}/">{E(x.nombre)}</a>{f" <small>({E(x.sigla)})</small>" if x.sigla else ""}'
+            q = slugify(" ".join(filter(None, (x.nombre, x.sigla, d, x.ciudad)))).replace("-", " ")
+            li.append(f'<li data-q="{E(q)}" data-n="{E(slugify(x.nombre))}" data-pim="{x.t(y, "pim") or 0:.0f}"><a href="{E(slugs[x.pliego])}/">{E(x.nombre)}</a>{f" <small>({E(x.sigla)})</small>" if x.sigla else ""}'
                       f'<span class="r">PIM {E(y)}{par}: {E(fm(x.t(y, "pim")))} · ejec. {E(fp(div(x.t(y, "dev"), x.t(y, "pim")), 0))}</span></li>')
-        secs.append(f'<section id="{E(slugify(d or "sin-departamento"))}"><h2>{E(d or "Sin departamento registrado")} '
+        secs.append(f'<section class="dep" id="{E(slugify(d or "sin-departamento"))}"><h2>{E(d or "Sin departamento registrado")} '
                     f'<small>({len(by_dep[d])})</small></h2><ul class="ulist idx">{"".join(li)}</ul></section>')
     body = f"""<body>
 {topbar(R)}
@@ -607,8 +608,16 @@ def page_index(unis, obs, slugs, by_dep):
 <p class="lead">{len(unis)} universidades públicas (pliegos del sector Educación). Para cada una: cuánto recibió (PIA, PIM), cuánto ejecutó
 (devengado), en qué gasta, de dónde viene el dinero, cuánto recauda e investigación, con datos del MEF. Año de referencia {E(yl)} (último cerrado);
 * = universidad creada recientemente, solo con datos parciales de {E(", ".join(obs.get("parcial") or {}))}.</p>
-<p class="toc">{toc}</p>
-{"".join(secs)}
+<div class="tools" id="tools" hidden>
+<label class="srch"><span>Buscar</span><input id="q" type="search" placeholder="Nombre, sigla o departamento" autocomplete="off"></label>
+<label class="ord"><span>Ordenar</span><select id="ord"><option value="dep">Por departamento</option><option value="n">Por nombre (A-Z)</option><option value="pim">Por PIM (mayor a menor)</option></select></label>
+<p class="cnt" id="cnt" aria-live="polite"></p>
+</div>
+<p class="toc" id="toc">{toc}</p>
+<div id="grp">{"".join(secs)}</div>
+<section id="flat" hidden><ul class="ulist idx" id="flatul"></ul></section>
+<p id="nores" class="note" hidden>Ninguna universidad coincide con la búsqueda.</p>
+<script>{INDEX_JS}</script>
 <section class="more"><a class="cta alt" href="{R}">Observatorio interactivo</a><a class="cta alt" href="{R}historias.html">Historias</a></section>
 </main>
 {footer(obs, R)}
@@ -687,6 +696,8 @@ def render_og(jobs):
 
 
 # ---------------------------------------------------------------- main
+INDEX_JS = "(function(){var $=function(i){return document.getElementById(i)},L=[].slice.call(document.querySelectorAll('#grp li[data-q]')),\nH=L.map(function(li){return li.parentNode}),q=$('q'),o=$('ord'),N=function(t){return t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()};\n$('tools').hidden=false;\nfunction run(){var t=N(q.value),m=o.value,n=0,flat=m!=='dep';\nL.forEach(function(li){var ok=!t||t.split(' ').every(function(w){return li.dataset.q.indexOf(w)>=0});li.hidden=!ok;if(ok)n++});\nif(flat){var s=L.slice().sort(m==='pim'?function(a,b){return b.dataset.pim-a.dataset.pim}:function(a,b){return a.dataset.n<b.dataset.n?-1:1});\ns.forEach(function(li){$('flatul').appendChild(li)})}else{L.forEach(function(li,i){H[i].appendChild(li)});\n[].forEach.call(document.querySelectorAll('#grp section.dep'),function(sec){sec.hidden=!sec.querySelector('li:not([hidden])')})}\n$('grp').hidden=flat;$('flat').hidden=!flat;$('toc').hidden=flat||!!t;$('nores').hidden=n>0;\n$('cnt').textContent=n+' de '+L.length+' universidades';\ntry{var u=new URL(location);t?u.searchParams.set('q',q.value):u.searchParams.delete('q');m!=='dep'?u.searchParams.set('orden',m):u.searchParams.delete('orden');history.replaceState(null,'',u)}catch(e){}}\nvar p=new URLSearchParams(location.search);if(p.get('q'))q.value=p.get('q');if(/^(n|pim)$/.test(p.get('orden')||''))o.value=p.get('orden');\nq.addEventListener('input',run);o.addEventListener('change',run);run()})();"
+
 CSS_PATH = os.path.join(ROOT, "u", "u.css")
 
 

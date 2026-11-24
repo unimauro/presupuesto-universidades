@@ -37,6 +37,35 @@ def main():
               f"aquí PIM {tp/M:.1f} M / dev {td/M:.1f} M; {len(diffs)} difieren (>20k)")
         for d in diffs[:10]:
             print("   ", d)
+    # 1b) Validación cruzada vs cubo SIAF del VPS (data/existente/siaf_vps/raw_AAAA.json, agente inventario)
+    for y in ("2024", "2025"):
+        fp = os.path.join(HERE, "..", "data", "existente", "siaf_vps", f"raw_{y}.json")
+        if not os.path.exists(fp):
+            continue
+        C = json.load(open(fp, encoding="utf-8"))["cubo"]
+        ix = {c: i for i, c in enumerate(C["cols"])}
+        agg = {}
+        for r in C["rows"]:
+            p = r[ix["pliego"]]
+            k = (p, r[ix["programa_ppto"]][:4])
+            agg[k] = agg.get(k, 0) + r[ix["pim"]]
+            if r[ix["tipo_act_proy"]].upper().startswith("PROY"):
+                agg[(p, "PROY")] = agg.get((p, "PROY"), 0) + r[ix["pim"]]
+        n = bad = 0
+        for (p, code), v in agg.items():
+            a = U.get(p, {}).get("anios", {}).get(y, {})
+            if code == "PROY":
+                mine = (a.get("resumen_inversion") or {}).get("pim")
+            else:
+                mine = (pp(a, code) or {}).get("pim")
+            if mine is None:
+                continue
+            n += 1
+            if abs(mine - v) > 1:
+                bad += 1
+                if bad <= 5:
+                    print(f"    dif {y} {p} {code}: CA {mine:,.0f} vs SIAF {v:,.0f}")
+        print(f"[validación vs SIAF VPS {y}] {n} celdas pliego×programa/proyectos comparadas (PIM), {bad} difieren > S/1")
     # 2) Serie nacional I+D (0137) y pregrado (0066)
     years = sorted({y for u in U.values() for y in u["anios"]})
     print("\n[serie nacional] año | PIM total univ | 0137 PIM | 0137 dev | %ej 0137 | inversión(proy) PIM | dev | %ej")
