@@ -330,3 +330,7 @@ details.notas ul { font-size: 13.5px; color: var(--muted); }
 }
 
 @media (min-width: 1240px) { .kpis.six { grid-template-columns: repeat(6, minmax(0, 1fr)); } .kpis.six .k-val { font-size: 22px; } }
+
+/* Nombres largos (p. ej. "U.N. TECNOLÓGICA DE ...") no deben ensanchar la 1.ª columna */
+td.txt.sticky-col { white-space: normal; min-width: 110px; max-width: 220px; }
+@media (min-width: 860px) { td.txt.sticky-col { max-width: 320px; } }

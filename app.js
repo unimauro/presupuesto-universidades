@@ -364,7 +364,10 @@
       const pa = div(va, ea), pb = div(vb, eb);
       return { u, va, vb, dabs: (va !== null && vb !== null) ? vb - va : null, dv: pctChg(va, vb), dr: pctChg(ra, rb), pa, pb, dp: pctChg(pa, pb), nueva: va === null };
     });
-    const ranked = rows.filter(r => r.dv !== null).sort((x, y) => y.dv - x.dv);
+    // Para el gráfico solo bases comparables: en A al menos S/ 10 M (evita +1000 % por bases mínimas)
+    const MINBASE = 10e6;
+    const ranked = rows.filter(r => r.dv !== null && num(r.va) !== null && r.va >= MINBASE).sort((x, y) => y.dv - x.dv);
+    const excl = rows.filter(r => r.dv !== null && !(r.va >= MINBASE)).length;
     const N = isMobile() ? 8 : 10;
     const chartRows = ranked.length > 2 * N ? ranked.slice(0, N).concat(ranked.slice(-N)) : ranked;
     const partialWarn = [a, b].filter(isPartial);
@@ -398,7 +401,7 @@
         </div>
         <div class="card">
           <h3>Universidades que más suben y más bajan</h3>
-          <p class="sub">Variación % del ${esc(METRIC_LBL[m])} entre ${esc(a)} y ${esc(b)} (${esc(modeLbl)}). ${chartRows.length < ranked.length ? `Las ${N} que más suben y las ${N} que más bajan.` : ''} Las nuevas no se incluyen.</p>
+          <p class="sub">Variación % del ${esc(METRIC_LBL[m])} entre ${esc(a)} y ${esc(b)} (${esc(modeLbl)}). ${chartRows.length < ranked.length ? `Las ${N} que más suben y las ${N} que más bajan.` : ''} Las nuevas no se incluyen${excl ? ` ni ${excl} con menos de S/ 10 M en ${esc(a)} (base muy pequeña; ver tabla)` : ''}.</p>
           <div class="chart"><canvas id="ch-vr-uni"></canvas></div>
         </div>
       </div>
