@@ -233,7 +233,7 @@ def main():
                       "nota": "Soles reales de 2025 = nominal × 100 / índice del año. " + ipc.get("nota_2026", "")}
     if l27:
         obs["expectativa_2027"] = {k: l27.get(k) for k in
-                                   ("version", "norma", "fecha", "url", "documentos", "notas",
+                                   ("version", "norma", "fecha", "url", "estado_tramite", "documentos", "notas",
                                     "total_universidades", "disposiciones")}
     def rnd(x):  # soles enteros: los céntimos no aportan y engordan el JSON
         if isinstance(x, float):
@@ -268,6 +268,9 @@ def partir(obs):
     res["universidades"] = []
     for u in obs["universidades"]:
         lu = {k: v for k, v in u.items() if k != "anios"}
+        if isinstance(lu.get("expectativa_2027"), dict):  # detalle (actividades/proyectos/productos) solo en u/{pliego}
+            lu["expectativa_2027"] = {k: v for k, v in lu["expectativa_2027"].items()
+                                      if k not in ("actividades", "proyectos", "productos", "categoria_presupuestal")}
         lu["anios"] = {}
         for y, a in u["anios"].items():
             la = {k: a[k] for k in LIGERO if k in a}

@@ -39,7 +39,7 @@ Categóricas `--k1…--k7` (UX P1-4: no repiten los tonos de PIA/PIM/Devengado).
 Claro: `#3D5A80` `#98C1D9` `#C06C3E` `#9A917F` `#55753A` `#8E4A68` `#6E5B46` · Oscuro: `#7FA3CF` `#B9DCEF` `#E08F63` `#7D7769` `#93B86F` `#D48AAB` `#B79E82`.
 Genéricas: 2.1→k1, 2.2→k2, 2.3→k5, 2.4→k7, 2.5→k4, 2.6→k6. Fuentes: RO→k1, RDR→k3, RD→k5, DyT→k6.
 Texto ocre pequeño (kickers): `--ochre-text` `#8F5D12` (claro, 4.5:1+) / `#E0A447` (oscuro); `--ochre` solo para barras y bordes.
-Cifras: Plex Sans con `tabular-nums` (no mono) y formato `S/ 6,954.6 M`, igual que index.
+Cifras: Plus Jakarta Sans con `tabular-nums` y formato `S/ 6,954.6 M`, igual que index.
 Resaltado de una universidad en historias: `#C2185B` (claro) / `#F07FB0` (oscuro).
 
 Colores del logo/OG: fondo del símbolo `#26346F`, trazos `#E6E8F3`, barra ocre `#E0A447`, línea de escaneo blanca.
@@ -48,16 +48,19 @@ OG: fondo `#1B2230`, rejilla `#2B323E`, edificio `#C6CCF5`/`#8F9CF0`, ocre `#E0A
 
 Tema: atributo `data-theme="light|dark"` en `<html>`: `localStorage["rp-theme"]` → `?tema=oscuro|claro` → `prefers-color-scheme`. Botón `#theme-toggle` (luna/sol) en ambas páginas.
 
-## Tipografías (Google Fonts)
-- Títulos: **Source Serif 4** (600/700)
-- Texto/UI: **IBM Plex Sans** (400/500/600)
-- Cifras/tablas: **IBM Plex Mono** (400/500) con `font-variant-numeric: tabular-nums`
+## Tipografías (Google Fonts, más juvenil: el público son estudiantes)
+- Títulos: **Bricolage Grotesque** (700/800)
+- Texto, UI y cifras: **Plus Jakarta Sans** (400/500/600/700); en cifras `font-variant-numeric: tabular-nums`
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 ```
+CSS: `--font-head:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif; --font-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;`
+
+Logos (`logo.svg`, `logo-dark.svg`): el texto está **convertido a trazos** (no depende de fuentes instaladas, porque un SVG usado como `<img>` no carga webfonts). Fuente editable en `assets/brand/src/*.src.svg`; para regenerar: `rsvg-convert -f svg src/logo.src.svg -o logo.svg`.
+Imágenes OG (`etl/og_generar.py`) y OG por universidad: rsvg-convert necesita los TTF instalados: `~/Library/Fonts/BricolageGrotesque.ttf` y `~/Library/Fonts/PlusJakartaSans.ttf` (variables, de github.com/google/fonts `ofl/bricolagegrotesque` y `ofl/plusjakartasans`). Nombres en fc-list: "Bricolage Grotesque", "Plus Jakarta Sans". El script avisa si faltan.
 
 ## Tokens CSS
 Usar directamente los de `styles.css`. `historias.css` replica los mismos valores con nombres propios (`--paper`=`--bg`, `--card`=`--surface`, `--ink-2`=`--muted`, `--amber`=`--ochre`).

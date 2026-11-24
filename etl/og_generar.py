@@ -29,9 +29,13 @@ ELEGIDA = "og-a-escalones"   # variante copiada como og.png
 # Paleta (styles.css): azul tinta + ocre
 BG = "#1B2230"; GRID = "#2B323E"; INK = "#26346F"; INK_L = "#8F9CF0"; INK_XL = "#C6CCF5"
 OCHRE = "#E0A447"; OCHRE_D = "#B0741A"; PAPER = "#E9E6DF"; MUTED = "#9BA3B1"; PIA_C = "#8B94A6"
-SERIF = "Georgia, 'Source Serif 4', serif"
-SANS = "'Helvetica Neue', Helvetica, Arial, 'IBM Plex Sans', sans-serif"
-NUM = SANS  # cifras en sans: Georgia usa números de estilo antiguo ("7.o") que se leen mal en miniatura
+# Tipografía de marca (BRAND.md): títulos Bricolage Grotesque 800, texto y cifras Plus Jakarta Sans.
+# rsvg-convert usa las fuentes del sistema: instalar los TTF variables de github.com/google/fonts
+# (ofl/bricolagegrotesque, ofl/plusjakartasans) en ~/Library/Fonts (macOS) o ~/.local/share/fonts + fc-cache.
+FONTS_REQ = ("Bricolage Grotesque", "Plus Jakarta Sans")
+SERIF = "'Bricolage Grotesque', sans-serif"   # nombre histórico: es la fuente de títulos
+SANS = "'Plus Jakarta Sans', sans-serif"
+NUM = SANS
 
 
 # ---------- datos ----------
@@ -102,7 +106,7 @@ def lienzo(cuerpo, bg=BG, grid=GRID, sample=False, fuente="Fuente: MEF – Consu
 {cuerpo}
 <rect x="0" y="560" width="1200" height="70" fill="#12151B" opacity=".92"/>
 {logo_mark(40, 573, 44)}
-{t(98, 604, "Radiografía Presupuestal", 24, PAPER, SERIF, "700")}
+{t(98, 604, "Radiografía Presupuestal", 24, PAPER, SERIF, "800")}
 {t(98, 622, fuente, 13, MUTED)}
 {t(1160, 606, URL, 26, OCHRE, weight="600", anchor="end")}
 {aviso}
@@ -114,8 +118,8 @@ def og_escalones(d, y, T, sample):
     vals = [("Me asignaron", "PIA", T["pia"], PIA_C), ("Me ampliaron", "PIM", T["pim"], INK_L), ("Gasté", "devengado", T["dev"], OCHRE)]
     top = max(v[2] for v in vals)
     base, hmax, w, gap, x0 = 535, 285, 300, 50, 75
-    c = [t(75, 92, f"Presupuesto universitario {y},", 50, PAPER, SERIF, "700"),
-         t(75, 150, "en 3 escalones", 50, OCHRE, SERIF, "700")]
+    c = [t(75, 92, f"Presupuesto universitario {y},", 50, PAPER, SERIF, "800"),
+         t(75, 150, "en 3 escalones", 50, OCHRE, SERIF, "800")]
     for i, (cap, sig, v, col) in enumerate(vals):
         h = hmax * v / top
         x = x0 + i * (w + gap)
@@ -158,7 +162,7 @@ def og_historias(d, y, sample):
     cents = round(sh * 100) if sh is not None else None
     cx, cy, r = 935, 290, 200
     import math
-    c = [t(70, 130, "POV: eres un sol", 72, PAPER, SERIF, "700"),
+    c = [t(70, 130, "POV: eres un sol", 72, PAPER, SERIF, "800"),
          t(70, 190, "del presupuesto universitario", 40, INK_XL, SANS, "400")]
     if cents is not None:
         a = 2 * math.pi * sh
@@ -173,7 +177,7 @@ def og_historias(d, y, sample):
               t(70, 385, "→ van a planilla", 44, PAPER, SANS, "700"),
               t(70, 470, f"{100 - cents} céntimos → todo lo demás", 38, INK_XL, SANS, "400")]
     else:
-        c.append(t(70, 330, "¿Cuántos céntimos van a planilla?", 54, OCHRE, SERIF, "700"))
+        c.append(t(70, 330, "¿Cuántos céntimos van a planilla?", 54, OCHRE, SERIF, "800"))
     return lienzo("\n".join(c), sample=sample, fuente=f"Personal y obligaciones sociales (genérica 2.1), devengado {y} · MEF – SIAF")
 
 
@@ -181,7 +185,7 @@ def og_historias(d, y, sample):
 def og_2027(d, sample):
     T27 = total(d, "2027")
     T26 = total(d, "2026")
-    c = [t(70, 120, "Lo que viene en", 56, PAPER, SERIF, "700"),
+    c = [t(70, 120, "Lo que viene en", 56, PAPER, SERIF, "800"),
          t(70, 250, "2027", 150, OCHRE, NUM, "700")]
     if T27 and T27.get("pia"):
         c += [t(1130, 300, f"S/ {mil_millones(T27['pia'])}", 150, INK_L, NUM, "700", "end"),
@@ -206,9 +210,21 @@ def render(svg, nombre, carpeta):
     return p
 
 
+def fuentes_ok():
+    """Avisa si faltan las fuentes de marca (rsvg caería en una de respaldo sin error)."""
+    if not shutil.which("fc-list"):
+        return True
+    out = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True).stdout
+    faltan = [f for f in FONTS_REQ if f not in out]
+    if faltan:
+        print("AVISO: faltan fuentes para rsvg-convert:", ", ".join(faltan), "(ver comentario FONTS_REQ)", file=sys.stderr)
+    return not faltan
+
+
 def main():
     if not shutil.which("rsvg-convert"):
         sys.exit("Falta rsvg-convert (brew install librsvg).")
+    fuentes_ok()
     d, sample = cargar()
     cerr = [y for y in anios_cerrados(d) if total(d, y)]
     if not cerr:
