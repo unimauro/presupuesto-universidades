@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <defs>
     <pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M40 0 H0 V40" fill="none" stroke="#1E3A50" stroke-width="1"/>
+      <path d="M40 0 H0 V40" fill="none" stroke="#2B323E" stroke-width="1"/>
     </pattern>
     <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#7FD6D0" stop-opacity="0"/>
-      <stop offset="1" stop-color="#7FD6D0" stop-opacity=".18"/>
+      <stop offset="0" stop-color="#8F9CF0" stop-opacity="0"/>
+      <stop offset="1" stop-color="#8F9CF0" stop-opacity=".18"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="630" fill="#0F2233"/>
+  <rect width="1200" height="630" fill="#1B2230"/>
   <rect width="1200" height="630" fill="url(#g)"/>
   <!-- edificio radiografiado -->
   <g transform="translate(760 120)">
-    <path d="M0 140 L180 40 L360 140 Z" fill="none" stroke="#7FD6D0" stroke-width="6" stroke-linejoin="round"/>
-    <rect x="30" y="250" width="50" height="150" rx="4" fill="#7FD6D0"/>
-    <rect x="115" y="180" width="50" height="220" rx="4" fill="#7FD6D0"/>
-    <rect x="200" y="290" width="50" height="110" rx="4" fill="#7FD6D0" opacity=".7"/>
-    <rect x="285" y="215" width="40" height="185" rx="4" fill="#E3A33B"/>
-    <path d="M-10 420 H370" stroke="#7FD6D0" stroke-width="6" stroke-linecap="round"/>
+    <path d="M0 140 L180 40 L360 140 Z" fill="none" stroke="#C6CCF5" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="30" y="250" width="50" height="150" rx="4" fill="#8F9CF0"/>
+    <rect x="115" y="180" width="50" height="220" rx="4" fill="#8F9CF0"/>
+    <rect x="200" y="290" width="50" height="110" rx="4" fill="#8F9CF0" opacity=".7"/>
+    <rect x="285" y="215" width="40" height="185" rx="4" fill="#E0A447"/>
+    <path d="M-10 420 H370" stroke="#C6CCF5" stroke-width="6" stroke-linecap="round"/>
     <rect x="-30" y="150" width="420" height="160" fill="url(#scan)"/>
     <path d="M-30 310 H390" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="8 8" opacity=".6"/>
   </g>
-  <text x="80" y="150" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="26" fill="#7FD6D0" letter-spacing="3">OBSERVATORIO · DATOS MEF / SIAF</text>
-  <text x="80" y="245" font-family="'Source Serif 4', Georgia, serif" font-size="78" font-weight="700" fill="#F2F5F7">Radiografía</text>
-  <text x="80" y="330" font-family="'Source Serif 4', Georgia, serif" font-size="78" font-weight="700" fill="#F2F5F7">Presupuestal</text>
-  <text x="80" y="400" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="32" fill="#C9D6DF">de las universidades públicas del Perú</text>
-  <text x="80" y="585" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="22" fill="#A9BAC6">PIA · PIM · devengado · planilla · inversión · I+D · ingresos propios</text>
+  <text x="80" y="150" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="26" fill="#E0A447" letter-spacing="3">OBSERVATORIO · DATOS MEF / SIAF</text>
+  <text x="80" y="245" font-family="'Source Serif 4', Georgia, serif" font-size="78" font-weight="700" fill="#E9E6DF">Radiografía</text>
+  <text x="80" y="330" font-family="'Source Serif 4', Georgia, serif" font-size="78" font-weight="700" fill="#E9E6DF">Presupuestal</text>
+  <text x="80" y="400" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="32" fill="#C6CCF5">de las universidades públicas del Perú</text>
+  <text x="80" y="585" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="22" fill="#9BA3B1">PIA · PIM · devengado · planilla · inversión · I+D · ingresos propios</text>
 </svg>

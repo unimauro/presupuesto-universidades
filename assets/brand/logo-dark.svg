@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" role="img" aria-labelledby="t">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 64" role="img" aria-labelledby="t">
   <title id="t">Radiografía Presupuestal de las Universidades Públicas del Perú</title>
   <g>
-    <rect width="64" height="64" rx="12" fill="#0F2233"/>
-    <path d="M12 22 L32 11 L52 22 Z" fill="none" stroke="#7FD6D0" stroke-width="2.6" stroke-linejoin="round"/>
-    <rect x="15" y="34" width="6" height="16" rx="1" fill="#7FD6D0"/>
-    <rect x="25" y="27" width="6" height="23" rx="1" fill="#7FD6D0"/>
-    <rect x="35" y="38" width="6" height="12" rx="1" fill="#7FD6D0" opacity=".7"/>
-    <rect x="45" y="30" width="4" height="20" rx="1" fill="#E3A33B"/>
-    <path d="M11 53 H53" stroke="#7FD6D0" stroke-width="2.6" stroke-linecap="round"/>
+    <rect width="64" height="64" rx="12" fill="#26346F"/>
+    <path d="M12 22 L32 11 L52 22 Z" fill="none" stroke="#E6E8F3" stroke-width="2.6" stroke-linejoin="round"/>
+    <rect x="15" y="34" width="6" height="16" rx="1" fill="#E6E8F3"/>
+    <rect x="25" y="27" width="6" height="23" rx="1" fill="#E6E8F3"/>
+    <rect x="35" y="38" width="6" height="12" rx="1" fill="#E6E8F3" opacity=".7"/>
+    <rect x="45" y="30" width="4" height="20" rx="1" fill="#E0A447"/>
+    <path d="M11 53 H53" stroke="#E6E8F3" stroke-width="2.6" stroke-linecap="round"/>
     <path d="M8 42 H56" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2 2" opacity=".55"/>
   </g>
-  <text x="78" y="30" font-family="'Source Serif 4', Georgia, serif" font-size="24" font-weight="700" fill="#F2F5F7">Radiografía Presupuestal</text>
-  <text x="78" y="51" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="13" fill="#A9BAC6" letter-spacing=".4">UNIVERSIDADES PÚBLICAS DEL PERÚ</text>
+  <text x="78" y="30" font-family="'Source Serif 4', Georgia, serif" font-size="23" font-weight="700" fill="#E9E6DF">Radiografía Presupuestal</text>
+  <text x="78" y="51" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="13" fill="#9BA3B1" letter-spacing=".4">UNIVERSIDADES PÚBLICAS DEL PERÚ</text>
 </svg>

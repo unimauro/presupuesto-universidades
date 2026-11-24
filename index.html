@@ -5,23 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Radiografía Presupuestal de las Universidades Públicas del Perú</title>
 <meta name="description" content="Observatorio cívico del presupuesto de todas las universidades públicas del Perú: PIA, PIM, devengado, en qué gastan, de dónde viene el dinero, inversión e investigación, año por año, con datos del MEF.">
-<meta name="theme-color" content="#26346f" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F2233" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_PE">
 <meta property="og:title" content="Radiografía Presupuestal de las Universidades Públicas del Perú">
 <meta property="og:description" content="¿Cuánto recibieron, cuánto gastaron y en qué? PIA, PIM y devengado de las universidades públicas peruanas con datos del MEF.">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://unimauro.github.io/presupuesto-universidades/">
+<meta property="og:url" content="https://unimauro.github.io/presupuesto-universidades/">
+<meta property="og:image" content="https://unimauro.github.io/presupuesto-universidades/assets/og/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/brand/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script>
   // Tema antes del primer pintado (evita parpadeo)
   (function () {
     var t = null;
     try { t = localStorage.getItem('rp-theme'); } catch (e) {}
+    var m = /[?&]tema=(oscuro|claro)/.exec(location.search); if (m) t = m[1] === 'oscuro' ? 'dark' : 'light';
     if (t !== 'dark' && t !== 'light') t = 'light';
     document.documentElement.setAttribute('data-theme', t);
   })();
@@ -35,7 +43,7 @@
 <header class="topbar" role="banner">
   <div class="topbar-row">
     <a class="brand" href="#resumen" aria-label="Inicio: Radiografía Presupuestal">
-      <img src="assets/favicon.svg" alt="" width="28" height="28">
+      <img src="assets/brand/logo-mark.svg" alt="" width="28" height="28">
       <span class="brand-txt"><strong>Radiografía Presupuestal</strong><span class="brand-sub">Universidades públicas del Perú</span></span>
     </a>
     <div class="topbar-ctl">
@@ -60,6 +68,7 @@
       <li><a href="#ficha"><span class="n">8</span>Ficha y comparador</a></li>
       <li><a href="#mapa"><span class="n">9</span>Mapa</a></li>
       <li><a href="#metodologia"><span class="n">10</span>Metodología</a></li>
+      <li class="nav-ext"><a href="historias.html"><span class="n">→</span>Historias</a></li>
     </ol>
   </nav>
 </header>
@@ -144,7 +153,7 @@
         <dt>S/ por estudiante</dt><dd>Devengado total dividido entre estudiantes matriculados. Incluye gasto que no es docencia (pensiones, inversión), así que es una cota superior.</dd>
       </dl>
       <h3>Índice de gestión presupuestal (referencial)</h3>
-      <p>El índice combina cinco componentes en escala 0–100: ejecución total, ejecución de inversión, peso de la investigación, autonomía financiera (RDR) y eficiencia en investigación. <strong>Es un indicador referencial y NO oficial</strong>: no mide calidad académica ni sustituye la evaluación de SUNEDU, y depende de los pesos y los datos disponibles.</p>
+      <p>El índice combina varios componentes en escala 0–100 (ejecución total, ejecución de inversión, investigación, autonomía financiera RDR, entre otros; ver tabla de pesos). <strong>Es un indicador referencial y NO oficial</strong>: no mide calidad académica ni sustituye la evaluación de SUNEDU, y depende de los pesos y los datos disponibles.</p>
       <div id="met-indice"></div>
       <h3>Advertencias</h3>
       <ul id="met-notas">

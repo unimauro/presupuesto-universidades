@@ -65,7 +65,8 @@
     data: null, sample: false, unis: [], years: [], partial: {}, lastClosed: null, year: null,
     rendered: new Set(), charts: new Map(),
     rank: { q: '', dep: '', sort: 'pim', dir: -1, all: false },
-    tray: { top: 15, uni: null },
+    top: 15,
+    tray: { uni: null },
     gasto: { metric: 'dev', uni: '' },
     fuentes: { metric: 'pim', uni: '' },
     ficha: { uni: null, cmp: [] },
@@ -155,6 +156,13 @@
       cv.parentElement.innerHTML = '<p class="empty">No se pudo cargar la librería de gráficos. Revisa tu conexión.</p>';
       return null;
     }
+    const ds = (cfg.data && cfg.data.datasets) || [];
+    const hasData = ds.some(d => (d.data || []).some(v => num(v) !== null));
+    if (!hasData) {
+      cv.parentElement.style.height = 'auto';
+      cv.parentElement.innerHTML = `<p class="empty" id="${esc(id)}">Aún no hay datos para este gráfico.</p>`;
+      return null;
+    }
     const ch = new window.Chart(cv, cfg);
     S.charts.set(id, ch);
     return ch;
@@ -181,10 +189,19 @@
   const partialNote = y => isPartial(y) ? `<p class="note warn"><strong>${esc(y)} es un año en curso</strong> (${esc(S.partial[String(y)])}): el devengado y la ejecución son parciales y no comparables con años cerrados.</p>` : '';
   const seg = (name, opts, cur) => `<div class="seg" role="group" aria-label="${esc(name)}">${opts.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${String(v) === String(cur)}">${esc(l)}</button>`).join('')}</div>`;
   const legendHtml = items => `<ul class="legend">${items.map(i => `<li><i style="background:${cssVar(i.c)}"></i>${esc(i.lbl)}</li>`).join('')}</ul>`;
-  const uniLink = u => `<a class="uni-link" href="#u=${encodeURIComponent(u.pliego)}">${esc(uName(u))}</a><span class="uni-sub">${esc(u.nombre || '')}${u.departamento ? ' · ' + esc(u.departamento) : ''}</span>`;
+  const uniLink = u => `<a class="uni-link" title="${esc(u.nombre || '')}" href="#u=${encodeURIComponent(u.pliego)}">${esc(uName(u))}</a><span class="uni-sub">${esc(u.nombre || '')}${u.departamento ? ' · ' + esc(u.departamento) : ''}</span>`;
 
+  // Control "Top 15 / Todas" compartido por los gráficos por universidad
+  const lim = arr => (S.top > 0 ? arr.slice(0, S.top) : arr.slice());
+  const topSeg = n => n > 15 ? `<div class="seg" data-top role="group" aria-label="Cantidad de universidades">${[['15', 'Top 15'], ['0', `Todas (${n})`]].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${String(S.top) === v}">${esc(l)}</button>`).join('')}</div>` : '';
+  const limNote = (shown, n) => shown < n ? `Mostrando ${shown} de ${n} (las de mayor PIM).` : '';
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.seg[data-top] button[data-v]'); if (!b) return;
+    S.top = +b.dataset.v;
+    ['trayectoria', 'gasto', 'fuentes', 'infra', 'idi'].forEach(id => { if (S.rendered.has(id)) safeRender(id); });
+  });
   function bindSeg(root, cb) {
-    $$('.seg', root).forEach(g => g.addEventListener('click', e => {
+    $$('.seg:not([data-top])', root).forEach(g => g.addEventListener('click', e => {
       const b = e.target.closest('button[data-v]'); if (!b) return;
       $$('button', g).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
       cb(b.dataset.v, g);
@@ -374,23 +391,23 @@
     const el = $('#body-trayectoria'); const y = S.year;
     const all = unisByPim(y);
     if (!S.tray.uni || !uniBy(S.tray.uni)) S.tray.uni = all[0] ? all[0].pliego : null;
-    const list = S.tray.top > 0 ? all.slice(0, S.tray.top) : all;
+    const list = lim(all);
     const tUni = uniBy(S.tray.uni);
     el.innerHTML = `
       ${partialNote(y)}
       <div class="controls">
         <label>Año<select id="tr-year">${yearOptions(y)}</select></label>
-        ${all.length > 15 ? seg('Cantidad', [['15', 'Top 15'], ['0', 'Todas']], S.tray.top) : ''}
+        ${topSeg(all.length)}
       </div>
       <div class="card">
         <h3>PIA → PIM → devengado, ${esc(yearLbl(y))}</h3>
-        <p class="sub">Millones de soles. Ordenado por PIM. ${list.length < all.length ? `Mostrando ${list.length} de ${all.length}.` : ''}</p>
+        <p class="sub">Millones de soles. Ordenado por PIM. ${limNote(list.length, all.length)}</p>
         <div class="chart"><canvas id="ch-tray"></canvas></div>
       </div>
       <div class="table-wrap" style="margin-top:12px"><table>
         <caption>Variación del presupuesto durante ${esc(yearLbl(y))}</caption>
         <thead><tr><th class="txt sticky-col" scope="col">Universidad</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Δ PIM − PIA</th><th scope="col">Δ %</th><th scope="col">Devengado</th><th scope="col">% Ejec.</th><th scope="col">Transf. con norma</th></tr></thead>
-        <tbody>${all.map(u => {
+        <tbody>${list.map(u => {
           const a = A(u, y) || {}; const pia = tot(u, y, 'pia'), pim = tot(u, y, 'pim');
           const tr = Array.isArray(a.transferencias) ? a.transferencias : [];
           return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(pia))}</td><td>${esc(fmtM(pim))}</td><td>${esc(fmtSigned(num(pim) !== null && num(pia) !== null ? pim - pia : null))}</td><td>${esc(fmtP(div(num(pim) !== null && num(pia) !== null ? pim - pia : null, pia)))}</td><td>${esc(fmtM(tot(u, y, 'dev')))}</td><td>${pill(kpi(u, y).ejec)}</td><td>${tr.length ? esc(tr.length + ' · ' + fmtM(sum(tr.map(t => num(t.monto))))) : '<span class="muted">—</span>'}</td></tr>`;
@@ -411,7 +428,6 @@
       </div>`;
     $('#tr-year', el).addEventListener('change', e => setYear(e.target.value));
     $('#tr-uni', el).addEventListener('change', e => { S.tray.uni = e.target.value; renderTrayectoria(); });
-    bindSeg(el, v => { S.tray.top = +v; renderTrayectoria(); });
 
     sizeFor('ch-tray', list.length, isMobile() ? 30 : 26);
     mkChart('ch-tray', {
@@ -455,7 +471,7 @@
   function compBlock(cfg) {
     // cfg: {key, el, cats, field ('generica'|'fuente'), state, title, evoTitle}
     const { el, cats, field, st } = cfg; const y = S.year;
-    const all = unisByPim(y);
+    const all = lim(unisByPim(y));
     const presentCats = cats.filter(c => S.unis.some(u => S.years.some(yy => pick((A(u, yy) || {})[field], c.frag))));
     const share = (u, c) => { const a = A(u, y) || {}; const t = sum(presentCats.map(cc => (pick(a[field], cc.frag) || {})[st.metric])); const v = (pick(a[field], c.frag) || {})[st.metric]; const d = div(v, t); return d === null ? null : +(d * 100).toFixed(2); };
     sizeFor(cfg.key + '-pct', all.length, isMobile() ? 28 : 24);
@@ -488,11 +504,12 @@
       <div class="controls">
         <label>Año<select class="c-year">${yearOptions(y)}</select></label>
         ${seg('Métrica', metricOpts, st.metric)}
+        ${topSeg(unisByPim(y).length)}
       </div>
       <div class="grid two">
         <div class="card">
           <h3>Composición por universidad, ${esc(yearLbl(y))}</h3>
-          <p class="sub">Porcentaje del ${st.metric === 'pim' ? 'PIM' : st.metric === 'pia' ? 'PIA' : 'devengado'} de cada universidad.</p>
+          <p class="sub">Porcentaje del ${st.metric === 'pim' ? 'PIM' : st.metric === 'pia' ? 'PIA' : 'devengado'} de cada universidad. ${limNote(lim(unisByPim(y)).length, unisByPim(y).length)}</p>
           <div class="chart"><canvas id="${key}-pct"></canvas></div>
           ${legendHtml(cats)}
         </div>
@@ -524,18 +541,44 @@
   function renderFuentes() {
     const el = $('#body-fuentes'); const st = S.fuentes; const y = S.year;
     const cats = FUENTES.filter(c => S.unis.some(u => S.years.some(yy => pick((A(u, yy) || {}).fuente, c.frag))));
-    const all = unisByPim(y);
-    const rdr = u => pick(((A(u, y) || {}).ingresos || {}).fuente, 'DIRECTAMENTE') || {};
+    const all = lim(unisByPim(y));
+    // RDR comparable: sin saldos de balance (caja acumulada de años previos) cuando el dato existe
+    const ing = u => (A(u, y) || {}).ingresos || {};
+    const rdrFull = u => pick(ing(u).fuente, 'DIRECTAMENTE') || {};
+    const rdr = u => ing(u).rdr_sin_saldos || rdrFull(u);
+    const sinSaldos = all.some(u => ing(u).rdr_sin_saldos);
     const hasRdr = all.some(u => num(rdr(u).recaudado) !== null || num(rdr(u).pim) !== null);
+    // Composición del RDR recaudado por categoría (sin saldos de balance)
+    const catTot = {};
+    all.forEach(u => Object.entries(ing(u).rdr_categoria || {}).forEach(([k, v]) => {
+      if (/saldos de balance/i.test(k)) return;
+      catTot[k] = (catTot[k] || 0) + (num(v && v.recaudado) || 0);
+    }));
+    const topCats = Object.keys(catTot).sort((a, b) => catTot[b] - catTot[a]).slice(0, 6);
+    const RCOL = ['--k1', '--k3', '--k5', '--k6', '--k2', '--k7', '--k4'];
+    const rcats = topCats.map((k, i) => ({ k, lbl: k, c: RCOL[i] }));
+    if (Object.keys(catTot).length > topCats.length) rcats.push({ k: '__otros', lbl: 'Otros conceptos', c: RCOL[6] });
+    const catShare = (u, c) => {
+      const e = Object.entries(ing(u).rdr_categoria || {}).filter(([k]) => !/saldos de balance/i.test(k));
+      const t = sum(e.map(([, v]) => num(v && v.recaudado)));
+      const v = c.k === '__otros' ? sum(e.filter(([k]) => !topCats.includes(k)).map(([, v]) => num(v && v.recaudado))) : num(((ing(u).rdr_categoria || {})[c.k] || {}).recaudado);
+      const d = div(v, t); return d === null ? null : +(d * 100).toFixed(2);
+    };
     const extra = `
       <div class="card" style="margin-top:12px">
-        <h3>Ingresos propios (RDR): presupuestado vs recaudado, ${esc(yearLbl(y))}</h3>
-        <p class="sub">PIM de ingresos RDR frente a lo efectivamente recaudado. Si se recauda menos de lo presupuestado, parte del gasto previsto no tiene financiamiento.</p>
+        <h3>Ingresos propios (RDR): presupuestado vs recaudado, ${esc(yearLbl(y))}</h3>${cats.length ? '' : topSeg(unisByPim(y).length)}
+        <p class="sub">PIM de ingresos RDR frente a lo efectivamente recaudado${sinSaldos ? ', <strong>sin saldos de balance</strong> (la caja acumulada de años anteriores infla el “recaudado” y no es comparable)' : ''}. Si se recauda menos de lo presupuestado, parte del gasto previsto no tiene financiamiento.</p>
         ${hasRdr ? '<div class="chart"><canvas id="ch-rdr"></canvas></div>' : '<p class="empty">Aún no hay datos de ingresos recaudados.</p>'}
       </div>
+      ${rcats.length ? `<div class="card" style="margin-top:12px">
+        <h3>¿De qué se compone el RDR? ${esc(yearLbl(y))}</h3>
+        <p class="sub">Porcentaje de lo recaudado por concepto (admisión, CEPRE, servicios académicos, etc.), sin saldos de balance.</p>
+        <div class="chart"><canvas id="ch-rdr-cat"></canvas></div>
+        ${legendHtml(rcats)}
+      </div>` : ''}
       ${hasRdr ? `<div class="table-wrap" style="margin-top:12px"><table><caption>Recaudación RDR ${esc(yearLbl(y))}</caption>
-        <thead><tr><th class="txt sticky-col" scope="col">Universidad</th><th scope="col">PIA ingresos RDR</th><th scope="col">PIM ingresos RDR</th><th scope="col">Recaudado</th><th scope="col">Recaudado / PIM</th><th scope="col">% RDR en PIM de gasto</th></tr></thead>
-        <tbody>${all.map(u => { const r = rdr(u); return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(num(r.pia)))}</td><td>${esc(fmtM(num(r.pim)))}</td><td>${esc(fmtM(num(r.recaudado)))}</td><td>${pill(kpi(u, y).rdr_recaudado_vs_pim)}</td><td>${esc(fmtP(kpi(u, y).pct_rdr))}</td></tr>`; }).join('')}</tbody></table></div>` : ''}`;
+        <thead><tr><th class="txt sticky-col" scope="col">Universidad</th><th scope="col">PIA ingresos RDR</th><th scope="col">PIM ingresos RDR</th><th scope="col">Recaudado${sinSaldos ? ' (sin saldos)' : ''}</th><th scope="col">Recaudado / PIM</th>${sinSaldos ? '<th scope="col">Recaudado incl. saldos</th>' : ''}<th scope="col">% RDR en PIM de gasto</th></tr></thead>
+        <tbody>${all.map(u => { const r = rdr(u); return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(num(r.pia)))}</td><td>${esc(fmtM(num(r.pim)))}</td><td>${esc(fmtM(num(r.recaudado)))}</td><td>${pill(div(r.recaudado, r.pim) ?? kpi(u, y).rdr_recaudado_vs_pim)}</td>${sinSaldos ? `<td>${esc(fmtM(num(rdrFull(u).recaudado)))}</td>` : ''}<td>${esc(fmtP(kpi(u, y).pct_rdr))}</td></tr>`; }).join('')}</tbody></table></div>` : ''}`;
     if (!cats.length) { el.innerHTML = '<p class="empty">Aún no hay datos por fuente de financiamiento.</p>' + extra; }
     else {
       el.innerHTML = compShell('ch-fue', cats, st, [['pim', 'PIM'], ['dev', 'Devengado'], ['pia', 'PIA']], extra);
@@ -557,6 +600,18 @@
         },
       }, 'Ingresos RDR presupuestados frente a recaudados por universidad');
     }
+    if (rcats.length) {
+      sizeFor('ch-rdr-cat', all.length, isMobile() ? 28 : 24);
+      mkChart('ch-rdr-cat', {
+        type: 'bar',
+        data: { labels: all.map(uName), datasets: rcats.map(c => ({ label: c.lbl, data: all.map(u => catShare(u, c)), backgroundColor: cssVar(c.c), borderWidth: 0 })) },
+        options: {
+          indexAxis: 'y',
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttP, title: it => (all[it[0].dataIndex] || {}).nombre || it[0].label } } },
+          scales: { x: { stacked: true, min: 0, max: 100, ticks: { callback: tickP } }, y: { stacked: true, ticks: { autoSkip: false } } },
+        },
+      }, 'Composición de los ingresos RDR recaudados por concepto');
+    }
   }
 
   // ================================================================== 6. INFRAESTRUCTURA
@@ -569,22 +624,23 @@
     all.forEach(u => ((A(u, y) || {}).proyectos || []).forEach(p => proys.push(Object.assign({ u }, p))));
     proys.forEach(p => { p.saldo = num(p.pim) !== null ? p.pim - (num(p.dev) || 0) : null; p.av = div(p.dev, p.pim); });
     const top = proys.filter(p => num(p.saldo) !== null && p.saldo > 0).sort((a, b) => b.saldo - a.saldo).slice(0, 20);
+    const hayProy = all.some(u => Array.isArray((A(u, y) || {}).proyectos));
     const bajo = proys.filter(p => num(p.av) !== null && p.av < 0.3 && (num(p.pim) || 0) > 0).length;
-    const ordered = all.slice().sort((a, b) => (kpi(b, y).ejec_inversion ?? -1) - (kpi(a, y).ejec_inversion ?? -1));
+    const ordered = lim(all).sort((a, b) => (kpi(b, y).ejec_inversion ?? -1) - (kpi(a, y).ejec_inversion ?? -1));
     el.innerHTML = `
       ${partialNote(y)}
-      <div class="controls"><label>Año<select id="in-year">${yearOptions(y)}</select></label></div>
+      <div class="controls"><label>Año<select id="in-year">${yearOptions(y)}</select></label>${topSeg(all.length)}</div>
       <div class="kpis">
         ${kpiBox('PIM en activos (2.6)', fmtM(pimInv), 'todas las universidades', 'accent')}
         ${kpiBox('Devengado en activos', fmtM(devInv), 'ejecución ' + fmtP(div(devInv, pimInv)), 'ochre')}
         ${kpiBox('Saldo sin ejecutar', fmtM(num(pimInv) !== null && num(devInv) !== null ? pimInv - devInv : null), 'PIM − devengado')}
-        ${kpiBox('Proyectos con presupuesto', fmtN(proys.length), y + '')}
-        ${kpiBox('Proyectos con avance < 30 %', fmtN(proys.length ? bajo : null), 'avance financiero')}
+        ${kpiBox('Proyectos con presupuesto', fmtN(hayProy ? proys.length : null), y + '')}
+        ${kpiBox('Proyectos con avance < 30 %', fmtN(hayProy ? bajo : null), 'avance financiero')}
         ${kpiBox('Peso de la inversión', fmtP(div(devInv, nacional(y).dev)), 'del devengado total')}
       </div>
       <div class="card">
         <h3>Ejecución de la inversión por universidad, ${esc(yearLbl(y))}</h3>
-        <p class="sub">Devengado / PIM de la genérica 2.6 (adquisición de activos no financieros).</p>
+        <p class="sub">Devengado / PIM de la genérica 2.6 (adquisición de activos no financieros). ${limNote(ordered.length, all.length)}</p>
         <div class="chart"><canvas id="ch-inv"></canvas></div>
       </div>
       <h3 style="margin:20px 0 8px">Top ${top.length || ''} proyectos con mayor saldo sin ejecutar</h3>
@@ -615,10 +671,10 @@
     const pimT = sum(all.map(u => pp(u).pim)), devT = sum(all.map(u => pp(u).dev));
     const pubsT = sum(all.map(u => (A(u, y) || {}).pubs));
     const devConPubs = sum(all.filter(u => num((A(u, y) || {}).pubs)).map(u => pp(u).dev));
-    const ordered = all.slice().sort((a, b) => (num(pp(b).pim) || 0) - (num(pp(a).pim) || 0));
+    const ordered = all.slice().sort((a, b) => (num(pp(b).pim) || 0) - (num(pp(a).pim) || 0) || (tot(b, y, 'pim') || 0) - (tot(a, y, 'pim') || 0)).slice(0, S.top > 0 ? S.top : undefined);
     el.innerHTML = `
       ${partialNote(y)}
-      <div class="controls"><label>Año<select id="id-year">${yearOptions(y)}</select></label></div>
+      <div class="controls"><label>Año<select id="id-year">${yearOptions(y)}</select></label>${topSeg(all.length)}</div>
       <div class="kpis">
         ${kpiBox('PIM PP 0137', fmtM(pimT), 'asignado a CTI', 'accent')}
         ${kpiBox('Devengado PP 0137', fmtM(devT), 'ejecutado', 'ochre')}
@@ -630,7 +686,7 @@
       <div class="grid two">
         <div class="card">
           <h3>PP 0137: asignado vs ejecutado, ${esc(yearLbl(y))}</h3>
-          <p class="sub">Millones de soles por universidad.</p>
+          <p class="sub">Millones de soles por universidad. ${limNote(ordered.length, all.length)}</p>
           <div class="chart"><canvas id="ch-idi"></canvas></div>
         </div>
         <div class="card">
@@ -859,11 +915,10 @@
     if (!S.map) {
       S.map = L.map('map', { scrollWheelZoom: false, zoomControl: true }).setView([-9.3, -75.0], isMobile() ? 4 : 5);
     }
-    const tileUrl = `https://{s}.basemaps.cartocdn.com/${dark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`;
-    if (!S.tiles || S.tiles._url !== tileUrl) {
-      if (S.tiles) S.map.removeLayer(S.tiles);
-      S.tiles = L.tileLayer(tileUrl, { maxZoom: 18, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>' }).addTo(S.map);
+    if (!S.tiles) {
+      S.tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(S.map);
     }
+    document.getElementById('map').classList.toggle('map-dark', dark);
     if (S.mapLayer) S.map.removeLayer(S.mapLayer);
     S.mapLayer = L.layerGroup().addTo(S.map);
     const pts = S.unis.filter(u => num(u.lat) !== null && num(u.lng) !== null && A(u, y));
@@ -877,7 +932,10 @@
         .bindTooltip(esc(uName(u)))
         .addTo(S.mapLayer);
     });
-    setTimeout(() => S.map.invalidateSize(), 50);
+    setTimeout(() => {
+      S.map.invalidateSize();
+      if (!S.mapFitted && pts.length > 1) { S.map.fitBounds(L.latLngBounds(pts.map(u => [u.lat, u.lng])), { padding: [24, 24] }); S.mapFitted = true; }
+    }, 50);
   }
 
   // ================================================================== 10. METODOLOGÍA
@@ -893,7 +951,7 @@
       $('#met-indice').innerHTML = `<div class="table-wrap"><table><caption>Componentes y pesos del índice referencial</caption><thead><tr><th class="txt" scope="col">Componente</th><th class="txt" scope="col">Indicador base</th><th scope="col">Peso</th></tr></thead><tbody>${Object.entries(im).map(([k, v]) => `<tr><td class="txt">${esc(IDX_LBL[k] || k)}</td><td class="txt"><code>${esc((v && v.kpi) || '')}</code></td><td>${esc(fmtP(num(v && v.peso), 0))}</td></tr>`).join('')}</tbody></table></div><p class="note">Cada componente se expresa en escala 0–100 según la posición relativa entre universidades. Si un componente no tiene dato, el puntaje se calcula con los pesos disponibles (ver “cobertura” en la ficha).</p>`;
     }
     if (Array.isArray(d.notas) && d.notas.length) {
-      $('#met-notas').insertAdjacentHTML('afterbegin', d.notas.map(n => `<li><strong>${esc(n)}</strong></li>`).join(''));
+      $('#met-notas').insertAdjacentHTML('afterend', `<details class="notas"><summary>Notas técnicas de los datos (${d.notas.length})</summary><ul>${d.notas.map(n => `<li>${esc(n)}</li>`).join('')}</ul></details>`);
     }
     // Normativa: data.normativa + transferencias con norma
     const norm = [].concat(Array.isArray(d.leyes) ? d.leyes : [], Array.isArray(d.normativa) ? d.normativa : [], Array.isArray(d.documentos) ? d.documentos : [])

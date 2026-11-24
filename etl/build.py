@@ -104,6 +104,7 @@ EXCLUIR = {"540"}  # Asamblea Nacional de Rectores (2012-2016): pliego del secto
 def main():
     gasto, inv, ing = load("gasto", "gasto.json"), load("inversion", "inversion.json"), load("ingresos", "ingresos.json")
     ctx, nor = load("contexto", "contexto.json"), load("normativa", "normativa.json")
+    l27 = load("ley2027", "ley2027.json")
     if not gasto.get("universidades"):
         raise SystemExit("Sin data/gasto/gasto.json todavía: nada que integrar.")
 
@@ -159,6 +160,9 @@ def main():
                 a["pia_ley"] = ley_pia[pl][y]
             a["kpi"] = kpis(a)
             out["anios"][y] = a
+        e = (l27.get("universidades") or {}).get(pl)
+        if e:
+            out["expectativa_2027"] = e
         unis.append(out)
 
     # Índice
@@ -212,6 +216,10 @@ def main():
         "leyes": [{k: l.get(k) for k in ("anio", "norma", "url")} for l in nor.get("leyes", [])],
         "universidades": unis,
     }
+    if l27:
+        obs["expectativa_2027"] = {k: l27.get(k) for k in
+                                   ("version", "norma", "fecha", "url", "documentos", "notas",
+                                    "total_universidades", "disposiciones")}
     with open(D("observatorio.json"), "w", encoding="utf-8") as f:
         json.dump(obs, f, ensure_ascii=False, separators=(",", ":"))
     print(f"OK data/observatorio.json: {len(unis)} universidades, años {anios[0]}–{anios[-1]}, "
