@@ -245,13 +245,25 @@ def og_historias(d, y, T, sample, claro=False):
          disp(60, 222, "de tu universidad?", 104, ink),
          (f'<text x="54" y="420" font-family="{DISPLAY}" font-weight="900" font-size="230" fill="{col}" letter-spacing="-0.5">'
           f'{escape(cifra(T["dev"])[0])}<tspan font-size="120" dx="28">{escape(cifra(T["dev"])[1])}</tspan></text>'),
-         t(62, 480, f"gastaron las {T['n']} universidades públicas en {y}. Te lo contamos capítulo por capítulo.", 29, sub, TEXTO, "700"),
+         t(62, 480, f"gastaron {T['n']} universidades públicas en {y}. Te lo contamos capítulo por capítulo.", 25, sub, TEXTO, "700"),
          ]
     return lienzo("\n".join(c), bg=PAPEL if claro else MAIZ, claro=claro, sample=sample,
                   fuente=f"Devengado {y} · MEF – Consulta Amigable (SIAF)")
 
 
 # ---------- 2027 ----------
+MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "set", "oct", "nov", "dic"]
+
+
+def fecha_corta(iso):
+    """'2026-11-05' -> '5-nov-2026'."""
+    try:
+        a, m, dd = str(iso).split("-")
+        return f"{int(dd)}-{MESES[int(m) - 1]}-{a}"
+    except (ValueError, IndexError):
+        return str(iso or "")
+
+
 ETAPA_2027 = {   # cómo nombrar la cifra según el trámite (nunca presentar un dictamen como ley publicada)
     "proyecto": "Según el proyecto de Presupuesto 2027 (Ejecutivo)",
     "dictamen": "Según el dictamen del Presupuesto 2027",
@@ -272,7 +284,7 @@ def og_2027(d, sample):
         if var is None and p26:
             var = (p27 / p26 - 1) * 100
         etapa = ETAPA_2027.get(str(e.get("version") or "").lower(), "Según el Presupuesto 2027 en trámite")
-        fecha = e.get("fecha") or ""
+        fecha = fecha_corta(e.get("fecha"))
         c += [disp(1140, 300, num, 230, AJI, "end"),
               t(1140, 352, f"{uni} para universidades", 34, PAPEL, TEXTO, "700", "end")]
         if var is not None:
@@ -301,7 +313,7 @@ def og_linea_base(d, y, sample):
          disp(60, 420, "van a universidades públicas", 76),
          t(62, 475, f"Presupuesto {y} (PIM) de los 3 niveles de gobierno", 27, LILA, TEXTO, "700")]
     # Waffle 10×10: cada cuadro = S/ 1; los primeros se pintan en ají (parcial el último)
-    x0, y0, u, g = 820, 150, 30, 6
+    x0, y0, u, g = 830, 135, 28, 6
     for i in range(100):
         cx, cy = x0 + (i % 10) * (u + g), y0 + (i // 10) * (u + g)
         c.append(f'<rect x="{cx}" y="{cy}" width="{u}" height="{u}" fill="{PAPEL}" opacity=".18"/>')

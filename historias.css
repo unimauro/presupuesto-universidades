@@ -200,7 +200,7 @@ h1{font:900 clamp(44px,13.4vw,112px)/.88 var(--font-display);font-stretch:62%;le
 .tres{margin:26px 0 0;border:3px solid var(--color-tinta);padding:14px 16px 6px;background:var(--color-papel)}
 .tres h2{font:800 20px/1.15 var(--font-display);font-stretch:78%;margin:0 0 8px}
 .tres dl{margin:0;display:grid;gap:0}
-.tres div{display:grid;grid-template-columns:auto 1fr;gap:0 12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--color-linea)}
+.tres div{display:grid;grid-template-columns:minmax(5.2em,auto) 1fr;gap:0 12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--color-linea)}
 .tres dt{font:900 36px/1 var(--font-display);font-stretch:66%;font-variant-numeric:proportional-nums lining-nums;white-space:nowrap}
 .tres dd{margin:0;font-size:15px;line-height:1.35;color:var(--color-tinta-2)}
 .tres .s{font-size:13px;color:var(--color-tinta-2);margin:6px 0 8px}
@@ -306,6 +306,7 @@ details.datos summary{cursor:pointer;min-height:44px;display:flex;align-items:ce
 @media (min-width:1024px){
   .hero-in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:0 56px;align-items:start}
   .hero-side{padding-top:18px}
+  h1{font-size:clamp(76px,7.4vw,100px);max-width:none}
   .hero-num .cifra{font-size:clamp(120px,13vw,180px)}
   .hero-num .unidad{font-size:clamp(34px,3.6vw,52px)}
   .portada .cap-t{max-width:24ch}

@@ -674,56 +674,56 @@ def page_index(unis, obs, slugs, by_dep):
 
 
 # ---------------------------------------------------------------- OG
+def _wrap(txt, n):
+    lines, cur = [], ""
+    for w in txt.split():
+        if len(cur) + len(w) + 1 > n and cur:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = (cur + " " + w).strip()
+    return lines + [cur]
+
+
 def og_svg(x):
-    name = x.sigla or x.nombre
-    if x.sigla:
-        lines, fsz = [x.sigla], 120 if len(x.sigla) <= 8 else 92
-        sub = x.nombre
-    else:
-        words, lines, cur = x.nombre.replace("Universidad Nacional", "U. N.").split(), [], ""
-        for w in words:
-            if len(cur) + len(w) + 1 > 24 and cur:
-                lines.append(cur)
-                cur = w
-            else:
-                cur = (cur + " " + w).strip()
-        lines.append(cur)
-        lines = lines[:3]
-        fsz, sub = 64, ""
-    sub_lines = []
-    if sub:
-        cur = ""
-        for w in sub.split():
-            if len(cur) + len(w) + 1 > 52 and cur:
-                sub_lines.append(cur)
-                cur = w
-            else:
-                cur = (cur + " " + w).strip()
-        sub_lines.append(cur)
-        sub_lines = sub_lines[:2]
+    """OG 1200x630 en el sistema visual v2: reutiliza lienzo/guarda/disp/cifra de etl/og_generar.py
+    (fuentes Archivo ExtraCondensed 900 + Atkinson Hyperlegible Next, ver BRAND.md)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import og_generar as G
     y = x.ult or (x.parciales[-1] if x.parciales else "")
-    par = " (parcial)" if y in x.parciales else ""
+    par = y in x.parciales
     pim, dev = x.t(y, "pim"), x.t(y, "dev")
-    F = "font-family=\"'Plus Jakarta Sans', Arial, sans-serif\""
-    S = "font-family=\"'Bricolage Grotesque', 'Plus Jakarta Sans', Arial, sans-serif\""
-    t = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">',
-         '<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0 H0 V40" fill="none" stroke="#2B323E" stroke-width="1"/></pattern></defs>',
-         '<rect width="1200" height="630" fill="#1B2230"/><rect width="1200" height="630" fill="url(#g)"/>',
-         f'<text x="70" y="92" {F} font-size="26" fill="#E0A447" letter-spacing="3">PRESUPUESTO {E(y)}{E(par.upper())} · DATOS MEF</text>']
-    yy = 92 + fsz + 20
-    for ln in lines:
-        t.append(f'<text x="70" y="{yy}" {S} font-size="{fsz}" font-weight="800" fill="#E9E6DF">{E(ln)}</text>')
-        yy += int(fsz * 1.08)
-    for ln in sub_lines:
-        t.append(f'<text x="70" y="{yy - fsz // 2 + 30}" {F} font-size="30" fill="#C6CCF5">{E(ln)}</text>')
-        yy += 38
-    t.append(f'<text x="70" y="470" {F} font-size="30" fill="#9BA3B1">PIM</text>'
-             f'<text x="70" y="535" {F} font-size="64" font-weight="700" fill="#C6CCF5">{E(fm(pim))}</text>'
-             f'<text x="640" y="470" {F} font-size="30" fill="#9BA3B1">Devengado ({E(fp(div(dev, pim), 0))})</text>'
-             f'<text x="640" y="535" {F} font-size="64" font-weight="700" fill="#E0A447">{E(fm(dev))}</text>'
-             f'<text x="70" y="595" {F} font-size="24" fill="#9BA3B1">unimauro.github.io/presupuesto-universidades · Radiografía Presupuestal</text>'
-             '</svg>')
-    return "".join(t)
+    c = [G.t(60, 72, f"PRESUPUESTO {y}{' (PARCIAL)' if par else ''} · DATOS MEF", 24, G.AJI, G.TEXTO, "700",
+             extra='letter-spacing="3"')]
+    if x.sigla:
+        fs_ = 150 if len(x.sigla) <= 8 else 110
+        c.append(G.disp(56, 200, x.sigla, fs_, G.PAPEL))
+        for i, ln in enumerate(_wrap(x.nombre, 64)[:2]):
+            c.append(G.t(60, 244 + i * 32, ln, 28, G.LILA, G.TEXTO, "700"))
+    else:
+        ls = _wrap(x.nombre, 34)
+        fs_, step, y0 = (76, 74, 150) if len(ls) <= 2 else (56, 56, 132)
+        ls = _wrap(x.nombre, 34 if fs_ == 76 else 46)[:3]
+        for i, ln in enumerate(ls):
+            c.append(G.disp(56, y0 + i * step, ln, fs_, G.PAPEL))
+
+    def bloque(x0, col, ink, lbl, v, nota):
+        out = [f'<rect x="{x0}" y="300" width="550" height="200" fill="{col}"/>',
+               G.disp(x0 + 30, 350, lbl, 38, ink, "start", "800")]
+        if num(v) is None:
+            out.append(G.disp(x0 + 30, 450, SD, 96, ink))
+        else:
+            n_, u_ = G.cifra(v)
+            out.append(f'<text x="{x0 + 30}" y="450" font-family="{G.DISPLAY}" font-weight="900" font-size="104" fill="{ink}" '
+                       f'letter-spacing="-0.5">{E(n_)}<tspan font-size="48" dx="14">{E(u_)}</tspan></text>')
+        out.append(G.t(x0 + 30, 484, nota, 24, ink, G.TEXTO, "700"))
+        return "".join(out)
+
+    ej = div(dev, pim)
+    c.append(bloque(40, G.ANIL, G.AJI, "PIM (presupuesto)", pim, f"modificado {y}"))
+    c.append(bloque(610, G.CHICHA, "#FFFFFF", "DEVENGADO (gastado)", dev,
+                    f"ejecutó {fp(ej, 0)}{' a la fecha' if par else ''}" if ej is not None else "ejecución: sin dato"))
+    return G.lienzo("\n".join(c), fuente=f"Pliego {x.pliego} · {y} · MEF – Consulta Amigable (SIAF)")
 
 
 def render_og(jobs):
