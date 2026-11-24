@@ -595,6 +595,7 @@ def page_uni(x, obs, slugs, by_dep, n_rank):
 <p class="meta">{meta} · Pliego {E(x.pliego)}</p>
 {kp}
 <a class="cta" href="{R}#u={E(x.pliego)}">Ver ficha interactiva →</a>
+@@TOC@@
 <section class="txt" id="resumen-u"><h2>Resumen en lenguaje llano</h2>{body_res}</section>
 <section id="evolucion"><h2>PIM y devengado por año</h2>
 <p class="legend-i"><i class="sw f-pim"></i>PIM <i class="sw f-dev"></i>Devengado{' <i class="sw f-hp2"></i>parcial' if x.parciales else ''}</p>
@@ -610,6 +611,13 @@ def page_uni(x, obs, slugs, by_dep, n_rank):
 </body>
 </html>
 """
+    toc = [("resumen-u", "Resumen"), ("en-que-gasta", "¿En qué gasta?"), ("financiamiento", "¿De dónde viene?"),
+           ("recauda", "¿Cuánto recauda?"), ("investigacion", "Investigación"), ("exp-2027", "2027 esperado"),
+           ("evolucion", "Gráfico PIM y devengado"), ("gasto-u", "Composición del gasto"), ("serie", "Serie anual"),
+           ("transferencias", "Transferencias"), ("mismo-departamento", "Mismo departamento"), ("fuentes-datos", "Fuentes")]
+    probe = body + footer(obs, R)
+    items = "".join(f'<li><a href="#{i}">{E(t)}</a></li>' for i, t in toc if f'id="{i}"' in probe)
+    body = body.replace("@@TOC@@", f'<nav class="enpagina" aria-label="En esta página"><h2>En esta página</h2><ol>{items}</ol></nav>')
     return h + body
 
 
@@ -751,6 +759,7 @@ def main():
     for v in by_dep.values():
         v.sort(key=lambda z: z.nombre)
     n_rank = ranking_info(obs)
+    HAS_EXP[0] = bool(obs.get("expectativa_2027"))
     os.makedirs(os.path.join(ROOT, "u"), exist_ok=True)
     og_dir = os.path.join(ROOT, "assets", "og", "u")
     os.makedirs(og_dir, exist_ok=True)
