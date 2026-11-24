@@ -164,35 +164,61 @@ def main():
     ap.add_argument("--pass", dest="passes", action="append",
                     help="programa|proyecto|funcion (repetible). Por defecto: los 3 en orden de prioridad")
     ap.add_argument("--years", default=None)
+    ap.add_argument("--workers", type=int, default=3)
     a = ap.parse_args()
     os.makedirs(CACHE, exist_ok=True)
     plan = []
     if a.passes:
         yrs = parse_years(a.years) if a.years else list(range(2016, 2027))
         plan = [(p, yrs) for p in a.passes]
-    else:  # prioridad pedida: programa 2016-2026, proyectos 2019-2026 (luego 2016-2018), función
-        plan = [("programa", list(range(2016, 2027))),
-                ("proyecto", list(range(2019, 2027))),
-                ("funcion", list(range(2016, 2027))),
-                ("proyecto", list(range(2016, 2019)))]
-    nav = Nav()
-    for dim, yrs in plan:
-        log(f"=== pasada {dim} {yrs[0]}-{yrs[-1]}")
-        for y in yrs:
+    else:  # prioridad: programa 2019-26, proyectos 2023-26, 2019-22, programa 2016-18, función, proyectos 2016-18
+        plan = [("programa", list(range(2026, 2018, -1))),
+                ("proyecto", list(range(2026, 2022, -1))),
+                ("proyecto", list(range(2022, 2018, -1))),
+                ("programa", [2018, 2017, 2016]),
+                ("funcion", list(range(2026, 2015, -1))),
+                ("proyecto", [2018, 2017, 2016])]
+    tasks = [(dim, y) for dim, yrs in plan for y in yrs]
+    import threading, queue
+    sys.path.insert(0, HERE)
+    import inversion_build
+    q = queue.Queue()
+    for t in tasks:
+        q.put(t)
+    lock = threading.Lock()
+
+    def worker(wid):
+        nav = None
+        while True:
+            try:
+                dim, y = q.get_nowait()
+            except queue.Empty:
+                return
             for attempt in range(5):
                 try:
+                    if nav is None:
+                        nav = Nav()
                     run_year(y, [dim], nav)
                     break
                 except Exception as e:
                     wait = 10 * (2 ** attempt)
-                    log(f"  {y} {dim}: error {repr(e)[:120]} → reintento en {wait}s")
+                    log(f"  [w{wid}] {y} {dim}: error {repr(e)[:120]} -> reintento en {wait}s")
                     time.sleep(wait)
-                    try:
-                        nav = Nav()
-                    except Exception:
-                        pass
+                    nav = None
             else:
-                log(f"  {y} {dim}: ABANDONADO tras 5 intentos")
+                log(f"  [w{wid}] {y} {dim}: ABANDONADO tras 5 intentos")
+            with lock:  # volcado incremental tras cada año
+                try:
+                    inversion_build.main()
+                    log(f"  [w{wid}] json actualizado tras {dim} {y}")
+                except Exception as e:
+                    log(f"  build error {e!r}")
+
+    ths = [threading.Thread(target=worker, args=(i,)) for i in range(a.workers)]
+    for t in ths:
+        t.start(); time.sleep(5)
+    for t in ths:
+        t.join()
     log("LISTO")
 
 

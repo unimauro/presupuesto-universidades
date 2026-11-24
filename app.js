@@ -778,7 +778,7 @@
         ${kpiBox('Variación', vT === null ? SD : (vT >= 0 ? '+' : '−') + fmtP(Math.abs(vT)), fmtDelta(p27, p26), 'ochre')}
         ${kpiBox('Suben', fmtN(withVar.length ? nUp : null), 'universidades con más PIA')}
         ${kpiBox('Bajan', fmtN(withVar.length ? nDown : null), 'universidades con menos PIA')}
-        ${kpiBox('Sin dato 2027', fmtN(S.unis.length - rows.length), 'de ' + S.unis.length)}
+        ${kpiBox('Sin PIA 2027', fmtN(S.unis.filter(u => num((expOf(u) || {}).pia_2027) === null).length), 'de ' + S.unis.length + ' universidades')}
       </div>
       <div class="card">
         <h3>Mayores subidas y bajadas del PIA 2027 frente al PIA 2026</h3>
