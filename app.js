@@ -1860,6 +1860,13 @@
     $('#h27-total').textContent = soles(st.p27);
     $('#h27-delta').textContent = `${st.d >= 0 ? '+' : '−'}${soles(Math.abs(st.d))} (${fmtChg(st.v)}) frente al PIA 2026`;
     $('#h27-count').textContent = `${st.up} universidades suben${st.nuevas ? ` (+${st.nuevas} nuevas)` : ''} · ${st.down} bajan`;
+    loadA2027().then(an => {
+      const el = $('#h27-matiz'); if (!el) return;
+      const mz = an ? a27Matiz(an) : null;
+      if (!mz || !mz.n) { el.hidden = true; return; }
+      el.hidden = false;
+      el.textContent = `Pero 2026 fue un año de recorte: ${mz.recorte} universidades arrancaron 2026 con menos que en 2025, y ${mz.bajoPim} reciben en 2027 menos de lo que terminaron teniendo en 2026 (PIM).`;
+    });
     const pimTxt = num(st.pim26) !== null ? (st.p27 > st.pim26 ? ` Supera incluso el PIM 2026 (${soles(st.pim26)}).` : ` Queda por debajo del PIM 2026 (${soles(st.pim26)}).`) : '';
     $('#h27-fine').textContent = `${st.vSame !== null ? `Con las mismas universidades: ${fmtChg(st.vSame)}.` : ''}${pimTxt} Fuente: ${fuente2027(st.x)}.`;
     // Carteles 2027 del arte del hero (assets/hero/)
@@ -1899,10 +1906,29 @@
   // Chip 2027 para la ficha
   function ficha2027Chip(u) {
     const e = expOf(u); if (!e) return '';
-    const a = num(e.pia_2027), b = num(e.pia_2026);
-    if (a === null) return '<span class="tag">2027: sin PIA propio en la propuesta</span>';
-    const v = pctChg(b, a);
-    return `<a class="h27-chip ${v > 0 ? 'up' : v < 0 ? 'down' : ''}" href="#expectativa"><b>2027 ${v > 0 ? '▲' : v < 0 ? '▼' : '＝'} ${esc(v === null ? 'nueva' : fmtChg(v))}</b> · ${esc(soles(a))}${b ? ` (PIA 2026: ${esc(soles(b))})` : ''}</a>`;
+    const p27 = num(e.pia_2027);
+    if (p27 === null) return '<span class="tag">2027: sin PIA propio en la propuesta</span>';
+    const pia = y => tot(u, y, 'pia'), pim = y => tot(u, y, 'pim');
+    const p26 = num(e.pia_2026) ?? pia(2026), m26 = num(e.pim_2026) ?? pim(2026), p25 = pia(2025);
+    const vA = pctChg(p26, p27), vM = pctChg(m26, p27), v65 = pctChg(p25, p26);
+    const cls = v => v > 0 ? 'up' : v < 0 ? 'down' : '';
+    // Mini serie PIA (línea) y PIM (punteada) 2023 → 2027
+    const ys = [2023, 2024, 2025, 2026, 2027];
+    const PIA = ys.map(y => y === 2027 ? p27 : pia(y)), PIM = ys.map(y => y === 2027 ? null : pim(y));
+    const mx = Math.max(1, ...PIA.concat(PIM).filter(v => num(v) !== null));
+    const X = i => 14 + i * 44, Y = v => 50 - (v / mx) * 40;
+    const line = arr => arr.map((v, i) => num(v) === null ? null : `${X(i)},${Y(v).toFixed(1)}`).filter(Boolean).join(' ');
+    const svg = `<svg class="mini27" viewBox="0 0 204 66" width="204" height="66" role="img" aria-label="PIA y PIM de 2023 a 2027">
+      <polyline points="${line(PIM)}" fill="none" stroke="${cssVar('--c-pim')}" stroke-width="2" stroke-dasharray="4 3"/>
+      <polyline points="${line(PIA)}" fill="none" stroke="${cssVar('--c-pia')}" stroke-width="2.5"/>
+      ${num(p27) !== null ? `<circle cx="${X(4)}" cy="${Y(p27).toFixed(1)}" r="5" fill="${cssVar('--tu')}" stroke="${cssVar('--tu-borde')}" stroke-width="2"/>` : ''}
+      ${ys.map((y, i) => `<text x="${X(i)}" y="64" text-anchor="middle" font-size="9" fill="${cssVar('--muted')}">${y}</text>`).join('')}
+    </svg>`;
+    return `<div class="ch27">
+      <a class="h27-chip ${cls(vA)}" href="#expectativa"><b>2027: ${esc(soles(p27))}</b></a>
+      <p class="ch27-cmp"><span class="${cls(vA)}">${esc(vA === null ? 'nueva' : fmtChg(vA))} vs PIA 2026</span> · <span class="${cls(vM)}">${esc(fmtChg(vM))} vs PIM 2026</span> · <span class="${cls(v65)}">${esc(fmtChg(v65))} el PIA 2026 vs 2025</span></p>
+      <div class="ch27-mini">${svg}<span class="small muted"><i class="lg-pia"></i>PIA · <i class="lg-pim"></i>PIM · <i class="lg-27"></i>2027</span></div>
+    </div>`;
   }
 
   // ================================================================== ¿A QUIÉN LE DIERON MÁS? (data/analisis2027.json bajo demanda)
@@ -1927,6 +1953,20 @@
       },
     }, title);
   }
+  // Base de comparación del 2027: PIA 2026 (por defecto), PIM 2026 o PIA 2025
+  S.a27 = { base: 'pia26' };
+  const A27_BASES = [['pia26', 'PIA 2026', 'pia_2026'], ['pim26', 'PIM 2026', 'pim_2026'], ['pia25', 'PIA 2025', 'pia_2025']];
+  const baseInfo = () => A27_BASES.find(b => b[0] === S.a27.base) || A27_BASES[0];
+  // Conteos del "matiz": recorte 2026 y universidades que reciben menos que su PIM 2026
+  function a27Matiz(a) {
+    const us = (a && a.universidades || []).filter(r => num(r.pia_2027) !== null && !r.sin_2027);
+    return {
+      n: us.length,
+      recorte: us.filter(r => num(r.var_pia_2026_vs_2025) !== null && r.var_pia_2026_vs_2025 < 0).length,
+      bajoPim: us.filter(r => num(r.var_vs_pim_2026) !== null && r.var_vs_pim_2026 < 0).length,
+      pierdenRo: us.filter(r => num(r.f_ro) !== null && r.f_ro < 0).length,
+    };
+  }
   function renderA2027(host) {
     host.innerHTML = '<p class="empty"><span class="spinner" aria-hidden="true"></span> Cargando el análisis 2027…</p>';
     loadA2027().then(a => {
@@ -1934,43 +1974,36 @@
       const t = a.total, unis = (a.universidades || []).map(r => Object.assign({}, r, { u: uniBy(r.pliego) }));
       const gen = a.por_generica || {}, fue = a.por_fuente || {};
       const pInv = div(num(gen.inversion), num(t.delta));
-      const nNuevas = unis.filter(r => r.nueva && num(r.pia_2027)).length;
       const top5 = num(t.top5_pct_del_aumento), top10 = num(t.top10_pct_del_aumento);
+      const mz = a27Matiz(a);
       host.innerHTML = `
         <h3 class="a27-h">¿A quién le dieron más?</h3>
         <p class="a27-tit">${top5 !== null ? `5 universidades se llevan el <mark>${esc(fmtP(top5, 0))}</mark> del aumento` : ''}${top10 !== null ? `; 10 se llevan el ${esc(fmtP(top10, 0))}` : ''}.</p>
-        <p class="sub">Aumento total ${esc(fmtSigned(num(t.delta)))}: ${esc(fmtN(t.n_suben - nNuevas))} universidades suben${nNuevas ? ` (+${nNuevas} nuevas)` : ''} por ${esc(soles(num(t.suma_subidas)))} y ${esc(fmtN(t.n_bajan))} bajan por ${esc(soles(Math.abs(num(t.suma_bajadas) || 0)))}.</p>
+        <p class="matiz"><strong>Ojo:</strong> comparar contra el PIA 2026 parte de un año recortado (${esc(mz.recorte)} de ${esc(mz.n)} universidades arrancaron 2026 con menos que en 2025). Contra lo que realmente tuvieron en 2026 (PIM), <strong>${esc(mz.bajoPim)} universidades reciben menos</strong> en 2027, y ${esc(mz.pierdenRo)} pierden recursos ordinarios del Tesoro.</p>
+        <div class="controls"><label>Comparar 2027 contra<select id="a27-base">${A27_BASES.map(([k, l]) => `<option value="${k}"${S.a27.base === k ? ' selected' : ''}>${esc(l)}${k === 'pia26' ? ' (por defecto)' : ''}</option>`).join('')}</select></label></div>
+        <p class="sub" id="a27-cuenta"></p>
         <div class="grid two">
           <div class="card"><h3>¿En qué se va el aumento?</h3><p class="sub">Δ por genérica de gasto, PIA 2027 − PIA 2026.${pInv !== null ? ` La inversión explica el <strong>${esc(fmtP(pInv, 0))}</strong>.` : ''}</p><div class="chart"><canvas id="ch-a27-gen"></canvas></div></div>
-          <div class="card"><h3>¿Con qué dinero?</h3><p class="sub">Δ por fuente de financiamiento. El aumento de RDR es una proyección de recaudación, no dinero asegurado.</p><div class="chart"><canvas id="ch-a27-fue"></canvas></div></div>
+          <div class="card"><h3>¿Con qué dinero?</h3><p class="sub">Δ por fuente, PIA 2027 − PIA 2026. El aumento de RDR es una proyección de recaudación, no dinero asegurado.</p><div class="chart"><canvas id="ch-a27-fue"></canvas></div></div>
         </div>
-        <div class="card" style="margin-top:12px"><h3>Las que más suben y las que bajan</h3>
-          <p class="sub">Δ en soles; el color indica la fuente que más explica el cambio.</p>
+        <div class="card" style="margin-top:12px"><h3 id="a27-uni-h">Las que más suben y las que bajan</h3>
+          <p class="sub" id="a27-uni-sub"></p>
           <ul class="legend">${FUENTE_DELTA.map(([, l, c]) => `<li><i style="background:${cssVar(c)}"></i>${esc(l)}</li>`).join('')}</ul>
           <div class="chart"><canvas id="ch-a27-uni"></canvas></div></div>
         <div class="grid two" style="margin-top:12px">
           <div class="card"><h3>Por departamento</h3><p class="sub">Δ PIA 2027 − PIA 2026 sumando sus universidades.</p><div class="chart"><canvas id="ch-a27-dep"></canvas></div></div>
-          <div class="card"><h3>¿Reciben más las que ejecutan mejor?</h3><p class="sub">Ejecución 2025 (eje horizontal) frente a la variación 2027 (vertical). ${num(a.rho_ejecucion_vs_aumento) !== null ? `ρ = ${esc(nf(a.rho_ejecucion_vs_aumento, 2))}: <strong>no se observa que reciban más las que ejecutan mejor</strong>.` : ''} Correlación no es causalidad.</p><div class="chart sq"><canvas id="ch-a27-sc"></canvas></div></div>
+          <div class="card"><h3>¿Reciben más las que ejecutan mejor?</h3><p class="sub">Ejecución 2025 (eje horizontal) frente a la variación 2027 vs PIA 2026 (vertical). ${num(a.rho_ejecucion_vs_aumento) !== null ? `ρ = ${esc(nf(a.rho_ejecucion_vs_aumento, 2))}: <strong>no se observa que reciban más las que ejecutan mejor</strong>.` : ''} Correlación no es causalidad.</p><div class="chart sq"><canvas id="ch-a27-sc"></canvas></div></div>
         </div>
-        <h3 style="margin:20px 0 8px">Todas las universidades: PIA 2026 → PIA 2027</h3>
+        <h3 style="margin:20px 0 8px" id="a27-tbl-h"></h3>
         <div id="a27-host"></div>
         <ul class="note lb-notas">${(a.notas || []).map(n => `<li>${esc(n)}</li>`).join('')}<li>Montos nominales; propuesta del dictamen, la ley final puede cambiar montos.</li>${a.fuente ? `<li>Fuente: ${esc(a.fuente)}</li>` : ''}</ul>`;
-      // (2) composición del aumento
+      // composición (siempre vs PIA 2026: es lo que trae el anexo)
       const GEN_D = [['personal', 'Personal', '--g1'], ['pensiones', 'Pensiones', '--g2'], ['bys', 'Bienes y serv.', '--g3'], ['inversion', 'Inversión (2.6)', '--g5'], ['otros', 'Otros', '--g4']];
       divBars('ch-a27-gen', GEN_D.filter(([k]) => num(gen[k]) !== null).map(([k, l, c]) => ({ lbl: l, c, v: gen[k] })), 'Aumento 2027 por genérica');
       divBars('ch-a27-fue', [['ro', 'RO (Tesoro)', '--f1'], ['rdr', 'RDR', '--f2'], ['rd', 'Canon (RD)', '--f3'], ['dyt', 'Donac. y transf.', '--f4']].filter(([k]) => num(fue[k]) !== null).map(([k, l, c]) => ({ lbl: l, c, v: fue[k] })), 'Aumento 2027 por fuente');
-      // (3) universidades
-      const withD = unis.filter(r => num(r.delta) !== null && !r.sin_2027);
-      const ups = withD.filter(r => r.delta > 0).sort((x, y) => y.delta - x.delta).slice(0, isMobile() ? 10 : 15);
-      const downs = withD.filter(r => r.delta < 0).sort((x, y) => x.delta - y.delta).slice(0, 10).reverse();
-      const uItem = r => { const ms = mainSource(r); return { lbl: shortTxt(r.uni || (r.u && uName(r.u)) || r.pliego, isMobile() ? 12 : 24), full: titleCase(r.nombre || ''), c: ms ? ms.c : '--c-pia', v: r.delta,
-        tip: `Δ ${fmtSigned(r.delta)} (${r.nueva ? 'nueva' : fmtChg(r.var_pct)}) · principal: ${ms ? ms.l : 's/d'}` }; };
-      divBars('ch-a27-uni', ups.concat(downs).map(uItem), 'Universidades con mayor subida y bajada en 2027');
-      // (4) departamentos
       const deps = (a.por_departamento || []).filter(d => num(d.delta) !== null).sort((x, y) => y.delta - x.delta);
       divBars('ch-a27-dep', deps.map(d => ({ lbl: titleCase(d.departamento), full: `${titleCase(d.departamento)} (${d.n} univ.)`, c: d.delta >= 0 ? '--sem-good' : '--sem-bad', v: d.delta, tip: `Δ ${fmtSigned(d.delta)} (${fmtChg(d.var_pct)})` })), 'Variación 2027 por departamento');
-      // (5) dispersión
-      const pts = withD.filter(r => num(r.ejec_2025) !== null && num(r.var_pct) !== null && !r.nueva);
+      const pts = unis.filter(r => num(r.ejec_2025) !== null && num(r.var_pct) !== null && !r.nueva && !r.sin_2027);
       const yCap = 150;
       mkChart('ch-a27-sc', {
         type: 'scatter',
@@ -1982,27 +2015,55 @@
             y: { type: 'linear', max: yCap, title: { display: true, text: `Variación 2027 (%, tope ${yCap})` }, ticks: { callback: tickP } } },
         },
       }, 'Ejecución 2025 frente a variación del presupuesto 2027');
-      // (6) tabla
-      makeTable($('#a27-host', host), {
-        id: 'a27t', caption: 'PIA 2026, PIA 2027 propuesto y de dónde sale el cambio. Montos en soles.', rows: unis, sort: { k: 'delta', dir: -1 }, limit: 20,
-        rowClass: r => (num(r.pia_2026) !== null && r.pia_2026 < BASE_CHICA && !r.nueva) ? 'row-dim' : '',
-        mobilePick: ['p26', 'p27', 'delta', 'dinv', 'fuente', 'ejec', 'pe'], mdef: 'delta',
-        search: { text: r => [r.uni, r.nombre, r.departamento, r.pliego, r.explica].join(' ') },
-        filters: [depFilter(r => r.u || { departamento: r.departamento }, unis),
-          { k: 'dir', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Suben'], ['down', 'Bajan'], ['nueva', 'Nuevas'], ['sin', 'Sin PIA 2027']], test: (r, v) => v === 'nueva' ? r.nueva : v === 'sin' ? !!r.sin_2027 : v === 'up' ? r.delta > 0 && !r.nueva : r.delta < 0 }],
-        cols: [
-          { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => r.uni || '', html: r => (r.u ? uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') : esc(r.uni || r.nombre || '')) + (r.explica ? `<span class="proy-meta">${esc(r.explica)}</span>` : '') },
-          { k: 'p26', lbl: 'PIA 2026', get: r => num(r.pia_2026), fmt: fmtM },
-          { k: 'p27', lbl: 'PIA 2027', get: r => num(r.pia_2027), html: r => `<strong>${esc(fmtM(num(r.pia_2027)))}</strong>` },
-          { k: 'delta', lbl: 'Δ S/', m: true, get: r => num(r.delta), html: r => `<span class="${r.delta > 0 ? 'up' : r.delta < 0 ? 'down' : ''}">${esc(num(r.delta) === null ? SD : fmtSigned(r.delta))}</span>` },
-          { k: 'var', lbl: 'Δ %', get: r => num(r.var_pct), html: r => r.nueva ? '<span class="muted">nueva</span>' : fmtVar(num(r.var_pct)) },
-          { k: 'dinv', lbl: 'Δ inversión', get: r => num(r.d_inversion), fmt: v => num(v) === null ? SD : fmtSigned(v) },
-          { k: 'dper', lbl: 'Δ personal', get: r => num(r.d_personal), fmt: v => num(v) === null ? SD : fmtSigned(v) },
-          { k: 'fuente', lbl: 'Fuente principal', get: r => (mainSource(r) || {}).l || '', html: r => { const m = mainSource(r); return m ? `<span class="src-dot" style="background:${cssVar(m.c)}"></span>${esc(m.l)}` : SD; } },
-          { k: 'ejec', lbl: 'Ejec. 2025', get: r => num(r.ejec_2025), html: r => pill(num(r.ejec_2025)) },
-          { k: 'pe', lbl: 'S/ por estudiante 2026 → 2027', get: r => num(r.por_estudiante_2027), html: r => num(r.por_estudiante_2027) === null ? SD : `${esc(soles(num(r.por_estudiante_2026)))} → <strong>${esc(soles(num(r.por_estudiante_2027)))}</strong>` },
-        ],
-      });
+
+      // Lo que depende de la base elegida: conteos, gráfico por universidad y tabla
+      const drawBase = () => {
+        const [bk, blbl, bfield] = baseInfo();
+        const rows = unis.map(r => {
+          const b = num(r[bfield]), p27 = num(r.pia_2027);
+          const d = (b !== null && p27 !== null && !r.sin_2027) ? p27 - b : null;
+          return Object.assign(r, { bD: d, bV: (d !== null && b) ? d / b : null, compensa: num(r.f_ro) < 0 && num(r.f_rdr) > 0 });
+        });
+        const valid = rows.filter(r => r.bD !== null && !(r.nueva && bk !== 'pim26' && !num(r[bfield])));
+        const up = valid.filter(r => r.bD > 0).length, down = valid.filter(r => r.bD < 0).length;
+        const sumUp = sum(valid.filter(r => r.bD > 0).map(r => r.bD)), sumDown = sum(valid.filter(r => r.bD < 0).map(r => r.bD));
+        $('#a27-cuenta', host).innerHTML = `Frente al <strong>${esc(blbl)}</strong>: <span class="up">${esc(up)} universidades reciben más</span> (${esc(soles(sumUp))}) y <span class="down">${esc(down)} reciben menos</span> (${esc(soles(Math.abs(sumDown || 0)))}).`;
+        $('#a27-uni-h', host).textContent = `Las que más suben y las que bajan frente al ${blbl}`;
+        $('#a27-uni-sub', host).textContent = `Δ en soles (PIA 2027 − ${blbl}); el color indica la fuente que más cambia frente al PIA 2026.`;
+        const ups = valid.filter(r => r.bD > 0).sort((x, y) => y.bD - x.bD).slice(0, isMobile() ? 10 : 15);
+        const downs = valid.filter(r => r.bD < 0).sort((x, y) => x.bD - y.bD).slice(0, isMobile() ? 10 : 15).reverse();
+        const uItem = r => { const ms = mainSource(r); return { lbl: shortTxt(r.uni || (r.u && uName(r.u)) || r.pliego, isMobile() ? 12 : 24), full: titleCase(r.nombre || ''), c: ms ? ms.c : '--c-pia', v: r.bD,
+          tip: `Δ ${fmtSigned(r.bD)} (${fmtChg(r.bV)}) vs ${blbl} · fuente que más cambia: ${ms ? ms.l : 's/d'}` }; };
+        divBars('ch-a27-uni', ups.concat(downs).map(uItem), `Universidades con mayor subida y bajada en 2027 frente al ${blbl}`);
+        $('#a27-tbl-h', host).textContent = `Todas las universidades: ${blbl} → PIA 2027`;
+        makeTable($('#a27-host', host), {
+          id: 'a27t', caption: `PIA 2027 propuesto frente al ${blbl}, y de dónde sale el cambio. Montos en soles.`, rows, sort: { k: 'delta', dir: -1 }, limit: 20,
+          rowClass: r => (num(r[bfield]) !== null && r[bfield] < BASE_CHICA && !r.nueva) ? 'row-dim' : '',
+          mobilePick: ['p25', 'p26', 'p27', 'delta', 'vpim', 'dro', 'drdr', 'dinv', 'ejec'], mdef: 'delta',
+          search: { text: r => [r.uni, r.nombre, r.departamento, r.pliego, r.explica].join(' ') },
+          filters: [depFilter(r => r.u || { departamento: r.departamento }, rows),
+            { k: 'dir', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Reciben más'], ['down', 'Reciben menos'], ['pim', 'Menos que su PIM 2026'], ['comp', 'Compensan con RDR'], ['nueva', 'Nuevas'], ['sin', 'Sin PIA 2027']],
+              test: (r, v) => v === 'nueva' ? r.nueva : v === 'sin' ? !!r.sin_2027 : v === 'pim' ? num(r.var_vs_pim_2026) < 0 : v === 'comp' ? r.compensa : v === 'up' ? r.bD > 0 : r.bD < 0 }],
+          cols: [
+            { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => r.uni || '', html: r => (r.u ? uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') : esc(r.uni || r.nombre || '')) + `${r.compensa ? '<span class="proy-meta"><span class="tag comp" title="Pierde recursos ordinarios del Tesoro y lo compensa con más ingresos propios (proyectados)">Compensa con RDR</span></span>' : ''}${r.explica ? `<span class="proy-meta">${esc(r.explica)}</span>` : ''}` },
+            { k: 'p25', lbl: 'PIA 2025', get: r => num(r.pia_2025), fmt: fmtM },
+            { k: 'p26', lbl: 'PIA 2026', get: r => num(r.pia_2026), fmt: fmtM },
+            { k: 'pim26', lbl: 'PIM 2026', get: r => num(r.pim_2026), fmt: fmtM },
+            { k: 'p27', lbl: 'PIA 2027', get: r => num(r.pia_2027), html: r => `<strong>${esc(fmtM(num(r.pia_2027)))}</strong>` },
+            { k: 'delta', lbl: `Δ S/ vs ${blbl}`, m: true, get: r => r.bD, html: r => `<span class="${r.bD > 0 ? 'up' : r.bD < 0 ? 'down' : ''}">${esc(r.bD === null ? SD : fmtSigned(r.bD))}</span>` },
+            { k: 'var', lbl: `Δ % vs ${blbl}`, get: r => r.bV, html: r => r.bV === null ? `<span class="muted">${r.nueva ? 'nueva' : SD}</span>` : fmtVar(r.bV) },
+            { k: 'vpim', lbl: 'Δ % vs PIM 2026', get: r => num(r.var_vs_pim_2026), html: r => fmtVar(num(r.var_vs_pim_2026)) },
+            { k: 'dro', lbl: 'Δ Tesoro (RO)', get: r => num(r.f_ro), html: r => `<span class="${r.f_ro > 0 ? 'up' : r.f_ro < 0 ? 'down' : ''}">${esc(num(r.f_ro) === null ? SD : fmtSigned(r.f_ro))}</span>` },
+            { k: 'drdr', lbl: 'Δ ingresos propios (RDR)', get: r => num(r.f_rdr), fmt: v => num(v) === null ? SD : fmtSigned(v) },
+            { k: 'dinv', lbl: 'Δ inversión', get: r => num(r.d_inversion), fmt: v => num(v) === null ? SD : fmtSigned(v) },
+            { k: 'fuente', lbl: 'Fuente que más cambia', get: r => (mainSource(r) || {}).l || '', html: r => { const m = mainSource(r); return m ? `<span class="src-dot" style="background:${cssVar(m.c)}"></span>${esc(m.l)}` : SD; } },
+            { k: 'ejec', lbl: 'Ejec. 2025', get: r => num(r.ejec_2025), html: r => pill(num(r.ejec_2025)) },
+            { k: 'pe', lbl: 'S/ por estudiante 2026 → 2027', get: r => num(r.por_estudiante_2027), html: r => num(r.por_estudiante_2027) === null ? SD : `${esc(soles(num(r.por_estudiante_2026)))} → <strong>${esc(soles(num(r.por_estudiante_2027)))}</strong>` },
+          ],
+        });
+      };
+      drawBase();
+      $('#a27-base', host).addEventListener('change', e => { S.a27.base = e.target.value; drawBase(); });
     });
   }
 

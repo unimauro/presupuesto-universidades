@@ -710,3 +710,15 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
   .hero.hero-v3 h1 { margin-bottom: 10px; }
   .hero.hero-v3 .kicker { margin-bottom: 4px; }
 }
+
+/* Matiz 2027: tan visible como el titular */
+.h27-matiz { margin: 10px 0 0; padding: 8px 10px; font: 700 15px/1.35 var(--font-cifras); color: #1E1428; background: #F4EEE2; border-left: 6px solid #FF6B7A; }
+.hero-v3 .h27 .h27-matiz { position: static; width: auto; height: auto; clip: auto; overflow: visible; white-space: normal; }
+.matiz { margin: 8px 0 12px; padding: 10px 12px; border: 2px solid var(--ink); border-left: 8px solid var(--sem-bad); background: var(--bad-bg); font-size: 15.5px; }
+.tag.comp { background: var(--f2); color: #fff; border-color: var(--ink); }
+.ch27 { margin: 6px 0 2px; }
+.ch27-cmp { margin: 4px 0; font: 700 13.5px var(--font-cifras); }
+.ch27-mini { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ch27-mini i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin: 0 4px 0 6px; }
+.lg-pia { background: var(--c-pia); } .lg-pim { background: var(--c-pim); } .lg-27 { background: var(--tu); height: 8px !important; width: 8px !important; border-radius: 50%; border: 1.5px solid var(--tu-borde); }
+@media (max-width: 639px) { .h27-matiz { font-size: 13.5px; } }

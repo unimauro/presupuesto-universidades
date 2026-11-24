@@ -1136,10 +1136,10 @@
   }
   const matizTxt = (m) => (m ? `Ojo: 2026 fue año de recorte. ${m.recorte26} de ${m.n} universidades arrancaron 2026 con menos que en 2025, y ${m.bajoPim} de ${m.n} recibirían en 2027 menos de lo que terminaron teniendo en 2026 (PIM). ${m.pierdenRO} pierden plata del Tesoro (RO)${m.compensan ? `; ${m.compensan} de ellas compensarían con más ingresos propios proyectados` : ''}.` : '');
   // Las tres comparaciones de una universidad (texto ya escapado).
-  function tres27(x) {
+  function tres27(x, corto) {
     if (!x || !isNum(x.var_pct)) return '';
     const p1 = (v) => esc(pctSigned(v, Math.abs(v) >= 1 ? 0 : 1));
-    let t = `${p1(x.var_pct)} frente a su PIA 2026`;
+    let t = corto ? 'frente a su PIA 2026' : `${p1(x.var_pct)} frente a su PIA 2026`;
     if (isNum(x.var_vs_pim_2026)) t += `${Math.sign(x.var_vs_pim_2026) !== Math.sign(x.var_pct) ? ', pero' : ' y'} ${p1(x.var_vs_pim_2026)} frente a lo que tuvo en 2026 (PIM)`;
     if (isNum(x.var_pia_2026_vs_2025) && Math.abs(x.var_pia_2026_vs_2025) >= 0.005) t += x.var_pia_2026_vs_2025 < 0 ? `; además, su PIA 2026 ya había caído ${esc(pct(-x.var_pia_2026_vs_2025))} frente al de 2025` : `; su PIA 2026 había subido ${esc(pct(x.var_pia_2026_vs_2025))} frente al de 2025`;
     if (isNum(x.f_ro) && Math.abs(x.f_ro) >= 1e5) {
@@ -1157,7 +1157,7 @@
     const arrow = (v) => (v > 0 ? '▲' : v < 0 ? '▼' : '=');
     const he = h && h.expectativa_2027, hx = h && a27u(h.pliego), m = matiz27();
     if (hx && isNum(hx.var_pct)) {
-      el.innerHTML = `<span>2027 para la <mark>${esc(label(h))}</mark>:</span><b class="${hx.delta < 0 ? 'baja' : ''}">${arrow(hx.delta)} ${esc(pctSigned(hx.var_pct, 1))} (${hx.delta >= 0 ? '+' : '−'}${esc(solesF(Math.abs(hx.delta)))})</b><span class="f-mat">${tres27(hx)}</span><span class="ir">Ver capítulo 11</span>`;
+      el.innerHTML = `<span>2027 para la <mark>${esc(label(h))}</mark>:</span><b class="${hx.delta < 0 ? 'baja' : ''}">${arrow(hx.delta)} ${esc(pctSigned(hx.var_pct, 1))} (${hx.delta >= 0 ? '+' : '−'}${esc(solesF(Math.abs(hx.delta)))})</b><span class="f-mat">${tres27(hx, true)}</span><span class="ir">Ver capítulo 11</span>`;
     } else if (he && isNum(he.var_pct) && isNum(he.pia_2027) && isNum(he.pia_2026)) {
       const d = he.pia_2027 - he.pia_2026;
       el.innerHTML = `<span>2027 para la <mark>${esc(label(h))}</mark>:</span><b class="${d < 0 ? 'baja' : ''}">${arrow(d)} ${esc(pctSigned(he.var_pct / 100, Math.abs(he.var_pct) >= 100 ? 0 : 1))} (${d >= 0 ? '+' : '−'}${esc(solesF(Math.abs(d)))})</b><span>frente a su PIA 2026, en el proyecto de presupuesto</span><span class="ir">Ver capítulo 11</span>`;
