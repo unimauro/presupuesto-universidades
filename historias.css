@@ -6,9 +6,9 @@
   --k1:#3D5A80; --k2:#98C1D9; --k3:#C06C3E; --k4:#9A917F; --k5:#55753A; --k6:#8E4A68;
   --shadow:0 1px 2px rgba(27,34,48,.06),0 4px 14px rgba(27,34,48,.05);
   --banner-bg:#F8EED2; --banner-ink:#5A4210;
-  --font-head:"Source Serif 4",Georgia,serif;
-  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --font-num:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-head:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
+  --font-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-num:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --radius:12px;
 }
 /* Tema: data-theme en <html> (script del <head>, igual que index.html). Respaldo sin JS: prefers-color-scheme. */
@@ -31,6 +31,7 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--font-body);overflow-x:hidden}
+button,select,input{font-family:inherit}
 a{color:var(--accent)}
 img{max-width:100%;height:auto}
 .num,.figs{font-family:var(--font-num);font-variant-numeric:tabular-nums}
@@ -40,7 +41,7 @@ img{max-width:100%;height:auto}
 
 .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:10px 16px;background:var(--card);color:var(--ink);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;font:700 17px/1.2 var(--font-head)}
+.brand{display:flex;align-items:center;gap:10px;min-height:44px;color:inherit;text-decoration:none;font:800 17px/1.2 var(--font-head)}
 .brand img{border-radius:6px}
 .top-nav{display:flex;align-items:center;gap:4px;font-size:14px}
 .top-nav a{color:var(--ink-2);text-decoration:none;padding:12px 10px;min-height:44px;display:inline-flex;align-items:center}
@@ -57,7 +58,7 @@ img{max-width:100%;height:auto}
 main{max-width:760px;margin:0 auto;padding:0 16px}
 .hero{padding:36px 0 12px}
 .kicker{margin:0 0 6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre-text);font-weight:600}
-h1{font:700 clamp(28px,7vw,44px)/1.12 var(--font-head);margin:0 0 14px}
+h1{font:800 clamp(28px,7vw,44px)/1.1 var(--font-head);letter-spacing:-.01em;margin:0 0 14px}
 .lede{font-size:18px;color:var(--ink-2);margin:0 0 16px}
 .banner{background:var(--banner-bg);color:var(--banner-ink);border-radius:var(--radius);padding:10px 14px;font-size:14px;margin:0 0 16px}
 .controls{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 18px}
@@ -82,7 +83,7 @@ select{font:15px var(--font-body);color:var(--ink);background:var(--card);border
 @media (prefers-reduced-motion:reduce){.story.enter{animation:none}.skeleton i{animation:none}}
 .story .kicker{display:flex;gap:8px;align-items:center}
 .story .kicker b{font:500 12px var(--font-num);background:var(--accent);color:var(--card);border-radius:4px;padding:1px 6px;letter-spacing:0}
-.story h2{font:700 clamp(23px,5.6vw,32px)/1.2 var(--font-head);margin:4px 0 12px}
+.story h2{font:800 clamp(23px,5.6vw,32px)/1.18 var(--font-head);letter-spacing:-.005em;margin:4px 0 12px}
 .story h2 em,.big{font-style:normal;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
 .story p{margin:0 0 14px}
 .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 16px}
@@ -116,12 +117,12 @@ details.caveat ul{padding-left:18px;margin:6px 0}
 .empty{color:var(--ink-2);font-style:italic}
 
 .method{border-top:1px solid var(--line);padding:32px 0 40px}
-.method h2{font:700 24px/1.25 var(--font-head);margin:0 0 10px}
+.method h2{font:800 24px/1.25 var(--font-head);margin:0 0 10px}
 .method li{margin:0 0 6px}
 .meta{font-size:12px;color:var(--ink-2)}
 
 .foot{background:var(--card);color:var(--ink-2);border-top:1px solid var(--line);padding:28px 16px;text-align:center;font-size:14px}
-.foot a{color:var(--accent)}
+.foot a{color:var(--accent);display:inline-block;padding-block:12px}
 .foot .logo-dark{display:none}
 :root[data-theme="dark"] .foot .logo-light{display:none}
 :root[data-theme="dark"] .foot .logo-dark{display:block}

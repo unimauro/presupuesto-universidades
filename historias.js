@@ -682,7 +682,7 @@
 
   function chartDefaults() {
     if (!hasChart()) return;
-    Chart.defaults.font.family = '"IBM Plex Sans", system-ui, sans-serif';
+    Chart.defaults.font.family = '"Plus Jakarta Sans", system-ui, sans-serif';
     Chart.defaults.font.size = 12;
     Chart.defaults.color = colors().ink2;
   }
