@@ -43,7 +43,7 @@ Ya se avisó a los agentes gasto, inversion e ingresos.
 - Totales: los activos universitarios pasan de 43,918 (2017) a 52,429 (2025). Los docentes, de 24,075 a 28,637. El costo anual de activos sube de S/1.57 mil M a S/2.98 mil M.
 - Caveat: `costo_anual` es el costo **programado** en el AIRHSP (incluye aportes, aguinaldos y escolaridad), no el devengado. Para el gasto ejecutado se usa la genérica 2.1 del SIAF.
 
-### 4. VPS 217.15.168.100 (acceso SSH por llave: OK)
+### 4. VPS <VPS> (acceso SSH por llave: OK)
 - **`/opt/qhaway-api/raw/2024-Gasto.csv.gz` y `2025-Gasto.csv.gz`**: detalle SIAF completo del MEF con PLIEGO. Pesan 718 y 740 MB y se descargaron el 1-jul-2026 y el 25-jun-2026; ambos años están cerrados. De ahí salen `siaf_2024_2025.json` y `proyectos_2024_2025.json`. No hay otros años en el VPS.
 - `qhaway-db` (BD qhaway): `gasto_cubo` (557k filas), `gasto_sector`, `res_cubo_n` y `gasto_meta_*` están agregados por sector, departamento, función, fuente y programa, **sin pliego**. No sirven para cortar por universidad.
 - `licitaperu-alertas-db-1` (BD gopues): `conosce_adjudicaciones` (550k), `conosce_contratos` (720k), `conosce_pac` (1.9M), `conosce_procesos` y `conosce_entidades` (RUC ↔ codigo_siaf). Para universidades se extrajo el agregado de adjudicaciones de 2018–2026.
