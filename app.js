@@ -71,7 +71,7 @@
     fuentes: { metric: 'pim', uni: '' },
     ficha: { uni: null, cmp: [] },
     exp: { sort: 'var', dir: -1, q: '' },
-    vr: { a: null, b: null, m: 'dev', real: true, sort: 'dv', dir: -1, q: '', comp: 'generica' },
+    vr: { a: null, b: null, m: 'dev', real: true, sort: 'dv', dir: -1, q: '', comp: 'generica', order: 'pct' },
     map: null, mapLayer: null, tiles: null,
   };
   const kpiCache = new Map();
@@ -151,6 +151,7 @@
     C.defaults.plugins.tooltip.bodyColor = cssVar('--bg');
     C.defaults.animation = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 350 };
     C.defaults.maintainAspectRatio = false;
+    if (!C.registry.plugins.get('valueLabel')) C.register(valueLabelPlugin);
     C.defaults.responsive = true;
   }
   function mkChart(id, cfg, label) {
@@ -286,6 +287,111 @@
     }, 'Porcentaje de ejecución anual del conjunto de universidades');
   }
 
+
+  // ================================================================== Tabla reutilizable
+  // makeTable(host, {id, caption, rows, cols, search, filters, sort, limit, mobilePick, mdef, rank})
+  //  cols: [{k, lbl, get(r), html?(r) (ya escapado), fmt?(v), txt?, sticky?, nosort?, m? (siempre visible en móvil)}]
+  //  filters: [{k, lbl, opts: [[valor, etiqueta]], test(r, v)}]  — valor '' = todos
+  const TBL = new Map();
+  const normTxt = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function depFilter(getU, rows) {
+    const deps = [...new Set(rows.map(r => (getU(r) || {}).departamento).filter(Boolean))].sort((a, b) => a.localeCompare(b, LOC));
+    return { k: 'dep', lbl: 'Departamento', opts: [['', 'Todos']].concat(deps.map(d => [d, titleCase(d)])), test: (r, v) => (getU(r) || {}).departamento === v };
+  }
+  function makeTable(host, o) {
+    const st = TBL.get(o.id) || { q: '', f: {}, sort: (o.sort || {}).k, dir: (o.sort || {}).dir ?? -1, all: false, mcol: o.mdef };
+    TBL.set(o.id, st);
+    const id = o.id; const filters = o.filters || [];
+    const pickCols = o.mobilePick ? o.cols.filter(c => o.mobilePick.includes(c.k)) : [];
+    host.innerHTML = `
+      <div class="controls">
+        ${o.search !== false ? `<label class="grow">Buscar<input type="search" id="${id}-q" placeholder="${esc((o.search && o.search.ph) || 'Nombre, sigla o departamento')}" autocomplete="off" value="${esc(st.q)}"></label>` : ''}
+        ${filters.map(f => `<label>${esc(f.lbl)}<select data-f="${esc(f.k)}">${f.opts.map(([v, l]) => `<option value="${esc(v)}"${String(st.f[f.k] ?? '') === String(v) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`).join('')}
+      </div>
+      ${pickCols.length ? `<div class="controls rk-mobile"><label class="grow">Columna a mostrar en el celular<select id="${id}-m">${pickCols.map(c => `<option value="${esc(c.k)}"${c.k === st.mcol ? ' selected' : ''}>${esc(String(c.lbl).replace('*', ''))}</option>`).join('')}</select></label></div>` : ''}
+      <div class="table-wrap tall"><table class="mt" id="${id}-t">${o.caption ? `<caption>${esc(o.caption)}</caption>` : ''}<thead></thead><tbody></tbody></table></div>
+      <p class="count mt-count"><span id="${id}-c" aria-live="polite"></span><button type="button" class="btn" id="${id}-more" hidden></button></p>`;
+    const searchText = (o.search && o.search.text) || (r => r.u ? [r.u.nombre, r.u.corto, r.u.pliego, r.u.departamento].join(' ') : '');
+    const hideM = c => (o.mobilePick && !c.m && c.k !== st.mcol) ? ' rk-hide-m' : '';
+    const draw = () => {
+      const q = normTxt(st.q.trim());
+      const col = o.cols.find(c => c.k === st.sort);
+      let list = o.rows.filter(r => !q || normTxt(searchText(r)).includes(q))
+        .filter(r => filters.every(f => { const v = st.f[f.k]; return v === undefined || v === '' || f.test(r, v); }));
+      if (col) list.sort((x, y) => {
+        const va = col.get(x), vb = col.get(y);
+        if (typeof va === 'string' || typeof vb === 'string') return st.dir * String(va ?? '').localeCompare(String(vb ?? ''), LOC);
+        if (num(va) === null && num(vb) === null) return 0; if (num(va) === null) return 1; if (num(vb) === null) return -1;
+        return st.dir * (va - vb);
+      });
+      const total = list.length;
+      const lim = o.limit && !st.all ? o.limit : Infinity;
+      const shown = list.slice(0, lim);
+      $(`#${id}-t thead`, host).innerHTML = '<tr>' + o.cols.map(c => {
+        const so = st.sort === c.k ? (st.dir > 0 ? 'ascending' : 'descending') : 'none';
+        const cls = [(c.txt || c.sticky) ? 'txt' : '', c.sticky ? 'sticky-col' : ''].join(' ').trim() + hideM(c);
+        return `<th scope="col" class="${cls}"${c.nosort ? '' : ` aria-sort="${so}"`}>${c.nosort ? esc(c.lbl) : `<button type="button" class="sort" data-k="${esc(c.k)}">${esc(c.lbl)}</button>`}</th>`;
+      }).join('') + '</tr>';
+      $(`#${id}-t tbody`, host).innerHTML = shown.length ? shown.map((r, i) => '<tr>' + o.cols.map(c => {
+        const cls = [(c.txt || c.sticky) ? 'txt' : '', c.sticky ? 'sticky-col' : '', c.wrap ? 'wrap' : ''].join(' ').trim() + hideM(c);
+        const inner = c.html ? c.html(r) : esc(c.fmt ? c.fmt(c.get(r)) : c.get(r));
+        return `<td class="${cls}">${c.sticky && o.rank ? `<span class="rk-n">${i + 1}</span>` : ''}${inner}</td>`;
+      }).join('') + '</tr>').join('') : `<tr><td colspan="${o.cols.length}" class="txt"><span class="muted">Sin resultados para ese filtro.</span></td></tr>`;
+      $(`#${id}-c`, host).textContent = `Mostrando ${shown.length} de ${o.rows.length}${total !== o.rows.length ? ` (${total} cumplen el filtro)` : ''}.`;
+      const more = $(`#${id}-more`, host);
+      more.hidden = !o.limit || total <= o.limit;
+      more.textContent = st.all ? `Mostrar solo ${o.limit}` : `Ver las ${total}`;
+      if (o.onDraw) o.onDraw(list);
+    };
+    const qi = $(`#${id}-q`, host);
+    if (qi) qi.addEventListener('input', debounce(e => { st.q = e.target.value; draw(); }));
+    $$('select[data-f]', host).forEach(s => s.addEventListener('change', e => { st.f[e.target.dataset.f] = e.target.value; draw(); }));
+    const ms = $(`#${id}-m`, host);
+    if (ms) ms.addEventListener('change', e => { st.mcol = e.target.value; st.sort = e.target.value; st.dir = -1; draw(); });
+    $(`#${id}-more`, host).addEventListener('click', () => { st.all = !st.all; draw(); });
+    $(`#${id}-t thead`, host).addEventListener('click', e => {
+      const b = e.target.closest('button.sort'); if (!b) return;
+      const c = o.cols.find(x => x.k === b.dataset.k);
+      if (st.sort === b.dataset.k) st.dir *= -1; else { st.sort = b.dataset.k; st.dir = (c && (c.txt || c.sticky)) ? 1 : -1; }
+      draw();
+    });
+    draw();
+    return { st, draw };
+  }
+  // Celda de universidad (sigla + nombre); escapada
+  const uniCell = (u, extra = '') => `<a class="uni-link" title="${esc(u.nombre || '')}" href="#u=${encodeURIComponent(u.pliego)}" data-pf="${esc(u.pliego)}">${esc(uName(u))}</a>${extra}<span class="uni-sub">${esc(titleCase(u.nombre || ''))}${u.departamento ? ' · ' + esc(titleCase(u.departamento)) : ''}</span>`;
+  const firstYearOf = u => S.years.find(y => num(tot(u, y, 'pim')) !== null) || null;
+  const isNueva = u => { const c = parseInt(u.creacion, 10); if (c) return c >= 2000; const f = firstYearOf(u); return f ? +f > +S.years[0] + 2 : false; };
+
+  // Plugin: etiqueta de valor al final de cada barra (dataset.valueLabel = fn(v, i) → texto)
+  const valueLabelPlugin = {
+    id: 'valueLabel',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        if (!ds.valueLabel) return;
+        const meta = chart.getDatasetMeta(di); if (meta.hidden) return;
+        ctx.save();
+        ctx.font = `600 11.5px ${cssVar('--font') || 'sans-serif'}`;
+        ctx.fillStyle = cssVar('--ink');
+        meta.data.forEach((el, i) => {
+          const v = ds.data[i]; if (num(v) === null) return;
+          const txt = ds.valueLabel(v, i); if (!txt) return;
+          const horiz = chart.options.indexAxis === 'y';
+          if (horiz) {
+            const neg = v < 0;
+            ctx.textAlign = neg ? 'right' : 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(txt, el.x + (neg ? -5 : 5), el.y);
+          } else {
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(txt, el.x, el.y - 4);
+          }
+        });
+        ctx.restore();
+      });
+    },
+  };
+
   // ================================================================== ¿SUBIÓ O BAJÓ?
   const ipcIdx = y => { const i = S.data && S.data.ipc && S.data.ipc.indice; return i ? num(i[String(y)]) : null; };
   const hasIpc = () => S.years.some(y => ipcIdx(y) !== null);
@@ -373,10 +479,18 @@
     });
     // Para el gráfico solo bases comparables: en A al menos S/ 10 M (evita +1000 % por bases mínimas)
     const MINBASE = 10e6;
-    const ranked = rows.filter(r => r.dv !== null && num(r.va) !== null && r.va >= MINBASE).sort((x, y) => y.dv - x.dv);
-    const excl = rows.filter(r => r.dv !== null && !(r.va >= MINBASE)).length;
+    const byAbs = S.vr.order === 'abs';
+    const key = r => byAbs ? r.dabs : r.dv;
+    const ranked = rows.filter(r => num(key(r)) !== null && !r.nueva && (byAbs || r.va >= MINBASE)).sort((x, y) => key(y) - key(x));
+    const excl = byAbs ? 0 : rows.filter(r => r.dv !== null && !(r.va >= MINBASE)).length;
     const N = isMobile() ? 8 : 10;
-    const chartRows = ranked.length > 2 * N ? ranked.slice(0, N).concat(ranked.slice(-N)) : ranked;
+    const ups = ranked.filter(r => key(r) > 0).slice(0, N);
+    const downsAll = ranked.filter(r => key(r) < 0).reverse();
+    const downs = downsAll.slice(0, N);
+    const noneDown = downsAll.length === 0;
+    const lows = noneDown ? ranked.slice(-N).reverse() : downs;
+    const upTitle = ups.length ? (ups.length < N ? `Solo ${ups.length} subieron` : `Las ${ups.length} que más suben`) : `Ninguna universidad subió entre ${a} y ${b}`;
+    const lowTitle = noneDown ? `Ninguna universidad bajó entre ${a} y ${b}: estas son las que menos crecieron` : (downsAll.length < N ? `Solo ${downsAll.length} ${downsAll.length === 1 ? 'bajó' : 'bajaron'} entre ${a} y ${b}` : `Las ${downs.length} que más bajan`);
     const partialWarn = [a, b].filter(isPartial);
     el.innerHTML = `
       <div class="controls">
@@ -407,9 +521,15 @@
           <ul class="comp-list">${compRows.map(c => `<li><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${cssVar(c.c)};margin-right:6px"></i>${esc(c.lbl)}</span><span>${fmtVar(c.d)}</span></li>`).join('')}</ul>
         </div>
         <div class="card">
-          <h3>Universidades que más suben y más bajan</h3>
-          <p class="sub">Variación % del ${esc(METRIC_LBL[m])} entre ${esc(a)} y ${esc(b)} (${esc(modeLbl)}). ${chartRows.length < ranked.length ? `Las ${N} que más suben y las ${N} que más bajan.` : ''} Las nuevas no se incluyen${excl ? ` ni ${excl} con menos de S/ 10 M en ${esc(a)} (base muy pequeña; ver tabla)` : ''}.</p>
-          <div class="chart"><canvas id="ch-vr-uni"></canvas></div>
+          <div class="controls" style="margin-bottom:4px"><label>Ordenar por<select id="vr-order"><option value="pct"${byAbs ? '' : ' selected'}>Δ %</option><option value="abs"${byAbs ? ' selected' : ''}>Δ S/ (millones)</option></select></label></div>
+          <h3>¿Qué universidades se movieron más?</h3>
+          <p class="sub">${byAbs ? 'Variación en millones' : 'Variación %'} del ${esc(METRIC_LBL[m])} entre ${esc(a)} y ${esc(b)} (${esc(modeLbl)}). Las nuevas no se incluyen${excl ? ` ni ${excl} con menos de S/ 10 M en ${esc(a)} (base muy pequeña; ver tabla)` : ''}.${byAbs ? '' : ' Δ S/ muestra mejor dónde se movió más dinero.'}</p>
+          <div class="split-chart">
+            <h4 class="up">${esc(upTitle)}</h4>
+            ${ups.length ? '<div class="chart"><canvas id="ch-vr-up"></canvas></div>' : ''}
+            <h4 class="${noneDown ? '' : 'down'}">${esc(lowTitle)}</h4>
+            ${lows.length ? '<div class="chart"><canvas id="ch-vr-down"></canvas></div>' : ''}
+          </div>
         </div>
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
@@ -481,20 +601,29 @@
         scales: { x: { beginAtZero: true, ticks: { callback: tickM, maxTicksLimit: isMobile() ? 4 : 7 } }, y: { ticks: { autoSkip: false, callback: function (v) { const l = this.getLabelForValue(v); return isMobile() && l.length > 18 ? l.slice(0, 17) + '…' : l; } } } },
       },
     }, `Comparación por componente entre ${a} y ${b}`);
-    const vals = chartRows.map(r => +(r.dv * 100).toFixed(1));
-    sizeFor('ch-vr-uni', chartRows.length, isMobile() ? 26 : 22);
-    mkChart('ch-vr-uni', {
-      type: 'bar',
-      data: { labels: chartRows.map(r => uName(r.u)), datasets: [{ label: 'Variación', data: vals, borderRadius: 3, backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
-      options: {
-        indexAxis: 'y',
-        plugins: { legend: { display: false }, tooltip: { callbacks: {
-          title: it => (chartRows[it[0].dataIndex] || {}).u.nombre || it[0].label,
-          label: ctx => { const r = chartRows[ctx.dataIndex]; return [`Variación: ${ctx.raw > 0 ? '+' : ''}${ctx.raw.toLocaleString(LOC)} %`, `${a}: ${fmtM(r.va)}`, `${b}: ${fmtM(r.vb)}`]; },
-        } } },
-        scales: { x: { ticks: { callback: tickP } }, y: { ticks: { autoSkip: false } } },
-      },
-    }, `Universidades con mayor subida y bajada entre ${a} y ${b}`);
+    $('#vr-order', el).addEventListener('change', e => { S.vr.order = e.target.value; renderVariacion(); });
+    const moverChart = (cid, list, color) => {
+      if (!list.length) return;
+      const vals = list.map(r => byAbs ? +(r.dabs / 1e6).toFixed(1) : +(r.dv * 100).toFixed(1));
+      const lbl = v => byAbs ? `${v > 0 ? '+' : v < 0 ? '−' : ''}S/ ${Math.abs(v).toLocaleString(LOC, { maximumFractionDigits: 1 })} M` : `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString(LOC, { maximumFractionDigits: 1 })} %`;
+      const maxAbs = Math.max(...vals.map(Math.abs), 1);
+      sizeFor(cid, list.length, isMobile() ? 30 : 26, 140);
+      mkChart(cid, {
+        type: 'bar',
+        data: { labels: list.map(r => uName(r.u)), datasets: [{ label: 'Variación', data: vals, borderRadius: 6, borderSkipped: false, maxBarThickness: 22,
+          backgroundColor: vals.map(v => cssVar(v >= 0 ? color : '--bad')), valueLabel: v => lbl(v) }] },
+        options: {
+          indexAxis: 'y', layout: { padding: { right: 64, left: vals.some(v => v < 0) ? 64 : 0 } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: {
+            title: it => (list[it[0].dataIndex] || {}).u.nombre || it[0].label,
+            label: ctx => { const r = list[ctx.dataIndex]; return [`Variación: ${fmtVarTxt(r.dv)}`, `${a}: ${fmtM(r.va)}`, `${b}: ${fmtM(r.vb)}`, `Δ S/: ${num(r.dabs) === null ? SD : fmtSigned(r.dabs)}`]; },
+          } } },
+          scales: { x: { display: false, min: Math.min(0, -maxAbs * (vals.some(v => v < 0) ? 1 : 0)), max: vals.some(v => v > 0) ? maxAbs : 0 }, y: { grid: { display: false }, ticks: { autoSkip: false, font: { weight: 600 } } } },
+        },
+      }, cid === 'ch-vr-up' ? upTitle : lowTitle);
+    };
+    moverChart('ch-vr-up', ups, '--good');
+    moverChart('ch-vr-down', lows, noneDown ? '--c-pia' : '--bad');
   }
   // Mini bloque en la ficha: serie nominal vs real
   function fichaVrHtml(u) {
@@ -650,14 +779,8 @@
         <p class="sub">Millones de soles. Ordenado por PIM. ${limNote(list.length, all.length)}</p>
         <div class="chart"><canvas id="ch-tray"></canvas></div>
       </div>
-      <div class="table-wrap" style="margin-top:12px"><table>
-        <caption>Variación del presupuesto durante ${esc(yearLbl(y))}</caption>
-        <thead><tr><th class="txt sticky-col" scope="col">Universidad</th><th scope="col">PIA</th><th scope="col">PIM</th><th scope="col">Δ PIM − PIA</th><th scope="col">Δ %</th><th scope="col">Devengado</th><th scope="col">% Ejec.</th><th scope="col">Transf. con norma</th></tr></thead>
-        <tbody>${list.map(u => {
-          const a = A(u, y) || {}; const pia = tot(u, y, 'pia'), pim = tot(u, y, 'pim');
-          const tr = Array.isArray(a.transferencias) ? a.transferencias : [];
-          return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(pia))}</td><td>${esc(fmtM(pim))}</td><td>${esc(fmtSigned(num(pim) !== null && num(pia) !== null ? pim - pia : null))}</td><td>${esc(fmtP(div(num(pim) !== null && num(pia) !== null ? pim - pia : null, pia)))}</td><td>${esc(fmtM(tot(u, y, 'dev')))}</td><td>${pill(kpi(u, y).ejec)}</td><td>${tr.length ? esc(tr.length + ' · ' + fmtM(sum(tr.map(t => num(t.monto))))) : '<span class="muted">—</span>'}</td></tr>`;
-        }).join('')}</tbody></table></div>
+      <h3 style="margin:20px 0 8px">Variación del presupuesto durante ${esc(yearLbl(y))}</h3>
+      <div id="tr-table"></div>
       <div class="grid two" style="margin-top:12px">
         <div class="card">
           <div class="controls" style="margin-bottom:6px"><label class="grow">Universidad<select id="tr-uni">${uniOptions(S.tray.uni)}</select></label></div>
@@ -674,6 +797,32 @@
       </div>`;
     $('#tr-year', el).addEventListener('change', e => setYear(e.target.value));
     $('#tr-uni', el).addEventListener('change', e => { S.tray.uni = e.target.value; renderTrayectoria(); });
+    const trRows = all.map(u => {
+      const a = A(u, y) || {}; const pia = tot(u, y, 'pia'), pim = tot(u, y, 'pim');
+      const tr = Array.isArray(a.transferencias) ? a.transferencias : [];
+      const d = (num(pim) !== null && num(pia) !== null) ? pim - pia : null;
+      return { u, pia, pim, d, dp: div(d, pia), dev: tot(u, y, 'dev'), ej: kpi(u, y).ejec, ntr: tr.length, mtr: sum(tr.map(t => num(t.monto))), nueva: isNueva(u) };
+    });
+    makeTable($('#tr-table', el), {
+      id: 'trt', caption: `Universidades públicas, ${yearLbl(y)}. Montos en soles.`, rows: trRows,
+      sort: { k: 'pim', dir: -1 }, limit: 25, mobilePick: ['pia', 'pim', 'd', 'dp', 'dev', 'ntr'], mdef: 'd',
+      filters: [
+        depFilter(r => r.u, trRows),
+        { k: 'ej', lbl: '% de ejecución', opts: [['', 'Todas'], ['bad', 'Menos de 75 %'], ['warn', '75 % a 90 %'], ['good', 'Más de 90 %']], test: (r, v) => semaforo(r.ej) === v },
+        { k: 'tr', lbl: 'Transferencias', opts: [['', 'Todas'], ['si', 'Solo con transferencias'], ['no', 'Sin transferencias']], test: (r, v) => (v === 'si') === (r.ntr > 0) },
+        { k: 'nv', lbl: 'Antigüedad', opts: [['', 'Todas'], ['nueva', 'Solo nuevas (desde 2000)'], ['antigua', 'Solo antiguas']], test: (r, v) => (v === 'nueva') === r.nueva },
+      ],
+      cols: [
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') },
+        { k: 'pia', lbl: 'PIA', get: r => r.pia, fmt: fmtM },
+        { k: 'pim', lbl: 'PIM', get: r => r.pim, fmt: fmtM },
+        { k: 'd', lbl: 'Δ PIM − PIA', get: r => r.d, fmt: v => num(v) === null ? SD : fmtSigned(v) },
+        { k: 'dp', lbl: 'Δ %', get: r => r.dp, html: r => fmtVar(r.dp) },
+        { k: 'dev', lbl: 'Devengado', get: r => r.dev, fmt: fmtM },
+        { k: 'ej', lbl: '% Ejec.', m: true, get: r => r.ej, html: r => pill(r.ej) },
+        { k: 'ntr', lbl: 'Transf. con norma', get: r => r.ntr, html: r => r.ntr ? esc(r.ntr + ' · ' + fmtM(r.mtr)) : '<span class="muted">—</span>' },
+      ],
+    });
 
     sizeFor('ch-tray', list.length, isMobile() ? 30 : 26);
     mkChart('ch-tray', {
@@ -992,6 +1141,7 @@
     return p === null ? null : (Math.abs(p) > 1.5 ? p / 100 : p);
   }
   const fmtVar = v => num(v) === null ? SD : `<span class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : v < 0 ? '−' : ''}${esc(fmtP(Math.abs(v)))}</span>`;
+  const fmtVarTxt = v => num(v) === null ? SD : `${v > 0 ? '+' : v < 0 ? '−' : ''}${fmtP(Math.abs(v))}`;
   const fmtDelta = (a, b) => (num(a) === null || num(b) === null) ? SD : fmtSigned(a - b);
   const linkOrText = (url, txt) => { const u = safeUrl(url); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(txt)}</a>` : esc(txt); };
   function versionBox(x) {
@@ -1546,7 +1696,15 @@
     b.innerHTML = html; b.className = 'banner' + (cls ? ' ' + cls : ''); b.hidden = false;
   }
 
+  // Numeración de secciones y nav según las visibles (sin huecos ni repetidos)
+  function renumber() {
+    $$('section[data-sec]').filter(sec => !sec.hidden).forEach((sec, i) => {
+      const n = $('.sec-n', sec); if (n) n.textContent = String(i + 1).padStart(2, '0');
+      const a = $(`#nav a[href="#${sec.id}"] .n`); if (a) a.textContent = String(i + 1);
+    });
+  }
   async function init() {
+    renumber();
     setupTheme();
     let d = null;
     try { d = await fetchJson('data/observatorio.json'); }
@@ -1569,6 +1727,9 @@
     chartTheme();
     const ysel = $('#year-global');
     ysel.innerHTML = yearOptions(S.year);
+    ysel.disabled = false;
+    const bn = $('#data-banner');
+    if (bn.classList.contains('loading')) { bn.hidden = true; bn.classList.remove('loading'); }
     ysel.addEventListener('change', e => setYear(e.target.value));
     const nLast = S.unis.filter(u => num(tot(u, S.lastClosed, 'pim')) !== null).length;
     $('#hero-meta').textContent = `${nLast} universidades con presupuesto en ${S.lastClosed} (${S.unis.length} en el padrón ${S.years[0]}–${S.years[S.years.length - 1]}) · último año cerrado: ${S.lastClosed}${d.generado ? ' · actualizado: ' + String(d.generado).slice(0, 10) : ''}`;
@@ -1589,11 +1750,7 @@
     } else {
       $('#expectativa').remove(); $('#nav-expectativa').remove(); delete SECTIONS.expectativa;
     }
-    // Numeración de secciones y nav según las visibles
-    $$('section[data-sec]').forEach((sec, i) => {
-      const n = $('.sec-n', sec); if (n) n.textContent = String(i + 1).padStart(2, '0');
-      const a = $(`#nav a[href="#${sec.id}"] .n`); if (a) a.textContent = String(i + 1);
-    });
+    renumber();
     setupLazy();
     setupScrollspy();
     // Impresión o ?completo: dibujar todas las secciones de una vez
