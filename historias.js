@@ -1372,7 +1372,7 @@
       lastW = window.innerWidth; clearTimeout(t);
       t = setTimeout(() => { redrawAll(); document.querySelectorAll('.anim').forEach((f) => f.classList.add('in')); }, 180);
     });
-    if (location.hash && S.goTo) S.goTo(decodeURIComponent(location.hash.slice(1)));
+    if (location.hash && S.goTo) { const id = decodeURIComponent(location.hash.slice(1)); (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => S.goTo(id)); }
     document.addEventListener('click', (e) => {
       const a = e.target.closest && e.target.closest('a[href^="#"]');
       if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
