@@ -123,6 +123,9 @@ def poli(puntos, fill, extra=""):
 def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
     """Frontón + columnas-barras + escalinata. Devuelve (svg, y_arquitrabe)."""
     n = len(serie); vmax = max(v for _, v in serie)
+    # Las columnas arrancan de un zócalo que equivale a S/ 1,500 M: así la caída 2025 -> 2026 (-3.7 %) se nota
+    # sin exagerar la escala (ver LEEME). Arte decorativo: las cifras exactas están en el texto.
+    BASE = 1.5e9
     gap = ancho * 0.30 / (n - 1); w = (ancho - gap * (n - 1)) / n
     x0 = cx - ancho / 2
     y_top_max = base_y - alto_max
@@ -133,20 +136,28 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
     # columnas (barras de PIM)
     cols = []
     for i, (a, v) in enumerate(serie):
-        h = alto_max * v / vmax
+        h = alto_max * (v - BASE) / (vmax - BASE)
         x = x0 + i * (w + gap)
         ult = i == n - 1
+        baja = i > 0 and v < serie[i - 1][1] and a >= 2026       # 2026 baja frente a 2025
         fill = AJI if ult else PAPEL
         CENTROS.setdefault(s, []).append((a, x + w / 2, base_y - h))
-        cap = (f'<rect x="{f(x - 2 * s)}" y="{f(base_y - h)}" width="{f(w + 4 * s)}" height="{f(5 * s)}" fill="{fill}"/>')
+        cap = (f'<rect x="{f(x - 2 * s)}" y="{f(base_y - h)}" width="{f(w + 4 * s)}" height="{f((7 if baja else 5) * s)}" '
+               f'fill="{COCHINILLA if baja else fill}"/>')
         fuste = f'<rect x="{f(x)}" y="{f(base_y - h)}" width="{f(w)}" height="{f(h)}" fill="{fill}"/>'
         estria = (f'<rect x="{f(x + w / 2 - 1 * s)}" y="{f(base_y - h + 10 * s)}" width="{f(2 * s)}" height="{f(max(h - 14 * s, 0))}" '
                   f'fill="{TINTA}" opacity="{.55 if ult else .16}"/>')
         # la última (2027) aún no es ley: borde punteado de tinta = "pendiente"
         pend = (f'<rect x="{f(x + 1.25 * s)}" y="{f(base_y - h + 1.25 * s)}" width="{f(w - 2.5 * s)}" height="{f(h - 2.5 * s)}" '
                 f'fill="none" stroke="{TINTA}" stroke-width="{f(2.5 * s)}" stroke-dasharray="{f(6 * s)} {f(4 * s)}"/>') if ult else ""
-        style = f' style="animation-delay:{i * 45 + (250 if ult else 0)}ms"' if animar else ""
-        cols.append(f'<g class="col{" col-27" if ult else ""}"{style}>{fuste}{estria if not ult else ""}{pend}{cap}</g>')
+        # brillo de la columna 2027: halo ají translúcido + destellos a los lados del capitel
+        brillo = ""
+        if ult:
+            brillo = (f'<rect x="{f(x - 5 * s)}" y="{f(base_y - h - 4 * s)}" width="{f(w + 10 * s)}" height="{f(h + 4 * s)}" fill="{AJI}" opacity=".35"/>')
+            for k, dy in enumerate((22, 48, 78)):
+                yy = base_y - h + dy * s
+                brillo += (f'<rect x="{f(x + w + 7 * s)}" y="{f(yy)}" width="{f((10 - k * 2) * s)}" height="{f(3 * s)}" fill="{AJI}"/>')
+        cols.append(f'<g class="col{" col-27" if ult else ""}">{brillo}{fuste}{estria if not ult else ""}{pend}{cap}</g>')
     out.append(f'<g class="cols">{"".join(cols)}</g>')
     # arquitrabe = friso de pallay
     ax0 = x0 - ala; ax1 = x0 + ancho + ala
@@ -180,13 +191,9 @@ def templo(cx, base_y, ancho, alto_max, serie, s=1.0, animar=True):
     return "\n".join(out), apex[1]
 
 
-ESTILO = """<style>
-@media (prefers-reduced-motion: no-preference) {
-  .col { transform-box: fill-box; transform-origin: 50% 100%; animation: crece .9s cubic-bezier(.2,.8,.2,1) both; }
-  .col-27 { animation-duration: 1.4s; }
-  @keyframes crece { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-}
-</style>"""
+# Sin animación dentro del SVG: en <img> no se controla y en algunos navegadores/headless se quedaba a medias.
+# El estado por defecto es el FINAL (todas las columnas a su altura).
+ESTILO = ""
 
 
 def hero_escritorio(serie):
@@ -231,7 +238,7 @@ def hero_escritorio(serie):
     cs = CENTROS[1.0]
     fam = "font-family=\"Archivo, 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif\" font-weight=\"800\" font-size=\"17\" text-anchor=\"middle\""
     o.append(f'<text x="{f(cs[0][1])}" y="651" fill="{PAPEL}" {fam}>{cs[0][0]}</text>')
-    o.append(f'<text x="{f(cs[-1][1])}" y="651" fill="{AJI}" {fam}>{cs[-1][0]}</text>')
+    o.append(f'<text x="{f(cs[-1][1])}" y="651" fill="{AJI}" {fam}>▲ {cs[-1][0]}</text>')
     o.append("</svg>")
     return "\n".join(o)
 
