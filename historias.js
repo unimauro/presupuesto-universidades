@@ -985,7 +985,7 @@
         return {
           cifra: esc(pct(T.top5_pct_del_aumento)),
           titulo: `de los ${esc(solesF(T.delta))} extra que propone el presupuesto 2027 se lo llevan solo 5 universidades`,
-          html: `<p class="lead">El aumento para 2027 no se reparte parejo. ${esc(T.n_suben)} universidades suben y ${esc(T.n_bajan)} bajan, pero cinco concentran más de la mitad de la plata nueva: ${esc(lista(top5.map((x) => `${nmP(x)} (${sF(x.delta)})`)))}.</p>
+          html: `<p class="lead">El aumento para 2027 no se reparte parejo. ${(() => { const c = cuenta27(); return `${esc(c.suben + c.nuevas)} universidades suben${c.nuevas ? ` (${esc(c.suben)} que ya tenían presupuesto y ${esc(c.nuevas)} nueva${c.nuevas > 1 ? 's' : ''})` : ''} y ${esc(c.bajan)} bajan`; })()}, pero cinco concentran más de la mitad de la plata nueva: ${esc(lista(top5.map((x) => `${nmP(x)} (${sF(x.delta)})`)))}.</p>
             <p>¿Por qué ellas? ${isNum(rdTop) && rdTop >= 0.5 ? `En esas cinco, el ${esc(pct(rdTop))} del aumento viene del canon y las regalías: la plata que llega a algunas regiones por la minería y el gas. Depende de cuánto se extrae y a qué precio, no de un premio a la universidad.` : 'Por obras puntuales y por la fuente de financiamiento de cada una (ver abajo).'} En el total, en cambio, el aumento se reparte entre lo que cobran las universidades, el canon y el Tesoro.${dep && dep.delta < 0 ? ` ${esc(titleCase(dep.departamento))} es el departamento que más pierde (${esc(sF(dep.delta))}${depUnis.length ? `: ${esc(lista(depUnis))}` : ''}).` : ''}</p>
             ${isNum(rho) ? `<p>¿Reciben más las que mejor gastan lo que tienen? No se ve esa relación: la correlación entre ejecución 2025 y aumento 2027 es prácticamente cero (ρ = ${esc(new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(rho).replace('-', '−'))}${Math.abs(rho) < 0.05 ? ', o sea, ninguna' : ''}).</p>` : ''}
             ${tu}
@@ -1094,6 +1094,16 @@
     $('#year-note').textContent = isPartial() ? `${Y} está en curso: cifras parciales.` : `Último año cerrado: ${S.closed[S.closed.length - 1]}.`;
   }
 
+  // Conteo 2027 igual que index: suben (con PIA 2026) + nuevas (sin PIA 2026) aparte; bajan.
+  function cuenta27() {
+    const us = S.a27 && Array.isArray(S.a27.universidades) ? S.a27.universidades.filter((x) => isNum(x.delta)) : null;
+    if (us) {
+      const nueva = (x) => x.nueva === true || !(isNum(x.pia_2026) && x.pia_2026 > 0);
+      return { suben: us.filter((x) => x.delta > 0 && !nueva(x)).length, nuevas: us.filter((x) => x.delta > 0 && nueva(x)).length, bajan: us.filter((x) => x.delta < 0).length };
+    }
+    const its = S.d.universidades.map((u) => u.expectativa_2027).filter((e) => e && isNum(e.var_pct));
+    return { suben: its.filter((e) => e.var_pct > 0).length, nuevas: 0, bajan: its.filter((e) => e.var_pct < 0).length };
+  }
   // Franja 2027 en el hero (resumen.expectativa_2027, calculado en vivo).
   function flash27(h) {
     const el = $('#flash27'), E = S.d && S.d.expectativa_2027;
@@ -1105,11 +1115,9 @@
       const d = he.pia_2027 - he.pia_2026;
       el.innerHTML = `<span>2027 para la <mark>${esc(label(h))}</mark>:</span><b class="${d < 0 ? 'baja' : ''}">${arrow(d)} ${esc(pctSigned(he.var_pct / 100, Math.abs(he.var_pct) >= 100 ? 0 : 1))} (${d >= 0 ? '+' : '−'}${esc(solesF(Math.abs(d)))})</b><span>en el proyecto de presupuesto</span><span class="ir">Ver capítulo 11</span>`;
     } else {
-      const its = S.d.universidades.map((u) => u.expectativa_2027).filter((e) => e && isNum(e.var_pct));
-      const A = S.a27 && S.a27.total;
-      const up = A && isNum(A.n_suben) ? A.n_suben : its.filter((e) => e.var_pct > 0).length, down = A && isNum(A.n_bajan) ? A.n_bajan : its.filter((e) => e.var_pct < 0).length;
+      const c = cuenta27();
       const d = isNum(T.pia_2027) && isNum(T.pia_2026) ? T.pia_2027 - T.pia_2026 : null;
-      el.innerHTML = `<span>2027:</span><b class="${d < 0 ? 'baja' : ''}">${arrow(d)} ${esc(pctSigned(T.var_pct / 100, 1))} (${d >= 0 ? '+' : '−'}${esc(solesF(Math.abs(d)))})</b><span>para las universidades públicas. ${esc(up)} suben, ${esc(down)} bajan.${h ? ` La ${esc(label(h))} no tiene monto propio.` : ''}</span><span class="ir">Ver capítulo 11</span>`;
+      el.innerHTML = `<span>2027:</span><b class="${d < 0 ? 'baja' : ''}">${arrow(d)} ${esc(pctSigned(T.var_pct / 100, 1))} (${d >= 0 ? '+' : '−'}${esc(solesF(Math.abs(d)))})</b><span>para las universidades públicas. ${esc(c.suben)} universidades suben${c.nuevas ? ` (+${esc(c.nuevas)} nueva${c.nuevas > 1 ? 's' : ''})` : ''} · ${esc(c.bajan)} bajan.${h ? ` La ${esc(label(h))} no tiene monto propio.` : ''}</span><span class="ir">Ver capítulo 11</span>`;
     }
     el.setAttribute('aria-label', el.textContent.replace(/[▲▼]/g, (m) => (m === '▲' ? 'sube' : 'baja')));
     el.hidden = false;

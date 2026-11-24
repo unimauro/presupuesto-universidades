@@ -685,3 +685,9 @@ tr.row-dim td.sticky-col .uni-link { opacity: .7; }
 .disp-tags .tag { font-size: 11px; padding: 1px 8px; }
 .disp-tags .tag.esp { background: var(--tu); color: #1E1428; }
 .disp-tags .tag.ok { background: var(--good-bg); color: var(--ink); }
+
+/* ¿A quién le dieron más? */
+.a27-h { font: 900 clamp(30px, 8vw, 52px)/.95 var(--font-display); font-stretch: 62%; margin: 8px 0 6px; }
+.a27-tit { font: 800 clamp(20px, 5.4vw, 28px)/1.2 var(--font-cifras); font-stretch: 85%; margin: 0 0 6px; }
+.a27-tit mark { background: var(--tu); color: #1E1428; padding: 0 .15em; }
+.src-dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border: 1.5px solid var(--ink); vertical-align: 0; }

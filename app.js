@@ -1603,6 +1603,7 @@
         <p class="sub">Presupuesto de apertura (PIA) del total de universidades; la línea punteada es el PIM, lo que terminaron teniendo tras las modificaciones del año.</p>
         <div class="chart"><canvas id="ch-exp-tot"></canvas></div>
       </div>
+      <div id="a27" style="margin-top:16px"></div>
       <div class="kpis">
         ${kpiBox('PIA 2027 (universidades)', fmtM(p27), rows.length + ' universidades', 'accent')}
         ${kpiBox('PIA 2026', fmtM(p26), 'apertura del año en curso')}
@@ -1666,6 +1667,7 @@
     }
     renderP2027($('#p27', el));
     exp2027TotalChart('ch-exp-tot');
+    renderA2027($('#a27', el));
     const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
     makeTable($('#ex-host', el), {
       rowClass: r => (num(r.p26) !== null && r.p26 < BASE_CHICA) ? 'row-dim' : '',
@@ -1887,6 +1889,107 @@
     if (a === null) return '<span class="tag">2027: sin PIA propio en la propuesta</span>';
     const v = pctChg(b, a);
     return `<a class="h27-chip ${v > 0 ? 'up' : v < 0 ? 'down' : ''}" href="#expectativa"><b>2027 ${v > 0 ? '▲' : v < 0 ? '▼' : '＝'} ${esc(v === null ? 'nueva' : fmtChg(v))}</b> · ${esc(soles(a))}${b ? ` (PIA 2026: ${esc(soles(b))})` : ''}</a>`;
+  }
+
+  // ================================================================== ¿A QUIÉN LE DIERON MÁS? (data/analisis2027.json bajo demanda)
+  let a27P = null;
+  const loadA2027 = () => a27P || (a27P = fetchJson('data/analisis2027.json').catch(() => null));
+  const FUENTE_DELTA = [['f_ro', 'RO (Tesoro)', '--f1'], ['f_rdr', 'RDR (ingresos propios)', '--f2'], ['f_rd', 'Canon y regalías (RD)', '--f3'], ['f_dyt', 'Donaciones y transf.', '--f4']];
+  const mainSource = r => { let best = null; FUENTE_DELTA.forEach(([k, l, c]) => { const v = num(r[k]); if (v !== null && (best === null || Math.abs(v) > Math.abs(best.v))) best = { k, l, c, v }; }); return best; };
+  // Barras divergentes con etiquetas que no chocan con los nombres
+  function divBars(id, items, title) {
+    const vals = items.map(it => it.v);
+    const mx = Math.max(1, ...vals.map(v => Math.abs(v)));
+    const hasNeg = vals.some(v => v < 0), hasPos = vals.some(v => v > 0);
+    sizeFor(id, items.length, isMobile() ? 30 : 26, 160);
+    mkChart(id, {
+      type: 'bar',
+      data: { labels: items.map(it => it.lbl), datasets: [{ label: 'Δ', data: vals.map(v => mill(v)), backgroundColor: items.map(it => cssVar(it.c)), borderRadius: 0, borderSkipped: false, maxBarThickness: 22,
+        valueLabel: (v, i) => (vals[i] >= 0 ? '+' : '−') + soles(Math.abs(vals[i])) }] },
+      options: {
+        indexAxis: 'y', layout: { padding: { right: hasPos ? (isMobile() ? 74 : 90) : 8 } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { title: it => (items[it[0].dataIndex] || {}).full || it[0].label, label: ctx => (items[ctx.dataIndex] || {}).tip || soles(ctx.raw * 1e6) } } },
+        scales: { x: { display: false, min: hasNeg ? -mill(mx) * (hasPos ? 1.5 : 1.6) : 0, max: hasPos ? mill(mx) : 0 }, y: { grid: { display: false }, ticks: { autoSkip: false, font: { weight: 600 } } } },
+      },
+    }, title);
+  }
+  function renderA2027(host) {
+    host.innerHTML = '<p class="empty"><span class="spinner" aria-hidden="true"></span> Cargando el análisis 2027…</p>';
+    loadA2027().then(a => {
+      if (!a || !a.total) { host.innerHTML = ''; return; }
+      const t = a.total, unis = (a.universidades || []).map(r => Object.assign({}, r, { u: uniBy(r.pliego) }));
+      const gen = a.por_generica || {}, fue = a.por_fuente || {};
+      const pInv = div(num(gen.inversion), num(t.delta));
+      const nNuevas = unis.filter(r => r.nueva && num(r.pia_2027)).length;
+      const top5 = num(t.top5_pct_del_aumento), top10 = num(t.top10_pct_del_aumento);
+      host.innerHTML = `
+        <h3 class="a27-h">¿A quién le dieron más?</h3>
+        <p class="a27-tit">${top5 !== null ? `5 universidades se llevan el <mark>${esc(fmtP(top5, 0))}</mark> del aumento` : ''}${top10 !== null ? `; 10 se llevan el ${esc(fmtP(top10, 0))}` : ''}.</p>
+        <p class="sub">Aumento total ${esc(fmtSigned(num(t.delta)))}: ${esc(fmtN(t.n_suben - nNuevas))} universidades suben${nNuevas ? ` (+${nNuevas} nuevas)` : ''} por ${esc(soles(num(t.suma_subidas)))} y ${esc(fmtN(t.n_bajan))} bajan por ${esc(soles(Math.abs(num(t.suma_bajadas) || 0)))}.</p>
+        <div class="grid two">
+          <div class="card"><h3>¿En qué se va el aumento?</h3><p class="sub">Δ por genérica de gasto, PIA 2027 − PIA 2026.${pInv !== null ? ` La inversión explica el <strong>${esc(fmtP(pInv, 0))}</strong>.` : ''}</p><div class="chart"><canvas id="ch-a27-gen"></canvas></div></div>
+          <div class="card"><h3>¿Con qué dinero?</h3><p class="sub">Δ por fuente de financiamiento. El aumento de RDR es una proyección de recaudación, no dinero asegurado.</p><div class="chart"><canvas id="ch-a27-fue"></canvas></div></div>
+        </div>
+        <div class="card" style="margin-top:12px"><h3>Las que más suben y las que bajan</h3>
+          <p class="sub">Δ en soles; el color indica la fuente que más explica el cambio.</p>
+          <ul class="legend">${FUENTE_DELTA.map(([, l, c]) => `<li><i style="background:${cssVar(c)}"></i>${esc(l)}</li>`).join('')}</ul>
+          <div class="chart"><canvas id="ch-a27-uni"></canvas></div></div>
+        <div class="grid two" style="margin-top:12px">
+          <div class="card"><h3>Por departamento</h3><p class="sub">Δ PIA 2027 − PIA 2026 sumando sus universidades.</p><div class="chart"><canvas id="ch-a27-dep"></canvas></div></div>
+          <div class="card"><h3>¿Reciben más las que ejecutan mejor?</h3><p class="sub">Ejecución 2025 (eje horizontal) frente a la variación 2027 (vertical). ${num(a.rho_ejecucion_vs_aumento) !== null ? `ρ = ${esc(nf(a.rho_ejecucion_vs_aumento, 2))}: <strong>no se observa que reciban más las que ejecutan mejor</strong>.` : ''} Correlación no es causalidad.</p><div class="chart sq"><canvas id="ch-a27-sc"></canvas></div></div>
+        </div>
+        <h3 style="margin:20px 0 8px">Todas las universidades: PIA 2026 → PIA 2027</h3>
+        <div id="a27-host"></div>
+        <ul class="note lb-notas">${(a.notas || []).map(n => `<li>${esc(n)}</li>`).join('')}<li>Montos nominales; propuesta del dictamen, la ley final puede cambiar montos.</li>${a.fuente ? `<li>Fuente: ${esc(a.fuente)}</li>` : ''}</ul>`;
+      // (2) composición del aumento
+      const GEN_D = [['personal', 'Personal', '--g1'], ['pensiones', 'Pensiones', '--g2'], ['bys', 'Bienes y serv.', '--g3'], ['inversion', 'Inversión (2.6)', '--g5'], ['otros', 'Otros', '--g4']];
+      divBars('ch-a27-gen', GEN_D.filter(([k]) => num(gen[k]) !== null).map(([k, l, c]) => ({ lbl: l, c, v: gen[k] })), 'Aumento 2027 por genérica');
+      divBars('ch-a27-fue', [['ro', 'RO (Tesoro)', '--f1'], ['rdr', 'RDR', '--f2'], ['rd', 'Canon (RD)', '--f3'], ['dyt', 'Donac. y transf.', '--f4']].filter(([k]) => num(fue[k]) !== null).map(([k, l, c]) => ({ lbl: l, c, v: fue[k] })), 'Aumento 2027 por fuente');
+      // (3) universidades
+      const withD = unis.filter(r => num(r.delta) !== null && !r.sin_2027);
+      const ups = withD.filter(r => r.delta > 0).sort((x, y) => y.delta - x.delta).slice(0, isMobile() ? 10 : 15);
+      const downs = withD.filter(r => r.delta < 0).sort((x, y) => x.delta - y.delta).slice(0, 10).reverse();
+      const uItem = r => { const ms = mainSource(r); return { lbl: shortTxt(r.uni || (r.u && uName(r.u)) || r.pliego, isMobile() ? 12 : 24), full: titleCase(r.nombre || ''), c: ms ? ms.c : '--c-pia', v: r.delta,
+        tip: `Δ ${fmtSigned(r.delta)} (${r.nueva ? 'nueva' : fmtChg(r.var_pct)}) · principal: ${ms ? ms.l : 's/d'}` }; };
+      divBars('ch-a27-uni', ups.concat(downs).map(uItem), 'Universidades con mayor subida y bajada en 2027');
+      // (4) departamentos
+      const deps = (a.por_departamento || []).filter(d => num(d.delta) !== null).sort((x, y) => y.delta - x.delta);
+      divBars('ch-a27-dep', deps.map(d => ({ lbl: titleCase(d.departamento), full: `${titleCase(d.departamento)} (${d.n} univ.)`, c: d.delta >= 0 ? '--sem-good' : '--sem-bad', v: d.delta, tip: `Δ ${fmtSigned(d.delta)} (${fmtChg(d.var_pct)})` })), 'Variación 2027 por departamento');
+      // (5) dispersión
+      const pts = withD.filter(r => num(r.ejec_2025) !== null && num(r.var_pct) !== null && !r.nueva);
+      const yCap = 150;
+      mkChart('ch-a27-sc', {
+        type: 'scatter',
+        data: { datasets: [{ label: 'Universidades', data: pts.map(r => ({ x: +(r.ejec_2025 * 100).toFixed(1), y: Math.min(yCap, +(r.var_pct * 100).toFixed(1)), r })),
+          backgroundColor: pts.map(r => cssVar(r.var_pct >= 0 ? '--c-pim' : '--sem-bad') + 'CC'), borderColor: cssVar('--ink'), borderWidth: 1, pointRadius: isMobile() ? 5 : 6, pointHoverRadius: 8 }] },
+        options: {
+          plugins: { legend: { display: false }, tooltip: { callbacks: { title: it => { const r = it[0].raw.r; return `${r.uni} · ${titleCase(r.nombre || '')}`; }, label: it => { const r = it.raw.r; return [`Ejecución 2025: ${fmtP(r.ejec_2025)}`, `Variación 2027: ${fmtChg(r.var_pct)} (${fmtSigned(r.delta)})`]; } } } },
+          scales: { x: { type: 'linear', min: 40, max: 100, title: { display: true, text: 'Ejecución 2025 (%)' }, ticks: { callback: tickP } },
+            y: { type: 'linear', max: yCap, title: { display: true, text: `Variación 2027 (%, tope ${yCap})` }, ticks: { callback: tickP } } },
+        },
+      }, 'Ejecución 2025 frente a variación del presupuesto 2027');
+      // (6) tabla
+      makeTable($('#a27-host', host), {
+        id: 'a27t', caption: 'PIA 2026, PIA 2027 propuesto y de dónde sale el cambio. Montos en soles.', rows: unis, sort: { k: 'delta', dir: -1 }, limit: 20,
+        rowClass: r => (num(r.pia_2026) !== null && r.pia_2026 < BASE_CHICA && !r.nueva) ? 'row-dim' : '',
+        mobilePick: ['p26', 'p27', 'delta', 'dinv', 'fuente', 'ejec', 'pe'], mdef: 'delta',
+        search: { text: r => [r.uni, r.nombre, r.departamento, r.pliego, r.explica].join(' ') },
+        filters: [depFilter(r => r.u || { departamento: r.departamento }, unis),
+          { k: 'dir', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Suben'], ['down', 'Bajan'], ['nueva', 'Nuevas'], ['sin', 'Sin PIA 2027']], test: (r, v) => v === 'nueva' ? r.nueva : v === 'sin' ? !!r.sin_2027 : v === 'up' ? r.delta > 0 && !r.nueva : r.delta < 0 }],
+        cols: [
+          { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => r.uni || '', html: r => (r.u ? uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') : esc(r.uni || r.nombre || '')) + (r.explica ? `<span class="proy-meta">${esc(r.explica)}</span>` : '') },
+          { k: 'p26', lbl: 'PIA 2026', get: r => num(r.pia_2026), fmt: fmtM },
+          { k: 'p27', lbl: 'PIA 2027', get: r => num(r.pia_2027), html: r => `<strong>${esc(fmtM(num(r.pia_2027)))}</strong>` },
+          { k: 'delta', lbl: 'Δ S/', m: true, get: r => num(r.delta), html: r => `<span class="${r.delta > 0 ? 'up' : r.delta < 0 ? 'down' : ''}">${esc(num(r.delta) === null ? SD : fmtSigned(r.delta))}</span>` },
+          { k: 'var', lbl: 'Δ %', get: r => num(r.var_pct), html: r => r.nueva ? '<span class="muted">nueva</span>' : fmtVar(num(r.var_pct)) },
+          { k: 'dinv', lbl: 'Δ inversión', get: r => num(r.d_inversion), fmt: v => num(v) === null ? SD : fmtSigned(v) },
+          { k: 'dper', lbl: 'Δ personal', get: r => num(r.d_personal), fmt: v => num(v) === null ? SD : fmtSigned(v) },
+          { k: 'fuente', lbl: 'Fuente principal', get: r => (mainSource(r) || {}).l || '', html: r => { const m = mainSource(r); return m ? `<span class="src-dot" style="background:${cssVar(m.c)}"></span>${esc(m.l)}` : SD; } },
+          { k: 'ejec', lbl: 'Ejec. 2025', get: r => num(r.ejec_2025), html: r => pill(num(r.ejec_2025)) },
+          { k: 'pe', lbl: 'S/ por estudiante 2026 → 2027', get: r => num(r.por_estudiante_2027), html: r => num(r.por_estudiante_2027) === null ? SD : `${esc(soles(num(r.por_estudiante_2026)))} → <strong>${esc(soles(num(r.por_estudiante_2027)))}</strong>` },
+        ],
+      });
+    });
   }
 
   // ================================================================== 8. FICHA + COMPARADOR
