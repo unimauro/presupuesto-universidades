@@ -203,4 +203,14 @@ Prioridades: **P0** bloquea una tarea central o da un dato engañoso · **P1** i
 - Resueltos: P1-12 (tema según el sistema + `#theme-toggle` de 44×44), P1-13 (siglas en el eje: "UN Tecnológica…" ya no se corta), P1-14 (formato `S/ 6,954.6 M` y Plex Sans; se quitó la carga de Plex Mono), P1-4 en historias (paleta categórica propia), P2-10, P2-11 (las anclas `#variacion`, `#gasto`, `#idi`, `#infra`, `#fuentes`, `#trayectoria` y `#ranking` existen en index) y P2-12 (`og-historias.png` existe). Sin errores JS y sin scroll horizontal (`scrollWidth = 375`).
 - Pendientes menores (P2): `a.brand` de 32 px de alto; enlaces de fuentes y "Volver al observatorio" del pie de 16–18 px. Siglas faltantes → ETL.
 
-**Index (`frontend`):** pendiente de verificar.
+**Index (`frontend`), verificado el 23-nov-2026 con Playwright (375×812, DPR 2, `is_mobile` + `has_touch`; `matchMedia('(pointer: coarse)')` = true) sobre el build local:**
+- P0-1 OK: con `#u=514`, `#ficha.top` = 112 px a los 1.5, 3 y 5 s.
+- P1-3 OK: el ranking móvil tiene 3 columnas (Universidad | métrica | % Ejec.), con selector y píldoras de semáforo.
+- P1-6 casi todo resuelto: los controles de menos de 44 px bajaron de 136 a 105, y ya no hay `select`, `input`, `.seg`, `th button.sort` ni `a.uni-link` por debajo de 44. Quedan:
+  - `#body-mapa` → la lista por departamento tiene 65 enlaces de 34 px y su `summary` mide 25 px.
+  - `#body-expectativa` → 12 enlaces `<strong>` de 38 px en la lista de disposiciones/documentos.
+  - Ficha: `#fi-link` de 16 px y un enlace en `.sub` de 16 px.
+  - `a.brand` de 32 px; chips del nav de 40 px (aceptable por el gap de 6 px); zoom de Leaflet de 30 px (estándar de la librería).
+- P1-7 OK: un deslizamiento con un dedo sobre el mapa desplaza la página (+401 px, no la atrapa); hay botón "Mover el mapa", `role="region"` + `aria-label`, texto de ayuda y una lista por departamento.
+- Observación P2: `document.documentElement.scrollWidth` = 414 con un viewport de 375. En Chrome no hay scroll horizontal real (`scrollX` sigue en 0 porque `body{overflow-x:hidden}`), pero en iOS Safari `overflow-x:hidden` en body no siempre lo impide. Sugerencia: `html,body{overflow-x:clip}` y buscar qué elemento posicionado se sale del ancho (no aparece en el flujo normal).
+- Pendiente: P1-2 (dividir el JSON) depende del integrador o ETL.

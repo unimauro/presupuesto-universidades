@@ -29,9 +29,9 @@
   --k6: #8e4a68;
   --k7: #6e5b46;
   /* genéricas (no repiten PIA/PIM/Devengado) */
-  --g1: #3d5a80; --g2: #7fa7c4; --g3: #55753a; --g4: #9a917f; --g5: #8e4a68; --g6: #c9a66b; --g7: #6e5b46;
+  --g1: #3d5a80; --g2: #98c1d9; --g3: #55753a; --g4: #9a917f; --g5: #8e4a68; --g6: #6e5b46; --g7: #c9a66b;
   /* fuentes */
-  --f1: #3d5a80; --f2: #c06c3e; --f3: #55753a; --f4: #8e4a68; --f5: #7fa7c4;
+  --f1: #3d5a80; --f2: #c06c3e; --f3: #55753a; --f4: #8e4a68; --f5: #98c1d9;
   --shadow: 0 1px 2px rgba(27, 34, 48, .06), 0 4px 14px rgba(27, 34, 48, .05);
   --radius: 12px;
   --top-h: 104px;
@@ -67,8 +67,8 @@
   --k5: #93b86f;
   --k6: #d48aab;
   --k7: #b79e82;
-  --g1: #8fb0d9; --g2: #b9d6ea; --g3: #93b86f; --g4: #8a8372; --g5: #d48aab; --g6: #d9b77e; --g7: #b79e82;
-  --f1: #8fb0d9; --f2: #e39a6f; --f3: #93b86f; --f4: #d48aab; --f5: #b9d6ea;
+  --g1: #7fa3cf; --g2: #b9dcef; --g3: #93b86f; --g4: #7d7769; --g5: #d48aab; --g6: #b79e82; --g7: #d9b77e;
+  --f1: #7fa3cf; --f2: #e08f63; --f3: #93b86f; --f4: #d48aab; --f5: #b9dcef;
   --ochre-text: #e0a447;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3);
   color-scheme: dark;
@@ -415,3 +415,16 @@ body { font-size: 15.5px; line-height: 1.6; }
 .mt-count { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 .split-chart h4 { margin: 12px 0 4px; font-size: 14px; }
 .split-chart .empty { margin: 6px 0; }
+
+/* Sección actualizando (capa de datos en camino) */
+.sec.is-loading .sec-head::after { content: "Cargando datos…"; display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--muted);
+  padding: 4px 12px 4px 30px; border-radius: 999px; background: var(--surface) no-repeat 10px center; border: 1px solid var(--line);
+  background-image: radial-gradient(circle, var(--accent) 35%, transparent 40%); animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+
+/* Gráficos: más altos en móvil, tarjetas con aire */
+.chart { height: 300px; }
+@media (min-width: 560px) { .chart { height: 340px; } }
+.card { border-radius: 16px; }
+.legend li { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-weight: 600; color: var(--ink); }
+.legend i { border-radius: 3px; }

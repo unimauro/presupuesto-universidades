@@ -66,7 +66,7 @@
     rendered: new Set(), charts: new Map(),
     rank: { q: '', dep: '', sort: 'pim', dir: -1, all: false, mcol: 'pim' },
     top: 15,
-    tray: { uni: null },
+    tray: { uni: null, order: 'pim', n: 15, hl: '' },
     gasto: { metric: 'dev', uni: '' },
     fuentes: { metric: 'pim', uni: '' },
     ficha: { uni: null, cmp: [] },
@@ -121,6 +121,15 @@
     const k = (a && a.kpi) || {};
     return { pim: num(k.idi_pim), dev: num(k.idi_dev) };
   }
+  const GEN_KPI = { '2.1': 'pct_personal', '2.2': 'pct_pensiones', '2.3': 'pct_bys', '2.6': 'pct_inversion' };
+  function genDev(u, y, frag) {
+    const a = A(u, y); if (!a) return null;
+    const g = pick(a.generica, frag);
+    if (g && num(g.dev) !== null) return g.dev;
+    if (a.generica) return null;
+    const k = (a.kpi || {})[GEN_KPI[frag]]; const d = num((a.total || {}).dev);
+    return (num(k) !== null && d !== null) ? k * d : null;
+  }
   const tot = (u, y, f) => num(((A(u, y) || {}).total || {})[f]);
 
   function nacional(y) {
@@ -140,20 +149,52 @@
   function chartTheme() {
     if (!hasChart()) return;
     const C = window.Chart;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     C.defaults.font.family = cssVar('--font') || 'system-ui';
     C.defaults.font.size = 12;
     C.defaults.color = cssVar('--muted');
     C.defaults.borderColor = cssVar('--line');
-    C.defaults.plugins.legend.labels.boxWidth = 12;
-    C.defaults.plugins.legend.labels.boxHeight = 12;
-    C.defaults.plugins.tooltip.backgroundColor = cssVar('--ink');
-    C.defaults.plugins.tooltip.titleColor = cssVar('--bg');
-    C.defaults.plugins.tooltip.bodyColor = cssVar('--bg');
-    C.defaults.animation = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 350 };
+    // Leyendas como chips
+    Object.assign(C.defaults.plugins.legend.labels, { usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 10, boxHeight: 10, padding: 14, font: { weight: 600, size: 12 } });
+    C.defaults.plugins.legend.position = 'bottom';
+    // Tooltips claros y táctiles
+    Object.assign(C.defaults.plugins.tooltip, {
+      backgroundColor: cssVar('--surface'), titleColor: cssVar('--ink'), bodyColor: cssVar('--ink'), footerColor: cssVar('--muted'),
+      borderColor: cssVar('--line-strong'), borderWidth: 1, padding: 12, cornerRadius: 12, boxPadding: 5, usePointStyle: true,
+      titleFont: { weight: 700, size: 13 }, bodyFont: { size: 12.5 }, caretSize: 6,
+    });
+    // Rejilla sutil, sin bordes de eje; sin rejilla en el eje de categorías
+    C.defaults.scale.grid.color = cssVar('--line');
+    C.defaults.scale.grid.drawTicks = false;
+    C.defaults.scale.border = Object.assign(C.defaults.scale.border || {}, { display: false });
+    C.defaults.scale.ticks.padding = 8;
+    if (C.defaults.scales && C.defaults.scales.category) C.defaults.scales.category.grid = Object.assign(C.defaults.scales.category.grid || {}, { display: false });
+    // Barras redondeadas, líneas suaves
+    C.defaults.elements.bar.borderRadius = 6;
+    C.defaults.elements.bar.borderSkipped = 'start';
+    C.defaults.datasets.bar.maxBarThickness = 26;
+    C.defaults.elements.line.tension = 0.35;
+    C.defaults.elements.line.borderWidth = 2.5;
+    C.defaults.elements.point.radius = 0;
+    C.defaults.elements.point.hoverRadius = 5;
+    C.defaults.elements.point.hitRadius = 14;
+    C.defaults.animation = reduce ? false : { duration: 700, easing: 'easeOutQuart' };
+    // Los degradados (CanvasGradient) no se pueden interpolar como color
+    if (C.defaults.animations) C.defaults.animations.colors = false;
     C.defaults.maintainAspectRatio = false;
     if (!C.registry.plugins.get('valueLabel')) C.register(valueLabelPlugin);
     C.defaults.responsive = true;
   }
+  // Degradado vertical bajo una línea (áreas suaves)
+  const areaFill = (cssName, alpha = 0.22) => ctx => {
+    const { chart } = ctx; const { ctx: c, chartArea } = chart;
+    const col = cssVar(cssName);
+    if (!chartArea) return col + '22';
+    const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    g.addColorStop(0, col + Math.round(alpha * 255).toString(16).padStart(2, '0'));
+    g.addColorStop(1, col + '00');
+    return g;
+  };
   function mkChart(id, cfg, label) {
     const old = S.charts.get(id);
     if (old) { old.destroy(); S.charts.delete(id); }
@@ -223,7 +264,7 @@
     const y = S.lastClosed;
     const n = nacional(y);
     const idiDev = sum(S.unis.map(u => idiOf(A(u, y)).dev));
-    const inv = sum(S.unis.map(u => (pick((A(u, y) || {}).generica, '2.6') || {}).dev));
+    const inv = sum(S.unis.map(u => genDev(u, y, '2.6')));
     const yPrev = S.years[S.years.indexOf(y) - 1];
     const nPrev = yPrev ? nacional(yPrev) : null;
     const varPim = nPrev ? div(n.pim - nPrev.pim, nPrev.pim) : null;
@@ -236,7 +277,7 @@
         ${kpiBox('% ejecución', fmtP(div(n.dev, n.pim)), 'devengado / PIM', 'ochre')}
         ${div(idiDev, n.dev) !== null && idiDev > 0
           ? kpiBox('% a I+D (PP 0137)', fmtP(div(idiDev, n.dev), 2), 'inversión: ' + fmtP(div(inv, n.dev)))
-          : kpiBox('% a personal', fmtP(div(sum(S.unis.map(u => (pick((A(u, y) || {}).generica, '2.1') || {}).dev)), n.dev)), 'inversión: ' + fmtP(div(inv, n.dev)))}
+          : kpiBox('% a personal', fmtP(div(sum(S.unis.map(u => genDev(u, y, '2.1'))), n.dev)), 'inversión: ' + fmtP(div(inv, n.dev)))}
       </div>
       <div class="grid two">
         <div class="card">
@@ -258,11 +299,11 @@
     mkChart('ch-nac', {
       type: 'line',
       data: {
-        labels: yrs.map(String),
+        labels: yrs.map(yTick),
         datasets: [
-          { label: 'PIA', data: ser('pia'), borderColor: cssVar('--c-pia'), backgroundColor: cssVar('--c-pia'), tension: .25, pointRadius: 2, segment: dashPartial },
-          { label: 'PIM', data: ser('pim'), borderColor: cssVar('--c-pim'), backgroundColor: cssVar('--c-pim'), borderWidth: 2.5, tension: .25, pointRadius: 2, segment: dashPartial },
-          { label: 'Devengado', data: ser('dev'), borderColor: cssVar('--c-dev'), backgroundColor: cssVar('--c-dev'), borderWidth: 2.5, tension: .25, pointRadius: 2, segment: dashPartial },
+          { label: 'PIA', data: ser('pia'), borderColor: cssVar('--c-pia'), backgroundColor: cssVar('--c-pia'), borderWidth: 2, borderDash: [5, 4], segment: dashPartial },
+          { label: 'PIM', data: ser('pim'), borderColor: cssVar('--c-pim'), backgroundColor: areaFill('--c-pim', 0.18), pointBackgroundColor: cssVar('--c-pim'), fill: 'origin', borderWidth: 3, segment: dashPartial },
+          { label: 'Devengado', data: ser('dev'), borderColor: cssVar('--c-dev'), backgroundColor: areaFill('--c-dev', 0.28), pointBackgroundColor: cssVar('--c-dev'), fill: 'origin', borderWidth: 3, segment: dashPartial },
         ],
       },
       options: {
@@ -277,7 +318,7 @@
       type: 'bar',
       data: {
         labels: yrs.map(yTick),
-        datasets: [{ label: 'Ejecución', data: ej, borderRadius: 4,
+        datasets: [{ label: 'Ejecución', data: ej, borderRadius: 6, valueLabel: v => isMobile() ? '' : Math.round(v) + '%',
           backgroundColor: yrs.map((yy, i) => isPartial(yy) ? cssVar('--line-strong') : cssVar('--' + ({ good: 'good', warn: 'warn', bad: 'bad', na: 'line' })[semaforo(ej[i] / 100)])) }],
       },
       options: {
@@ -533,39 +574,26 @@
         </div>
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
-      <div class="controls"><label class="grow">Buscar<input type="search" id="vr-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.vr.q)}"></label></div>
-      <div class="table-wrap tall"><table id="vr-table"><caption>${esc(METRIC_LBL[m])} ${esc(a)} vs ${esc(b)}, ${esc(modeLbl)}.</caption><thead></thead><tbody></tbody></table></div>
+      <div id="vr-host"></div>
       <p class="count"><button type="button" class="btn" id="vr-share">Copiar enlace a esta comparación</button></p>`;
 
-    const cols = [
-      ['nombre', 'Universidad', r => uName(r.u)], ['va', esc(a), r => r.va], ['vb', esc(b), r => r.vb],
-      ['dabs', 'Δ S/', r => r.dabs], ['dv', real ? 'Δ % (real)' : 'Δ % (nominal)', r => r.dv],
-      ['dr', 'Δ real %', r => r.dr], ['pb', `S/ por estudiante ${esc(b)}`, r => r.pb], ['dp', 'Δ % por estudiante', r => r.dp],
-    ].filter(c => !(real && c[0] === 'dr')).filter(c => !(['pb', 'dp'].includes(c[0]) && !rows.some(r => r.pb !== null)));
-    const draw = () => {
-      const q = S.vr.q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-      const col = cols.find(c => c[0] === S.vr.sort) || cols.find(c => c[0] === 'dv');
-      const list = rows.filter(r => !q || [r.u.nombre, r.u.corto, r.u.pliego, r.u.departamento].join(' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q))
-        .sort((x, y) => {
-          const va = col[2](x), vb = col[2](y);
-          if (typeof va === 'string') return S.vr.dir * va.localeCompare(vb, LOC);
-          if (va === null && vb === null) return 0; if (va === null) return 1; if (vb === null) return -1;
-          return S.vr.dir * (va - vb);
-        });
-      $('#vr-table thead', el).innerHTML = '<tr>' + cols.map((c, i) => `<th scope="col" class="${i === 0 ? 'txt sticky-col' : ''}" aria-sort="${S.vr.sort === c[0] ? (S.vr.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-k="${c[0]}">${c[1]}</button></th>`).join('') + '</tr>';
-      const cell = (c, r) => {
-        if (c[0] === 'nombre') return `<td class="txt sticky-col"><a class="uni-link" title="${esc(r.u.nombre || '')}" href="#u=${encodeURIComponent(r.u.pliego)}">${esc(uName(r.u))}</a>${r.nueva ? '<span class="tag new">nueva</span>' : ''}<span class="uni-sub">${esc(r.u.nombre || '')}</span></td>`;
-        const v = c[2](r);
-        if (['dv', 'dr', 'dp'].includes(c[0])) return `<td>${fmtVar(v)}</td>`;
-        if (c[0] === 'dabs') return `<td>${esc(num(v) === null ? SD : fmtSigned(v))}</td>`;
-        if (c[0] === 'pb') return `<td>${esc(fmtS(v))}</td>`;
-        return `<td>${esc(fmtM(v))}</td>`;
-      };
-      $('#vr-table tbody', el).innerHTML = list.map(r => '<tr>' + cols.map(c => cell(c, r)).join('') + '</tr>').join('') || `<tr><td colspan="${cols.length}" class="txt muted">Sin resultados.</td></tr>`;
-    };
-    draw();
+    const hasPer = rows.some(r => r.pb !== null);
+    makeTable($('#vr-host', el), {
+      id: 'vrt', caption: `${METRIC_LBL[m]} ${a} vs ${b}, ${modeLbl}.`, rows, sort: { k: 'dv', dir: -1 }, limit: 25,
+      mobilePick: ['va', 'vb', 'dabs', 'dv'].concat(real ? [] : ['dr']).concat(hasPer ? ['pb', 'dp'] : []), mdef: 'dabs',
+      filters: [depFilter(r => r.u, rows),
+        { k: 'sent', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Solo las que suben'], ['down', 'Solo las que bajan'], ['nueva', 'Solo nuevas']], test: (r, v) => v === 'nueva' ? r.nueva : v === 'up' ? r.dv > 0 : r.dv < 0 }],
+      cols: [
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u, r.nueva ? '<span class="tag new">nueva</span>' : '') },
+        { k: 'va', lbl: String(a), get: r => r.va, fmt: fmtM },
+        { k: 'vb', lbl: String(b), get: r => r.vb, fmt: fmtM },
+        { k: 'dabs', lbl: 'Δ S/', get: r => r.dabs, fmt: v => num(v) === null ? SD : fmtSigned(v) },
+        { k: 'dv', lbl: real ? 'Δ % (real)' : 'Δ % (nominal)', m: true, get: r => r.dv, html: r => fmtVar(r.dv) },
+      ].concat(real ? [] : [{ k: 'dr', lbl: 'Δ real %', get: r => r.dr, html: r => fmtVar(r.dr) }])
+        .concat(hasPer ? [{ k: 'pb', lbl: `S/ por estudiante ${b}`, get: r => r.pb, fmt: fmtS }, { k: 'dp', lbl: 'Δ % por estudiante', get: r => r.dp, html: r => fmtVar(r.dp) }] : []),
+    });
 
-    const rerun = () => { writeVrParams(); renderVariacion(); if (S.rendered.has('ficha')) renderFicha(); };
+    const rerun = () => { writeVrParams(); safeRender('variacion'); if (S.rendered.has('ficha')) safeRender('ficha'); };
     $('#vr-a', el).addEventListener('change', e => { S.vr.a = e.target.value; rerun(); });
     $('#vr-b', el).addEventListener('change', e => { S.vr.b = e.target.value; rerun(); });
     bindSeg(el, (v, g) => {
@@ -574,12 +602,6 @@
       else if (lbl === 'Moneda') S.vr.real = v === '1';
       else if (lbl === 'Componente') S.vr.comp = v;
       rerun();
-    });
-    $('#vr-q', el).addEventListener('input', debounce(e => { S.vr.q = e.target.value; draw(); }));
-    $('#vr-table thead', el).addEventListener('click', e => {
-      const bt = e.target.closest('button.sort'); if (!bt) return;
-      if (S.vr.sort === bt.dataset.k) S.vr.dir *= -1; else { S.vr.sort = bt.dataset.k; S.vr.dir = bt.dataset.k === 'nombre' ? 1 : -1; }
-      draw();
     });
     $('#vr-share', el).addEventListener('click', async e => {
       writeVrParams();
@@ -666,80 +688,31 @@
       html: v => num(v) === null ? `<span class="muted">${SD}</span>` : `<span class="score"><b>${esc(fmtScore(v))}</b><span class="bar ochre"><span style="width:${Math.max(0, Math.min(100, v))}%"></span></span></span>` },
   ];
   function renderRanking() {
-    const el = $('#body-ranking');
-    const deps = [...new Set(S.unis.map(u => u.departamento).filter(Boolean))].sort((a, b) => a.localeCompare(b, LOC));
-    if (!$('#rk-table', el)) {
-      el.innerHTML = `
-        <div class="controls">
-          <label class="grow">Buscar<input type="search" id="rk-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.rank.q)}"></label>
-          <label>Departamento<select id="rk-dep"><option value="">Todos</option>${deps.map(d => `<option${d === S.rank.dep ? ' selected' : ''}>${esc(d)}</option>`).join('')}</select></label>
-          <label>Año<select id="rk-year">${yearOptions(S.year)}</select></label>
-          <button type="button" class="btn" id="rk-csv">Descargar CSV</button>
-        </div>
-        <div id="rk-partial"></div>
-        <div class="controls rk-mobile"><label class="grow">Columna a mostrar en el celular<select id="rk-metric">${RANK_COLS.filter(c => !['nombre', 'ejec'].includes(c.k)).map(c => `<option value="${esc(c.k)}"${c.k === S.rank.mcol ? ' selected' : ''}>${esc(c.lbl.replace('*', ''))}</option>`).join('')}</select></label></div>
-        <div class="table-wrap tall"><table id="rk-table"><caption id="rk-cap"></caption><thead></thead><tbody></tbody></table></div>
-        <p class="count"><span id="rk-count"></span> <button type="button" class="btn" id="rk-more" hidden></button></p>
-        <p class="note">* Índice de gestión presupuestal: referencial, NO oficial (ver Metodología). Semáforo de ejecución: ≥ 90 % verde, 75–90 % ámbar, &lt; 75 % rojo.</p>`;
-      $('#rk-q', el).addEventListener('input', debounce(e => { S.rank.q = e.target.value; drawRankRows(); }));
-      $('#rk-dep', el).addEventListener('change', e => { S.rank.dep = e.target.value; drawRankRows(); });
-      $('#rk-year', el).addEventListener('change', e => setYear(e.target.value));
-      $('#rk-csv', el).addEventListener('click', downloadCsv);
-      $('#rk-metric', el).addEventListener('change', e => { S.rank.mcol = e.target.value; S.rank.sort = e.target.value; S.rank.dir = -1; drawRankRows(); });
-      $('#rk-more', el).addEventListener('click', () => { S.rank.all = !S.rank.all; drawRankRows(); });
-      $('#rk-table thead', el).addEventListener('click', e => {
-        const b = e.target.closest('button.sort'); if (!b) return;
-        const k = b.dataset.k;
-        if (S.rank.sort === k) S.rank.dir *= -1; else { S.rank.sort = k; S.rank.dir = k === 'nombre' ? 1 : -1; }
-        drawRankRows();
-      });
-    } else {
-      $('#rk-year', el).innerHTML = yearOptions(S.year);
-    }
-    drawRankRows();
-  }
-  function rankRows() {
-    const y = S.year;
-    const q = S.rank.q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    const col = RANK_COLS.find(c => c.k === S.rank.sort) || RANK_COLS[2];
-    const rows = S.unis.filter(u => A(u, y))
-      .filter(u => !S.rank.dep || u.departamento === S.rank.dep)
-      .filter(u => !q || [u.nombre, u.corto, u.pliego, u.departamento].join(' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q));
-    rows.sort((a, b) => {
-      const va = col.get(a, y), vb = col.get(b, y);
-      if (typeof va === 'string' || typeof vb === 'string') return S.rank.dir * String(va ?? '').localeCompare(String(vb ?? ''), LOC);
-      if (num(va) === null && num(vb) === null) return 0;
-      if (num(va) === null) return 1;
-      if (num(vb) === null) return -1;
-      return S.rank.dir * (va - vb);
-    });
-    return rows;
-  }
-  function drawRankRows() {
     const el = $('#body-ranking'); const y = S.year;
-    const allRows = rankRows();
-    const LIM = 20;
-    const rows = S.rank.all ? allRows : allRows.slice(0, LIM);
-    const more = $('#rk-more', el);
-    more.hidden = allRows.length <= LIM;
-    more.textContent = S.rank.all ? 'Mostrar solo las primeras ' + LIM : 'Ver las ' + allRows.length;
-    $('#rk-partial', el).innerHTML = partialNote(y);
-    $('#rk-cap', el).textContent = `Universidades públicas, año ${yearLbl(y)}. Montos en soles.`;
-    // En móvil solo se ven: Universidad | columna elegida | % Ejec.
-    const hideM = c => (['nombre', 'ejec', S.rank.mcol].includes(c.k) ? '' : ' rk-hide-m');
-    $('#rk-table thead', el).innerHTML = '<tr>' + RANK_COLS.map(c => {
-      const sort = S.rank.sort === c.k ? (S.rank.dir > 0 ? 'ascending' : 'descending') : 'none';
-      return `<th scope="col" class="${c.k === 'nombre' ? 'txt sticky-col' : ''}${hideM(c)}" aria-sort="${sort}"><button type="button" class="sort" data-k="${esc(c.k)}">${esc(c.lbl)}</button></th>`;
-    }).join('') + '</tr>';
-    $('#rk-table tbody', el).innerHTML = rows.length ? rows.map((u, i) => '<tr>' +
-      RANK_COLS.map(c => {
-        if (c.k === 'nombre') return `<td class="txt sticky-col"><span class="rk-n">${i + 1}</span>${uniLink(u)}</td>`;
-        const v = c.get(u, y);
-        return `<td class="${hideM(c).trim()}">${c.html ? c.html(v) : esc(c.f(v))}</td>`;
-      }).join('') + '</tr>').join('')
-      : `<tr><td colspan="${RANK_COLS.length}" class="txt"><span class="muted">Sin resultados para ese filtro.</span></td></tr>`;
-    $('#rk-count', el).textContent = `Mostrando ${rows.length} de ${allRows.length} universidades con datos en ${y}.`;
+    el.innerHTML = `
+      <div class="controls">
+        <label>Año<select id="rk-year">${yearOptions(y)}</select></label>
+        <button type="button" class="btn" id="rk-csv">Descargar CSV</button>
+      </div>
+      ${partialNote(y)}
+      <div id="rk-host"></div>
+      <p class="note">* Índice de gestión presupuestal: referencial, NO oficial (ver Metodología). Semáforo de ejecución: ≥ 90 % verde, 75–90 % ámbar, &lt; 75 % rojo.</p>`;
+    $('#rk-year', el).addEventListener('change', e => setYear(e.target.value));
+    $('#rk-csv', el).addEventListener('click', downloadCsv);
+    const rows = S.unis.filter(u => A(u, y)).map(u => ({ u }));
+    makeTable($('#rk-host', el), {
+      id: 'rk', caption: `Universidades públicas, año ${yearLbl(y)}. Montos en soles.`, rows, rank: true,
+      sort: { k: 'pim', dir: -1 }, limit: 20,
+      mobilePick: RANK_COLS.filter(c => !['nombre', 'ejec'].includes(c.k)).map(c => c.k), mdef: 'pim',
+      filters: [depFilter(r => r.u, rows),
+        { k: 'ej', lbl: '% de ejecución', opts: [['', 'Todas'], ['bad', 'Menos de 75 %'], ['warn', '75 % a 90 %'], ['good', 'Más de 90 %']], test: (r, v) => semaforo(kpi(r.u, y).ejec) === v }],
+      cols: RANK_COLS.map(c => c.k === 'nombre'
+        ? { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u) }
+        : { k: c.k, lbl: c.lbl, m: c.k === 'ejec', get: r => c.get(r.u, y), html: c.html ? (r => c.html(c.get(r.u, y))) : undefined, fmt: c.f || undefined }),
+      onDraw: list => { S.rank.list = list.map(r => r.u); },
+    });
   }
+  function rankRows() { return S.rank.list || S.unis.filter(u => A(u, S.year)); }
   function downloadCsv() {
     const y = S.year; const rows = rankRows();
     const head = ['pliego', 'universidad', 'sigla', 'departamento', 'anio', 'pia', 'pim', 'devengado', 'ejecucion', 'pct_personal', 'pct_inversion', 'pct_idi', 'ejec_idi', 'pct_rdr', 'soles_por_estudiante', 'indice'];
@@ -766,17 +739,22 @@
     const el = $('#body-trayectoria'); const y = S.year;
     const all = unisByPim(y);
     if (!S.tray.uni || !uniBy(S.tray.uni)) S.tray.uni = all[0] ? all[0].pliego : null;
-    const list = lim(all);
     const tUni = uniBy(S.tray.uni);
+    const ORD = { pim: ['PIM', u => tot(u, y, 'pim')], pia: ['PIA', u => tot(u, y, 'pia')], dev: ['Devengado', u => tot(u, y, 'dev')],
+      d: ['Δ PIM − PIA', u => (num(tot(u, y, 'pim')) !== null && num(tot(u, y, 'pia')) !== null) ? tot(u, y, 'pim') - tot(u, y, 'pia') : null],
+      ej: ['% ejecución', u => kpi(u, y).ejec], nombre: ['Nombre', u => uName(u)] };
     el.innerHTML = `
       ${partialNote(y)}
-      <div class="controls">
-        <label>Año<select id="tr-year">${yearOptions(y)}</select></label>
-        ${topSeg(all.length)}
-      </div>
+      <div class="controls"><label>Año<select id="tr-year">${yearOptions(y)}</select></label></div>
       <div class="card">
         <h3>PIA → PIM → devengado, ${esc(yearLbl(y))}</h3>
-        <p class="sub">Millones de soles. Ordenado por PIM. ${limNote(list.length, all.length)}</p>
+        <div class="controls" style="margin:8px 0">
+          <label class="grow">Resaltar universidad<input type="search" id="tr-hl" list="tr-hl-list" placeholder="Sigla o nombre" autocomplete="off" value="${esc(S.tray.hl)}"></label>
+          <datalist id="tr-hl-list">${all.map(u => `<option value="${esc(uName(u))}">${esc(titleCase(u.nombre || ''))}</option>`).join('')}</datalist>
+          <label>Ordenar por<select id="tr-ord">${Object.entries(ORD).map(([k, [l]]) => `<option value="${k}"${S.tray.order === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+          <label>Cantidad<select id="tr-n">${[[15, 'Top 15'], [30, 'Top 30'], [0, `Todas (${all.length})`]].map(([v, l]) => `<option value="${v}"${+S.tray.n === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+        </div>
+        <p class="sub" id="tr-sub"></p>
         <div class="chart"><canvas id="ch-tray"></canvas></div>
       </div>
       <h3 style="margin:20px 0 8px">Variación del presupuesto durante ${esc(yearLbl(y))}</h3>
@@ -824,24 +802,45 @@
       ],
     });
 
-    sizeFor('ch-tray', list.length, isMobile() ? 30 : 26);
-    mkChart('ch-tray', {
-      type: 'bar',
-      data: {
-        labels: list.map(uName),
-        datasets: [
-          { label: 'PIA', data: list.map(u => mill(tot(u, y, 'pia'))), backgroundColor: cssVar('--c-pia'), borderRadius: 3 },
-          { label: 'PIM', data: list.map(u => mill(tot(u, y, 'pim'))), backgroundColor: cssVar('--c-pim'), borderRadius: 3 },
-          { label: 'Devengado', data: list.map(u => mill(tot(u, y, 'dev'))), backgroundColor: cssVar('--c-dev'), borderRadius: 3 },
-        ],
-      },
-      options: {
-        indexAxis: 'y', interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ttM, title: it => (list[it[0].dataIndex] || {}).nombre || it[0].label } } },
-        scales: { x: { ticks: { callback: tickM, maxTicksLimit: isMobile() ? 4 : 8 } }, y: { ticks: { autoSkip: false } } },
-        onClick: (e, els) => { if (els.length) { S.tray.uni = list[els[0].index].pliego; renderTrayectoria(); } },
-      },
-    }, `PIA, PIM y devengado por universidad en ${y}`);
+    const findU = q => { const n = normTxt(q.trim()); if (!n) return null; return all.find(u => normTxt(uName(u)) === n) || all.find(u => normTxt(uName(u) + ' ' + u.nombre).includes(n)) || null; };
+    const drawTray = () => {
+      const [ordLbl, f] = ORD[S.tray.order] || ORD.pim;
+      const sorted = all.slice().sort((p, q) => {
+        const a = f(p), b = f(q);
+        if (typeof a === 'string') return a.localeCompare(b, LOC);
+        if (num(a) === null) return 1; if (num(b) === null) return -1; return b - a;
+      });
+      const n = +S.tray.n;
+      let list = n > 0 ? sorted.slice(0, n) : sorted;
+      const hl = findU(S.tray.hl);
+      let extra = false;
+      if (hl && !list.includes(hl)) { list = list.concat([hl]); extra = true; }
+      $('#tr-sub', el).textContent = `Millones de soles. Ordenado por ${ordLbl}. Mostrando ${list.length - (extra ? 1 : 0)} de ${all.length}${extra ? ` + ${uName(hl)} (resaltada)` : ''}.${hl ? '' : S.tray.hl.trim() ? ' No encontramos esa universidad.' : ''}`;
+      const col = (v, u) => (hl && u !== hl) ? cssVar(v) + '59' : cssVar(v);
+      sizeFor('ch-tray', list.length, isMobile() ? 34 : 28);
+      mkChart('ch-tray', {
+        type: 'bar',
+        data: {
+          labels: list.map(u => uName(u) + (u === hl ? ' ◀' : '')),
+          datasets: [
+            { label: 'PIA', data: list.map(u => mill(tot(u, y, 'pia'))), backgroundColor: list.map(u => col('--c-pia', u)) },
+            { label: 'PIM', data: list.map(u => mill(tot(u, y, 'pim'))), backgroundColor: list.map(u => col('--c-pim', u)) },
+            { label: 'Devengado', data: list.map(u => mill(tot(u, y, 'dev'))), backgroundColor: list.map(u => col('--c-dev', u)) },
+          ],
+        },
+        options: {
+          indexAxis: 'y', interaction: { mode: 'index', intersect: false },
+          plugins: { tooltip: { callbacks: { label: ttM, title: it => (list[it[0].dataIndex] || {}).nombre || it[0].label,
+            afterBody: it => { const u = list[it[0].dataIndex]; const k = kpi(u, y); return [`Ejecución: ${fmtP(k.ejec)}`, `PIM − PIA: ${fmtDelta(tot(u, y, 'pim'), tot(u, y, 'pia'))}`]; } } } },
+          scales: { x: { position: 'top', ticks: { callback: tickM, maxTicksLimit: isMobile() ? 4 : 8 } }, y: { grid: { display: false }, ticks: { autoSkip: false, font: ctx => ({ weight: list[ctx.index] === hl ? 800 : 500 }) } } },
+          onClick: (e, els) => { if (els.length) { S.tray.uni = list[els[0].index].pliego; renderTrayectoria(); } },
+        },
+      }, `PIA, PIM y devengado por universidad en ${y}`);
+    };
+    drawTray();
+    $('#tr-hl', el).addEventListener('input', debounce(e => { S.tray.hl = e.target.value; drawTray(); }, 250));
+    $('#tr-ord', el).addEventListener('change', e => { S.tray.order = e.target.value; drawTray(); });
+    $('#tr-n', el).addEventListener('change', e => { S.tray.n = +e.target.value; drawTray(); });
 
     const yrs = S.years;
     mkChart('ch-tray-uni', {
@@ -872,7 +871,7 @@
     sizeFor(cfg.key + '-pct', all.length, isMobile() ? 28 : 24);
     mkChart(cfg.key + '-pct', {
       type: 'bar',
-      data: { labels: all.map(uName), datasets: presentCats.map(c => ({ label: c.lbl, data: all.map(u => share(u, c)), backgroundColor: cssVar(c.c), borderWidth: 0 })) },
+      data: { labels: all.map(uName), datasets: presentCats.map(c => ({ label: c.lbl, data: all.map(u => share(u, c)), backgroundColor: cssVar(c.c), borderWidth: 0, borderRadius: 2 })) },
       options: {
         indexAxis: 'y',
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttP, title: it => (all[it[0].dataIndex] || {}).nombre || it[0].label } } },
@@ -883,7 +882,7 @@
     const yrs = S.years; const u = st.uni ? uniBy(st.uni) : null; const pool = u ? [u] : S.unis;
     mkChart(cfg.key + '-evo', {
       type: 'bar',
-      data: { labels: yrs.map(yTick), datasets: presentCats.map(c => ({ label: c.lbl, data: yrs.map(yy => mill(sum(pool.map(x => (pick((A(x, yy) || {})[field], c.frag) || {})[st.metric])))), backgroundColor: fadeFor(yrs, cssVar(c.c)) })) },
+      data: { labels: yrs.map(yTick), datasets: presentCats.map(c => ({ label: c.lbl, data: yrs.map(yy => mill(sum(pool.map(x => (pick((A(x, yy) || {})[field], c.frag) || {})[st.metric])))), backgroundColor: fadeFor(yrs, cssVar(c.c)), borderRadius: 2 })) },
       options: {
         interaction: { mode: 'index', intersect: false },
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttM, title: it => yearLbl(it[0].label) } } },
@@ -971,9 +970,7 @@
         <div class="chart"><canvas id="ch-rdr-cat"></canvas></div>
         ${legendHtml(rcats)}
       </div>` : ''}
-      ${hasRdr ? `<div class="table-wrap" style="margin-top:12px"><table><caption>Recaudación RDR ${esc(yearLbl(y))}</caption>
-        <thead><tr><th class="txt sticky-col" scope="col">Universidad</th><th scope="col">PIA ingresos RDR</th><th scope="col">PIM ingresos RDR</th><th scope="col">Recaudado${sinSaldos ? ' (sin saldos)' : ''}</th><th scope="col">Recaudado / PIM</th>${sinSaldos ? '<th scope="col">Recaudado incl. saldos</th>' : ''}<th scope="col">% RDR en PIM de gasto</th></tr></thead>
-        <tbody>${all.map(u => { const r = rdr(u); return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(num(r.pia)))}</td><td>${esc(fmtM(num(r.pim)))}</td><td>${esc(fmtM(num(r.recaudado)))}</td><td>${pill(div(r.recaudado, r.pim) ?? kpi(u, y).rdr_recaudado_vs_pim)}</td>${sinSaldos ? `<td>${esc(fmtM(num(rdrFull(u).recaudado)))}</td>` : ''}<td>${esc(fmtP(kpi(u, y).pct_rdr))}</td></tr>`; }).join('')}</tbody></table></div>` : ''}`;
+      ${hasRdr ? `<h3 style="margin:20px 0 8px">Recaudación de ingresos propios (RDR), ${esc(yearLbl(y))}</h3><div id="rdr-host"></div>` : ''}`;
     if (!cats.length) { el.innerHTML = '<p class="empty">Aún no hay datos por fuente de financiamiento.</p>' + extra; }
     else {
       el.innerHTML = compShell('ch-fue', cats, st, [['pim', 'PIM'], ['dev', 'Devengado'], ['pia', 'PIA']], extra);
@@ -981,6 +978,20 @@
       compBlock({ key: 'ch-fue', el, cats, field: 'fuente', st, title: 'Composición del presupuesto por fuente de financiamiento', evoTitle: 'Evolución por fuente de financiamiento' });
     }
     if (hasRdr) {
+      const rdrRows = unisByPim(y).map(u => { const r = rdr(u); return { u, pia: num(r.pia), pim: num(r.pim), rec: num(r.recaudado), ratio: div(r.recaudado, r.pim) ?? kpi(u, y).rdr_recaudado_vs_pim, full: num(rdrFull(u).recaudado), pct: kpi(u, y).pct_rdr }; });
+      makeTable($('#rdr-host', el), {
+        id: 'rdrt', caption: `Ingresos RDR ${yearLbl(y)}${sinSaldos ? ', sin saldos de balance' : ''}. Montos en soles.`, rows: rdrRows, sort: { k: 'rec', dir: -1 }, limit: 20,
+        mobilePick: ['pia', 'pim', 'rec', 'full', 'pct'], mdef: 'rec',
+        filters: [depFilter(r => r.u, rdrRows), { k: 'cum', lbl: 'Recaudación', opts: [['', 'Todas'], ['bajo', 'Recaudó menos de lo presupuestado'], ['alto', 'Recaudó igual o más']], test: (r, v) => num(r.ratio) !== null && ((v === 'bajo') === (r.ratio < 1)) }],
+        cols: [
+          { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u) },
+          { k: 'pia', lbl: 'PIA ingresos RDR', get: r => r.pia, fmt: fmtM },
+          { k: 'pim', lbl: 'PIM ingresos RDR', get: r => r.pim, fmt: fmtM },
+          { k: 'rec', lbl: sinSaldos ? 'Recaudado (sin saldos)' : 'Recaudado', get: r => r.rec, fmt: fmtM },
+          { k: 'ratio', lbl: 'Recaudado / PIM', m: true, get: r => r.ratio, html: r => pill(r.ratio) },
+        ].concat(sinSaldos ? [{ k: 'full', lbl: 'Recaudado incl. saldos', get: r => r.full, fmt: fmtM }] : [])
+          .concat([{ k: 'pct', lbl: '% RDR en PIM de gasto', get: r => r.pct, fmt: fmtP }]),
+      });
       sizeFor('ch-rdr', all.length, isMobile() ? 30 : 26);
       mkChart('ch-rdr', {
         type: 'bar',
@@ -999,7 +1010,7 @@
       sizeFor('ch-rdr-cat', all.length, isMobile() ? 28 : 24);
       mkChart('ch-rdr-cat', {
         type: 'bar',
-        data: { labels: all.map(uName), datasets: rcats.map(c => ({ label: c.lbl, data: all.map(u => catShare(u, c)), backgroundColor: cssVar(c.c), borderWidth: 0 })) },
+        data: { labels: all.map(uName), datasets: rcats.map(c => ({ label: c.lbl, data: all.map(u => catShare(u, c)), backgroundColor: cssVar(c.c), borderWidth: 0, borderRadius: 2 })) },
         options: {
           indexAxis: 'y',
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: ttP, title: it => (all[it[0].dataIndex] || {}).nombre || it[0].label } } },
@@ -1018,7 +1029,7 @@
     const proys = [];
     all.forEach(u => ((A(u, y) || {}).proyectos || []).forEach(p => proys.push(Object.assign({ u }, p))));
     proys.forEach(p => { p.saldo = num(p.pim) !== null ? p.pim - (num(p.dev) || 0) : null; p.av = div(p.dev, p.pim); });
-    const top = proys.filter(p => num(p.saldo) !== null && p.saldo > 0).sort((a, b) => b.saldo - a.saldo).slice(0, 20);
+    const top = proys.filter(p => num(p.pim) !== null && p.pim > 0);
     const hayProy = all.some(u => Array.isArray((A(u, y) || {}).proyectos));
     const bajo = proys.filter(p => num(p.av) !== null && p.av < 0.3 && (num(p.pim) || 0) > 0).length;
     const ordered = lim(all).sort((a, b) => (kpi(b, y).ejec_inversion ?? -1) - (kpi(a, y).ejec_inversion ?? -1));
@@ -1038,17 +1049,27 @@
         <p class="sub">Devengado / PIM de la genérica 2.6 (adquisición de activos no financieros). ${limNote(ordered.length, all.length)}</p>
         <div class="chart"><canvas id="ch-inv"></canvas></div>
       </div>
-      <h3 style="margin:20px 0 8px">Top ${top.length || ''} proyectos con mayor saldo sin ejecutar</h3>
-      ${top.length ? `<div class="table-wrap"><table><caption>Proyectos ordenados por saldo (PIM − devengado), ${esc(yearLbl(y))}</caption>
-        <thead><tr><th class="txt" scope="col">Universidad</th><th class="txt" scope="col">Código</th><th class="txt" scope="col">Proyecto</th><th scope="col">PIM</th><th scope="col">Devengado</th><th scope="col">Saldo</th><th scope="col">Avance</th></tr></thead>
-        <tbody>${top.map(p => `<tr><td class="txt"><a class="uni-link" href="#u=${encodeURIComponent(p.u.pliego)}">${esc(uName(p.u))}</a></td><td class="txt">${esc(p.codigo || SD)}</td><td class="wrap">${esc(p.nombre || SD)}</td><td>${esc(fmtM(num(p.pim)))}</td><td>${esc(fmtM(num(p.dev)))}</td><td><strong>${esc(fmtM(p.saldo))}</strong></td><td><span class="score"><b>${esc(fmtP(p.av, 0))}</b><span class="bar"><span style="width:${Math.max(0, Math.min(100, (p.av || 0) * 100))}%"></span></span></span></td></tr>`).join('')}</tbody></table></div>`
-        : hayProy ? '<p class="empty">El MEF no registra proyectos con saldo para este año.</p>' : '<p class="empty">Aún no tenemos el detalle de proyectos de inversión; la inversión total (genérica 2.6) sí se muestra arriba.</p>'}`;
+      <h3 style="margin:20px 0 8px">Proyectos de inversión, ${esc(yearLbl(y))}</h3>
+      ${top.length ? '<p class="sub">Ordenados por saldo sin ejecutar (PIM − devengado). Avance financiero, no físico.</p><div id="pr-host"></div>' : hayProy ? '<p class="empty">El MEF no registra proyectos con saldo para este año.</p>' : '<p class="empty">Aún no tenemos el detalle de proyectos de inversión; la inversión total (genérica 2.6) sí se muestra arriba.</p>'}`;
     $('#in-year', el).addEventListener('change', e => setYear(e.target.value));
+    if (top.length) makeTable($('#pr-host', el), {
+      id: 'prt', caption: `Proyectos de inversión con presupuesto en ${yearLbl(y)}. Montos en soles.`, rows: top, sort: { k: 'saldo', dir: -1 }, limit: 20,
+      search: { ph: 'Proyecto, código o universidad', text: p => [p.nombre, p.codigo, p.u.nombre, p.u.corto, p.u.departamento].join(' ') },
+      mobilePick: ['pim', 'dev', 'saldo', 'av'], mdef: 'saldo',
+      filters: [depFilter(p => p.u, top), { k: 'av', lbl: 'Avance', opts: [['', 'Todos'], ['0', 'Sin avance (0 %)'], ['30', 'Menos de 30 %'], ['90', '90 % o más']], test: (p, v) => num(p.av) !== null && (v === '0' ? p.av === 0 : v === '30' ? p.av < 0.3 : p.av >= 0.9) }],
+      cols: [
+        { k: 'proy', lbl: 'Proyecto', sticky: true, m: true, get: p => p.nombre || '', html: p => `<span class="proy-n">${esc(p.nombre || SD)}</span><span class="uni-sub">${esc(p.codigo || '')} · <a href="#u=${encodeURIComponent(p.u.pliego)}">${esc(uName(p.u))}</a></span>` },
+        { k: 'pim', lbl: 'PIM', get: p => num(p.pim), fmt: fmtM },
+        { k: 'dev', lbl: 'Devengado', get: p => num(p.dev), fmt: fmtM },
+        { k: 'saldo', lbl: 'Saldo', m: true, get: p => p.saldo, html: p => `<strong>${esc(fmtM(p.saldo))}</strong>` },
+        { k: 'av', lbl: 'Avance', get: p => p.av, html: p => `<span class="score"><b>${esc(fmtP(p.av, 0))}</b><span class="bar"><span style="width:${Math.max(0, Math.min(100, (p.av || 0) * 100))}%"></span></span></span>` },
+      ],
+    });
     const vals = ordered.map(u => { const v = kpi(u, y).ejec_inversion; return v === null || v === undefined ? null : +(v * 100).toFixed(1); });
     sizeFor('ch-inv', ordered.length, isMobile() ? 26 : 22);
     mkChart('ch-inv', {
       type: 'bar',
-      data: { labels: ordered.map(uName), datasets: [{ label: 'Ejecución de inversión', data: vals, borderRadius: 3,
+      data: { labels: ordered.map(uName), datasets: [{ label: 'Ejecución de inversión', data: vals, borderRadius: 6, valueLabel: v => Math.round(v) + ' %',
         backgroundColor: vals.map(v => cssVar('--' + ({ good: 'good', warn: 'warn', bad: 'bad', na: 'line-strong' })[semaforo(v === null ? null : v / 100)])) }] },
       options: {
         indexAxis: 'y',
@@ -1090,11 +1111,24 @@
           <div class="chart"><canvas id="ch-idi-evo"></canvas></div>
         </div>
       </div>
-      <div class="table-wrap" style="margin-top:12px"><table><caption>Investigación por universidad, ${esc(yearLbl(y))}</caption>
-        <thead><tr><th class="txt sticky-col" scope="col">Universidad</th><th scope="col">PIM 0137</th><th scope="col">Devengado 0137</th><th scope="col">Ejec. I+D</th><th scope="col">% I+D del gasto</th><th scope="col">Publicaciones</th><th scope="col">S/ por publicación</th></tr></thead>
-        <tbody>${ordered.map(u => { const k = kpi(u, y); return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(num(pp(u).pim)))}</td><td>${esc(fmtM(num(pp(u).dev)))}</td><td>${pill(k.ejec_idi)}</td><td>${esc(fmtP(k.pct_idi, 2))}</td><td>${esc(fmtN((A(u, y) || {}).pubs))}</td><td>${esc(fmtS(k.idi_por_pub))}</td></tr>`; }).join('')}</tbody></table></div>
+      <h3 style="margin:20px 0 8px">Investigación por universidad, ${esc(yearLbl(y))}</h3><div id="idi-host"></div>
       <p class="note">El costo por publicación es una aproximación: el PP 0137 financia también equipamiento, tesis y proyectos cuyos resultados se publican en años posteriores, y no todo el gasto en investigación se registra en el PP 0137 (también hay canon y fondos concursables externos).</p>`;
     $('#id-year', el).addEventListener('change', e => setYear(e.target.value));
+    const idiRows = all.map(u => { const k = kpi(u, y); return { u, pim: num(pp(u).pim), dev: num(pp(u).dev), ej: k.ejec_idi, pct: k.pct_idi, pubs: num((A(u, y) || {}).pubs), cpp: k.idi_por_pub }; });
+    makeTable($('#idi-host', el), {
+      id: 'idt', caption: `PP 0137 y publicaciones, ${yearLbl(y)}.`, rows: idiRows, sort: { k: 'pim', dir: -1 }, limit: 20,
+      mobilePick: ['pim', 'dev', 'pct', 'pubs', 'cpp'], mdef: 'dev',
+      filters: [depFilter(r => r.u, idiRows), { k: 'con', lbl: 'Dato I+D', opts: [['', 'Todas'], ['si', 'Con presupuesto I+D'], ['no', 'Sin presupuesto I+D']], test: (r, v) => (v === 'si') === ((r.pim || 0) > 0) }],
+      cols: [
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u) },
+        { k: 'pim', lbl: 'PIM 0137', get: r => r.pim, fmt: fmtM },
+        { k: 'dev', lbl: 'Devengado 0137', get: r => r.dev, fmt: fmtM },
+        { k: 'ej', lbl: 'Ejec. I+D', m: true, get: r => r.ej, html: r => pill(r.ej) },
+        { k: 'pct', lbl: '% I+D del gasto', get: r => r.pct, fmt: v => fmtP(v, 2) },
+        { k: 'pubs', lbl: 'Publicaciones', get: r => r.pubs, fmt: fmtN },
+        { k: 'cpp', lbl: 'S/ por publicación', get: r => r.cpp, fmt: fmtS },
+      ],
+    });
     sizeFor('ch-idi', ordered.length, isMobile() ? 28 : 24);
     mkChart('ch-idi', {
       type: 'bar',
@@ -1181,8 +1215,7 @@
         <div class="chart"><canvas id="ch-exp"></canvas></div>
       </div>
       <h3 style="margin:20px 0 8px">Todas las universidades</h3>
-      <div class="controls"><label class="grow">Buscar<input type="search" id="ex-q" placeholder="Nombre, sigla o pliego" autocomplete="off" value="${esc(S.exp.q)}"></label></div>
-      <div class="table-wrap tall"><table id="ex-table"><caption>PIA 2027 vs PIA 2026 por universidad. Montos en soles.</caption><thead></thead><tbody></tbody></table></div>
+      <div id="ex-host"></div>
       <div class="grid two" style="margin-top:12px">
         <div class="card"><h3>Disposiciones relevantes para universidades</h3>
           ${disp.length ? '<ul class="tlist">' + disp.map(d => `<li><span class="t-top"><strong>${linkOrText(d.url, d.articulo || 'Disposición')}</strong></span><span class="t-fin">${esc(d.resumen || '')}</span></li>`).join('') + '</ul>' : '<p class="empty">Aún no se han extraído disposiciones del documento.</p>'}
@@ -1192,38 +1225,24 @@
           ${notas.length ? '<ul class="note" style="padding-left:18px">' + notas.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : ''}
         </div>
       </div>`;
-    const draw = () => {
-      const q = S.exp.q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-      const cols = [
-        ['nombre', 'Universidad', u => uName(u)],
-        ['p26', 'PIA 2026', u => num(expOf(u).pia_2026)],
-        ['p27', 'PIA 2027', u => num(expOf(u).pia_2027)],
-        ['delta', 'Δ S/', u => (num(expOf(u).pia_2027) !== null && num(expOf(u).pia_2026) !== null) ? expOf(u).pia_2027 - expOf(u).pia_2026 : null],
-        ['var', 'Δ %', u => expVar(expOf(u))],
-      ];
-      const col = cols.find(c => c[0] === S.exp.sort) || cols[4];
-      const list = rows.filter(u => !q || [u.nombre, u.corto, u.pliego, u.departamento].join(' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q))
-        .sort((a, b) => {
-          const va = col[2](a), vb = col[2](b);
-          if (typeof va === 'string') return S.exp.dir * va.localeCompare(vb, LOC);
-          if (va === null && vb === null) return 0; if (va === null) return 1; if (vb === null) return -1;
-          return S.exp.dir * (va - vb);
-        });
-      $('#ex-table thead', el).innerHTML = '<tr>' + cols.map((c, i) => `<th scope="col" class="${i === 0 ? 'txt sticky-col' : ''}" aria-sort="${S.exp.sort === c[0] ? (S.exp.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-k="${c[0]}">${esc(c[1])}</button></th>`).join('') + '</tr>';
-      $('#ex-table tbody', el).innerHTML = list.map(u => { const e = expOf(u); return `<tr><td class="txt sticky-col">${uniLink(u)}</td><td>${esc(fmtM(num(e.pia_2026)))}</td><td><strong>${esc(fmtM(num(e.pia_2027)))}</strong></td><td>${esc(fmtDelta(e.pia_2027, e.pia_2026))}</td><td>${fmtVar(expVar(e))}</td></tr>`; }).join('') || `<tr><td colspan="5" class="txt muted">Sin resultados.</td></tr>`;
-    };
-    draw();
-    $('#ex-q', el).addEventListener('input', debounce(e => { S.exp.q = e.target.value; draw(); }));
-    $('#ex-table thead', el).addEventListener('click', e => {
-      const b = e.target.closest('button.sort'); if (!b) return;
-      if (S.exp.sort === b.dataset.k) S.exp.dir *= -1; else { S.exp.sort = b.dataset.k; S.exp.dir = b.dataset.k === 'nombre' ? 1 : -1; }
-      draw();
+    const exRows = rows.map(u => { const e = expOf(u); return { u, p26: num(e.pia_2026), p27: num(e.pia_2027), d: (num(e.pia_2027) !== null && num(e.pia_2026) !== null) ? e.pia_2027 - e.pia_2026 : null, v: expVar(e) }; });
+    makeTable($('#ex-host', el), {
+      id: 'ext', caption: 'PIA 2027 vs PIA 2026 por universidad. Montos en soles.', rows: exRows, sort: { k: 'v', dir: -1 }, limit: 25,
+      mobilePick: ['p26', 'p27', 'd'], mdef: 'p27',
+      filters: [depFilter(r => r.u, exRows), { k: 'dir', lbl: 'Dirección', opts: [['', 'Todas'], ['up', 'Suben'], ['down', 'Bajan']], test: (r, v) => num(r.v) !== null && ((v === 'up') === (r.v > 0)) }],
+      cols: [
+        { k: 'nombre', lbl: 'Universidad', sticky: true, m: true, get: r => uName(r.u), html: r => uniCell(r.u) },
+        { k: 'p26', lbl: 'PIA 2026', get: r => r.p26, fmt: fmtM },
+        { k: 'p27', lbl: 'PIA 2027', get: r => r.p27, html: r => `<strong>${esc(fmtM(r.p27))}</strong>` },
+        { k: 'd', lbl: 'Δ S/', get: r => r.d, fmt: v => num(v) === null ? SD : fmtSigned(v) },
+        { k: 'v', lbl: 'Δ %', m: true, get: r => r.v, html: r => fmtVar(r.v) },
+      ],
     });
     const vals = chartList.map(u => +(expVar(expOf(u)) * 100).toFixed(1));
     sizeFor('ch-exp', chartList.length, isMobile() ? 26 : 22);
     mkChart('ch-exp', {
       type: 'bar',
-      data: { labels: chartList.map(uName), datasets: [{ label: 'Variación PIA 2027 vs 2026', data: vals, borderRadius: 3, backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
+      data: { labels: chartList.map(uName), datasets: [{ label: 'Variación PIA 2027 vs 2026', data: vals, borderRadius: 6, valueLabel: v => (v > 0 ? '+' : '') + v.toLocaleString(LOC, { maximumFractionDigits: 1 }) + ' %', backgroundColor: vals.map(v => cssVar(v >= 0 ? '--good' : '--bad')) }] },
       options: {
         indexAxis: 'y',
         plugins: { legend: { display: false }, tooltip: { callbacks: {
@@ -1297,7 +1316,7 @@
             ${u.licencia ? `<span class="tag">${esc(u.licencia)}</span>` : ''}
           </div>
         </div>
-        <p class="share"><a href="${esc(link)}" id="fi-link">Enlace directo a esta ficha</a> <button type="button" class="btn" id="fi-copy">Copiar enlace</button></p>
+        <p class="share"><a href="${esc(link)}" id="fi-link">Enlace directo a esta ficha</a> <button type="button" class="btn" id="fi-copy">Copiar enlace</button> <span id="fi-seo"></span></p>
       </div>
       ${partialNote(y)}
       <div class="kpis six">
@@ -1350,6 +1369,11 @@
       </div>`;
 
     $('#fi-uni', el).addEventListener('change', e => selectUni(e.target.value, false));
+    // Enlace a la página estática de la universidad (u/<slug>/), si existe el mapa de slugs
+    loadSlugs().then(m => {
+      const sl = m && m[u.pliego]; const box = $('#fi-seo', el);
+      if (sl && box && S.ficha.uni === u.pliego) box.innerHTML = `<a href="u/${encodeURIComponent(sl)}/">${esc('Página de esta universidad')}</a>`;
+    });
     $('#fi-year', el).addEventListener('change', e => setYear(e.target.value));
     const onCmp = () => { S.ficha.cmpTouched = true; S.ficha.cmp = [$('#fi-c1', el).value, $('#fi-c2', el).value].filter(Boolean); renderFicha(); };
     $('#fi-c1', el).addEventListener('change', onCmp);
@@ -1364,10 +1388,10 @@
     const tt = { callbacks: { label: ttM, title: it => yearLbl(it[0].label) } };
     mkChart('ch-fi-ser', {
       type: 'line',
-      data: { labels: yrs.map(String), datasets: [
-        { label: 'PIA', data: yrs.map(yy => mill(tot(u, yy, 'pia'))), borderColor: cssVar('--c-pia'), backgroundColor: cssVar('--c-pia'), tension: .25, pointRadius: 2 },
-        { label: 'PIM', data: yrs.map(yy => mill(tot(u, yy, 'pim'))), borderColor: cssVar('--c-pim'), backgroundColor: cssVar('--c-pim'), borderWidth: 2.5, tension: .25, pointRadius: 2 },
-        { label: 'Devengado', data: yrs.map(yy => mill(tot(u, yy, 'dev'))), borderColor: cssVar('--c-dev'), backgroundColor: cssVar('--c-dev'), borderWidth: 2.5, tension: .25, pointRadius: 2, segment: { borderDash: ctx => (isPartial(yrs[ctx.p1DataIndex]) ? [5, 4] : undefined) } },
+      data: { labels: yrs.map(yTick), datasets: [
+        { label: 'PIA', data: yrs.map(yy => mill(tot(u, yy, 'pia'))), borderColor: cssVar('--c-pia'), backgroundColor: cssVar('--c-pia'), borderWidth: 2, borderDash: [5, 4] },
+        { label: 'PIM', data: yrs.map(yy => mill(tot(u, yy, 'pim'))), borderColor: cssVar('--c-pim'), backgroundColor: areaFill('--c-pim', 0.18), pointBackgroundColor: cssVar('--c-pim'), fill: 'origin', borderWidth: 3 },
+        { label: 'Devengado', data: yrs.map(yy => mill(tot(u, yy, 'dev'))), borderColor: cssVar('--c-dev'), backgroundColor: areaFill('--c-dev', 0.28), pointBackgroundColor: cssVar('--c-dev'), fill: 'origin', borderWidth: 3, segment: { borderDash: ctx => (isPartial(yrs[ctx.p1DataIndex]) ? [5, 4] : undefined) } },
       ] },
       options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, tooltip: tt }, scales: { y: { beginAtZero: true, ticks: { callback: tickM } } } },
     }, `Serie de PIA, PIM y devengado de ${uName(u)}`);
@@ -1381,7 +1405,7 @@
       ] },
       options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ttP, title: it => yearLbl(it[0].label) } } }, scales: { y: { min: 0, max: 100, ticks: { callback: tickP } } } },
     }, `Ejecución anual de ${uName(u)}`);
-    const stackSer = (field, cats, m) => cats.map(c => ({ label: c.lbl, backgroundColor: fadeFor(yrs, cssVar(c.c)), data: yrs.map(yy => mill(num((pick((A(u, yy) || {})[field], c.frag) || {})[m]))) }));
+    const stackSer = (field, cats, m) => cats.map(c => ({ label: c.lbl, borderRadius: 2, backgroundColor: fadeFor(yrs, cssVar(c.c)), data: yrs.map(yy => mill(num((pick((A(u, yy) || {})[field], c.frag) || {})[m]))) }));
     const stackOpts = { interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: tt }, scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: tickM } } } };
     mkChart('ch-fi-gen', { type: 'bar', data: { labels: yrs.map(yTick), datasets: stackSer('generica', GENERICAS, 'dev') }, options: stackOpts }, `Gasto por genérica de ${uName(u)}`);
     mkChart('ch-fi-fue', { type: 'bar', data: { labels: yrs.map(yTick), datasets: stackSer('fuente', FUENTES.filter(c => yrs.some(yy => pick((A(u, yy) || {}).fuente, c.frag))), 'pim') }, options: stackOpts }, `Fuentes de financiamiento de ${uName(u)}`);
@@ -1400,13 +1424,15 @@
       },
     }, 'Comparación de componentes del índice entre universidades');
   }
+  let slugsP = null;
+  const loadSlugs = () => slugsP || (slugsP = fetch('u/slugs.json').then(r => r.ok ? r.json() : null).then(j => (j && j.slugs) || null).catch(() => null));
   function selectUni(p, scroll) {
     if (!uniBy(p)) return;
     S.ficha.uni = String(p);
     S.ficha.cmp = S.ficha.cmp.filter(x => x !== String(p));
     const h = '#u=' + encodeURIComponent(p);
     if (location.hash !== h) history.replaceState(null, '', h);
-    if (S.rendered.has('ficha')) renderFicha();
+    if (S.rendered.has('ficha')) safeRender('ficha');
     if (scroll) { const sec = $('#ficha'); if (sec) sec.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
   }
 
@@ -1517,7 +1543,11 @@
       const title = u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(n.norma || n.titulo || 'Documento')}</a>` : esc(n.norma || n.titulo || 'Documento');
       return `<li><span class="t-top"><span><strong>${title}</strong>${n.tipo ? ` <span class="pill na">${esc(n.tipo)}</span>` : ''}</span><span class="muted small">${esc(n.fecha || '')}</span></span>${n.titulo && n.norma ? `<span class="t-fin">${esc(n.titulo)}</span>` : ''}${n.resumen ? `<span class="t-fin">${esc(n.resumen)}</span>` : ''}</li>`;
     }).join('') + '</ul>' : '<p class="empty">El listado de leyes y normas se completará con la integración de datos.</p>';
-    const trHtml = tr.length ? `
+    const allLoaded = !layered() || S.years.every(y => yearDone.has(String(y)));
+    const trHtml = !allLoaded ? `
+      <h3>Transferencias y modificaciones registradas</h3>
+      <p class="note">Para no hacer pesada la página, el detalle de transferencias de todos los años se descarga solo si lo pides.</p>
+      <button type="button" class="btn" id="met-load">Cargar transferencias de todos los años</button>` : tr.length ? `
       <h3>Transferencias y modificaciones registradas (${tr.length})</h3>
       <div class="controls"><label class="grow">Filtrar<input type="search" id="met-q" placeholder="Norma, universidad o finalidad" autocomplete="off"></label></div>
       <div class="table-wrap"><table><thead><tr><th class="txt" scope="col">Fecha</th><th class="txt" scope="col">Norma</th><th class="txt" scope="col">Universidad</th><th scope="col">Monto</th><th class="txt" scope="col">Finalidad</th></tr></thead><tbody id="met-tr"></tbody></table></div>` : '';
@@ -1527,9 +1557,67 @@
       const rows = tr.filter(t => !qq || [t.norma, t.finalidad, t.u.nombre, t.u.corto].join(' ').toLowerCase().includes(qq)).slice(0, 300);
       $('#met-tr').innerHTML = rows.map(t => { const u = safeUrl(t.url); return `<tr><td class="txt">${esc(t.fecha || t.y)}</td><td class="txt">${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t.norma || 'Norma')}</a>` : esc(t.norma || SD)}</td><td class="txt"><a class="uni-link" href="#u=${encodeURIComponent(t.u.pliego)}">${esc(uName(t.u))}</a></td><td>${esc(fmtM(num(t.monto)))}</td><td class="wrap">${esc(t.finalidad || '')}</td></tr>`; }).join('') || `<tr><td colspan="5" class="txt muted">Sin resultados.</td></tr>`;
     };
-    if (tr.length) { drawTr(''); $('#met-q').addEventListener('input', debounce(e => drawTr(e.target.value))); }
+    if (allLoaded && tr.length) { drawTr(''); $('#met-q').addEventListener('input', debounce(e => drawTr(e.target.value))); }
+    const ml = $('#met-load');
+    if (ml) ml.addEventListener('click', () => {
+      ml.disabled = true; ml.innerHTML = '<span class="spinner" aria-hidden="true"></span> Cargando…';
+      Promise.all(S.years.map(ensureYear)).then(() => { $$('details.notas').forEach(x => x.remove()); renderMetodologia(); });
+    });
     $('#met-generado').textContent = `Datos generados: ${d.generado || SD}. Años cubiertos: ${S.years[0]}–${S.years[S.years.length - 1]}.`;
   }
+
+  // ================================================================== capas de datos (lazy)
+  // resumen.json (totales + kpi) al inicio; anio/{y}.json y u/{pliego}.json bajo demanda.
+  const yearP = new Map(), uniP = new Map(), yearDone = new Set(), uniDone = new Set();
+  let pending = 0;
+  const layered = () => !!(S.capas && !S.full);
+  function mergeInto(u, y, obj) { if (!u || !obj) return; u.anios[y] = Object.assign(u.anios[y] || {}, obj); }
+  function ensureYear(y) {
+    y = String(y || '');
+    if (!layered() || !y || yearDone.has(y)) return Promise.resolve();
+    if (!yearP.has(y)) {
+      pending++;
+      yearP.set(y, fetchJson(S.capas.anio.replace('{anio}', y))
+        .then(j => { Object.entries((j && j.universidades) || {}).forEach(([pl, obj]) => mergeInto(uniBy(pl), y, obj)); })
+        .catch(err => console.warn('capa año', y, err))
+        .finally(() => { pending--; yearDone.add(y); kpiCache.clear(); }));
+    }
+    return yearP.get(y);
+  }
+  function ensureUni(pl) {
+    pl = String(pl || '');
+    if (!layered() || !pl || uniDone.has(pl) || !uniBy(pl)) return Promise.resolve();
+    if (!uniP.has(pl)) {
+      pending++;
+      uniP.set(pl, fetchJson(S.capas.u.replace('{pliego}', pl))
+        .then(j => {
+          const u = uniBy(pl); if (!u || !j) return;
+          Object.entries(j.anios || {}).forEach(([y, obj]) => mergeInto(u, y, obj));
+          Object.keys(j).forEach(k => { if (k !== 'anios' && u[k] === undefined) u[k] = j[k]; });
+        })
+        .catch(err => console.warn('capa universidad', pl, err))
+        .finally(() => { pending--; uniDone.add(pl); kpiCache.clear(); }));
+    }
+    return uniP.get(pl);
+  }
+  // Qué capas necesita cada sección; soft = se pinta ya y se repinta al llegar
+  const NEEDS = {
+    resumen: () => ({ years: [S.lastClosed], soft: true }),
+    variacion: () => ({ years: [S.vr.a || vrDefaults().a, S.vr.b || vrDefaults().b], soft: true }),
+    trayectoria: () => ({ years: [S.year], soft: true }),
+    gasto: () => ({ years: [S.year].concat(S.years), soft: true }),
+    fuentes: () => ({ years: [S.year].concat(S.years), soft: true }),
+    infra: () => ({ years: [S.year] }),
+    idi: () => ({ years: [S.year], soft: true }),
+    ficha: () => ({ unis: [S.ficha.uni || (unisByPim(S.lastClosed)[0] || {}).pliego], soft: false }),
+  };
+  function setSecLoading(id, on) {
+    const sec = document.getElementById(id); if (sec) sec.classList.toggle('is-loading', !!on);
+  }
+  // Prefetch de la ficha al pasar el dedo o el mouse por un nombre
+  ['mouseover', 'touchstart', 'focusin'].forEach(ev => document.addEventListener(ev, e => {
+    const a = e.target.closest && e.target.closest('[data-pf]'); if (a) ensureUni(a.dataset.pf);
+  }, { passive: true }));
 
   // ================================================================== registro / lazy render
   const SECTIONS = {
@@ -1540,6 +1628,22 @@
   const YEAR_DEPENDENT = ['ranking', 'trayectoria', 'gasto', 'fuentes', 'infra', 'idi', 'ficha', 'mapa'];
 
   function safeRender(id) {
+    const n = layered() && NEEDS[id] ? NEEDS[id]() : {};
+    const ys = [...new Set((n.years || []).filter(Boolean).map(String))].filter(y => !yearDone.has(y));
+    const us = (n.unis || []).filter(Boolean).filter(pl => !uniDone.has(String(pl)));
+    if (ys.length || us.length) {
+      const first = !document.getElementById('body-' + id) || $('.skeleton', document.getElementById('body-' + id));
+      if (n.soft) drawSection(id);
+      setSecLoading(id, true);
+      // el año seleccionado primero; el resto (series) después
+      const urgent = ys.slice(0, 2).map(ensureYear).concat(us.map(ensureUni));
+      Promise.all(urgent).then(() => Promise.all(ys.slice(2).map(ensureYear))).then(() => { setSecLoading(id, false); drawSection(id); });
+      void first;
+      return;
+    }
+    drawSection(id);
+  }
+  function drawSection(id) {
     try { SECTIONS[id](); }
     catch (err) {
       console.error('Error al dibujar', id, err);
@@ -1622,7 +1726,7 @@
     const p = decodeURIComponent(m[1]);
     if (!uniBy(p)) return;
     S.ficha.uni = p;
-    if (!S.rendered.has('ficha')) renderSection('ficha'); else renderFicha();
+    if (!S.rendered.has('ficha')) renderSection('ficha'); else safeRender('ficha');
     pinTo('ficha');
   }
   // Mantiene una sección en pantalla mientras las de arriba se dibujan (lazy render cambia alturas)
@@ -1643,7 +1747,7 @@
   function updateHero() {
     const y = isPartial(S.year) ? S.lastClosed : S.year;
     const n = nacional(y);
-    const per = div(sum(S.unis.map(u => (pick((A(u, y) || {}).generica, '2.1') || {}).dev)), n.dev);
+    const per = div(sum(S.unis.map(u => genDev(u, y, '2.1'))), n.dev);
     const ej = div(n.dev, n.pim);
     const nU = S.unis.filter(u => num(tot(u, y, 'pim')) !== null).length;
     if (num(n.pim) === null) return;
@@ -1707,13 +1811,16 @@
     renumber();
     setupTheme();
     let d = null;
-    try { d = await fetchJson('data/observatorio.json'); }
-    catch (e) {
-      try { d = await fetchJson('data/sample/observatorio.json'); S.sample = true; }
+    try { d = await fetchJson('data/resumen.json'); S.capas = (d && d.capas && d.capas.anio && d.capas.u) ? d.capas : null; S.full = !S.capas; }
+    catch (e0) {
+      try { d = await fetchJson('data/observatorio.json'); S.full = true; }
+      catch (e) {
+        try { d = await fetchJson('data/sample/observatorio.json'); S.sample = true; S.full = true; }
       catch (e2) {
         showBanner('<strong>No se pudieron cargar los datos.</strong> Si abriste el archivo directamente, sírvelo con un servidor local (por ejemplo <code>python3 -m http.server</code>).', 'error');
         $$('.sec-body .skeleton').forEach(s => s.remove());
         return;
+      }
       }
     }
     try { normalize(d); }
@@ -1721,6 +1828,8 @@
       showBanner('<strong>Los datos tienen un formato inesperado.</strong> ' + esc(e.message), 'error');
       return;
     }
+    // Detalle del último año cerrado en paralelo (para KPIs y la primera pantalla)
+    ensureYear(S.lastClosed).then(() => { updateHero(); if (S.rendered.has('resumen')) drawSection('resumen'); });
     if (S.sample || d.ejemplo) {
       showBanner('<strong>Datos de ejemplo.</strong> Estás viendo cifras ficticias para probar la página; aún no se publican los datos reales del MEF. No las uses para sacar conclusiones.');
     }

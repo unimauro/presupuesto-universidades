@@ -146,20 +146,69 @@ def bloque_norma(texto, numero):
     if not m:
         return texto
     fin = re.search(r"\n\s*\d{6,7}-\d\s*\n", texto[m.end():])  # código de publicación El Peruano
-    return texto[max(0, m.start() - 6000): m.end() + (fin.end() if fin else 30000)]
+    return texto[max(0, m.start() - 800): m.end() + (fin.end() if fin else 30000)]
 
 
-def monto_total(texto):
-    m = re.search(r"hasta\s+por\s+la\s+suma\s+de\s+S/\.?\s*([\d .,]+\d)", texto, re.I)
-    if m:
+def candidatos_total(texto):
+    """[(pos, valor, tipo)] de 'hasta por la suma de S/ X' y 'TOTAL EGRESOS X' en el bloque."""
+    out = []
+    for m in re.finditer(r"hasta\s+por\s+la\s+suma\s+de\s+S/\.?\s*([\d .,]+\d)", texto, re.I):
         v = ultimo_monto(m.group(1))
         if v:
-            return v, "art1"
-    vals = [ultimo_monto(x) for x in re.findall(r"TOTAL\s*EGRESOS\s*([\d .,]+\d)", texto, re.I)]
-    vals = [v for v in vals if v]
-    if vals:
-        return max(vals), "total_egresos"
+            out.append((m.start(), v, "art1"))
+    for m in re.finditer(r"TOTAL\s*EGRESOS\s*([\d .,]+\d)", texto, re.I):
+        v = ultimo_monto(m.group(1))
+        if v:
+            out.append((m.start(), v, "total_egresos"))
+    return sorted(out)
+
+
+def monto_total(texto, suma=None, desde=800):
+    """Monto total del DS. Si hay suma por pliego (anexo) y coincide con algún candidato, se usa ese.
+    Si no: valor más repetido entre los candidatos posteriores al encabezado del DS (el total
+    aparece en el art. 1 y en 'TOTAL EGRESOS' del DE LA / A LA)."""
+    cands = candidatos_total(texto)
+    if not cands:
+        return None, None
+    if suma:
+        for _, v, t in cands:
+            if abs(v - suma) <= max(1.0, suma * 0.001):
+                return v, t
+    post = [c for c in cands if c[0] >= desde - 50] or cands
+    cnt = {}
+    for _, v, _t in post:
+        cnt[v] = cnt.get(v, 0) + 1
+    best = max(cnt.values())
+    for _, v, t in post:
+        if cnt[v] == best:
+            return v, t if best == 1 else "repetido"
     return None, None
+
+
+def titulo_anexo_pypdf(pdfs):
+    """Título del anexo con pypdf (respeta espacios mejor que pdfplumber en PDFs con kerning apretado)."""
+    import logging
+    import pypdf
+    logging.disable(logging.CRITICAL)
+    for f in pdfs:
+        if not re.search(r"anexo", f.name, re.I):
+            continue
+        try:
+            t = pypdf.PdfReader(str(f)).pages[0].extract_text() or ""
+        except Exception:  # noqa
+            continue
+        m = re.search(r"ANEXO[^\n]*\n(.{20,600}?)\n\s*(?:En\s*Soles|\(En Soles\)|Fuente|N°|PLIEGO)", t, re.S | re.I)
+        if m:
+            r = re.sub(r"\s+", " ", m.group(1)).strip()
+            if r.count(" ") >= len(r) / 15:
+                return r
+    return None
+
+
+def con_espacios(t):
+    if not t or t.count(" ") < len(t) / 15 or len(t) < 45:
+        return False
+    return not re.match(r"(Fuente|\(En soles|DE LA|SECCI|Categor|En Soles)", t, re.I) and "PLIEGO" not in t
 
 
 def finalidad(texto_ds, texto_anexos, desc):
@@ -238,7 +287,6 @@ def main():
         cuerpo, anexos, files = textos(c)
         num = numero_ds(c["titulo"])
         cuerpo_ds = bloque_norma(cuerpo, num) if (num and cuerpo) else cuerpo
-        total, via_total = monto_total(cuerpo_ds)
         filas = []
         pdfs_locales = sorted((CACHE / "pdf" / c["id"]).glob("*.pdf")) if (CACHE / "pdf" / c["id"]).exists() else []
         for f in pdfs_locales:
@@ -246,6 +294,34 @@ def main():
                 filas += filas_pliego_pdf(f)
         if not filas:
             filas = filas_pliego(anexos) or filas_pliego(cuerpo_ds)
+        desglose = "anexo" if filas else None
+        if filas and not any(re.search(r"anexo", f.name, re.I) for f in pdfs_locales):
+            desglose = "cuerpo"
+        suma_anexo = sum(v for _, _, v in filas) if filas else None
+        total, via_total = monto_total(cuerpo_ds, suma_anexo)
+        if filas and suma_anexo and total and abs(suma_anexo - 2 * total) >= 1 and suma_anexo > total * 1.001:
+            # ¿el total correcto es otro candidato mayor? (p. ej. art1 de otra norma vecina)
+            mayores = [v for _, v, _t in candidatos_total(cuerpo_ds) if v >= suma_anexo - 1]
+            if mayores:
+                total, via_total = min(mayores), "candidato>=suma"
+        if not filas and total:
+            # DS sin anexo: si el "A LA" del cuerpo tiene UN solo pliego universitario, recibe el total
+            unis = {m.group(1): re.sub(r"\s+", " ", m.group(2)).strip()
+                    for m in re.finditer(r"PLIEGO\s*(5\d{2})\s*:\s*((?:U\.\s*N\.|Universidad|UNIVERSIDAD)[^\n]{0,70})", cuerpo_ds)}
+            otros = set(re.findall(r"A\s+LA\s*:.{0,400}?PLIEGOS?\s*[:0-9]+\s*:?\s*(Gobiernos|Gobierno Regional|M\.)",
+                                   cuerpo_ds[750:], re.S))
+            if len(unis) == 1 and not otros:
+                (p1, n1), = unis.items()
+                # monto = primer TOTAL EGRESOS después de la línea "PLIEGO 5xx" (tabla A LA)
+                pos = [m.end() for m in re.finditer(r"PLIEGO\s*%s\s*:" % p1, cuerpo_ds)]
+                te = [(m.start(), ultimo_monto(m.group(1))) for m in
+                      re.finditer(r"TOTAL\s*EGRESOS\s*([\d .,]+\d)", cuerpo_ds, re.I)]
+                sig = [v for st, v in te if pos and st > pos[0] and v]
+                monto_u = sig[0] if sig else total
+                filas = [(p1, n1, monto_u)]
+                if sig and abs(monto_u - total) > 1:
+                    total, via_total = monto_u, "total_egresos_a_la"
+                desglose = "cuerpo_pliego_unico"
         por = {}
         for p, nom, v in filas:
             por[p] = por.get(p, 0) + v
@@ -275,13 +351,15 @@ def main():
             "norma": re.sub(r"Decreto Supremo N\.° ", "DS N° ", c["titulo"]).replace("Decreto de Urgencia N.° ", "DU N° "),
             "fecha": c["fecha"], "anio": int(c["fecha"][:4]), "url": c["url"],
             "pdfs": [u for u in c["pdfs"] if "/preview_" not in u],
-            "finalidad": finalidad(cuerpo_ds, anexos, desc),
+            "finalidad": (lambda f: f if con_espacios(f) else (titulo_anexo_pypdf(pdfs_locales) or desc))(
+                finalidad(cuerpo_ds, anexos, desc)),
             "descripcion": desc,
             "monto_total": total, "monto_total_fuente": via_total,
             "monto_universidades": suma if por else None,
             "n_universidades": len(por),
             "cuadra": cuadra, "anexo_duplicado_corregido": dup or None,
             "por_pliego": {k: round(v, 2) for k, v in sorted(por.items())},
+            "desglose_fuente": desglose,
             "nota": nota_t,
         })
 
@@ -299,6 +377,17 @@ def main():
                                              f"pliegos y fuentes de financiamiento (AF {L['anio']})",
                                    "url": L["url"], "anio": L["anio"] - 1 if L["anio"] > 2016 else L["anio"],
                                    "tipo": "ley"})
+    # documentos agregados a mano (no están en gob.pe)
+    documentos.append({
+        "titulo": "Proyecto de Ley de Presupuesto del Sector Público para el AF 2027 (PL 00002/2026-2031-CR, "
+                  "presentado por el Ejecutivo el 28-ago-2026, Oficio 242-2026-PR) — dictamen; copia NO oficial "
+                  "(lpderecho.pe). Anexo 4 por pliego no ubicado en fuente oficial accesible.",
+        "url": "https://img.lpderecho.pe/wp-content/uploads/2026/11/PL-00002-2026-2031-CR-LP-Derecho.pdf",
+        "anio": 2026, "tipo": "ley"})
+    documentos.append({
+        "titulo": "MEF — Consulta de Transferencias a los Gobiernos Nacional, Regional, Local y EPS "
+                  "(canon, sobrecanon, regalías y FOCAM a universidades)",
+        "url": "https://apps5.mineco.gob.pe/transferencias/gn/default.aspx", "anio": 2026, "tipo": "otro"})
     # canon
     canon, canon_det = {}, []
     cf = CACHE / "canon.json"
