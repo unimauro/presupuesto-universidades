@@ -136,13 +136,17 @@ def main():
                "creacion": c.get("creacion"), "licencia": c.get("licencia"), "tipo": c.get("tipo"), "anios": {}}
         for y, a in g.get("anios", {}).items():
             a = dict(a)
+            for dim in ("generica", "fuente", "categoria"):  # en desgloses basta pia/pim/dev (total conserva los 6)
+                if isinstance(a.get(dim), dict):
+                    a[dim] = {k: {m: v.get(m) for m in ("pia", "pim", "dev") if m in v} for k, v in a[dim].items()}
             ia = iu.get(pl, {}).get("anios", {}).get(y, {})
             for k in ("programa", "funcion", "proyectos"):
                 if ia.get(k):
                     a[k] = ia[k]
             na = nu.get(pl, {}).get("anios", {}).get(y)
             if na:
-                a["ingresos"] = na
+                # rdr_detalle (específica) pesa ~3 MB y la web no lo usa: queda solo en data/ingresos/ingresos.json
+                a["ingresos"] = {k: v for k, v in na.items() if k != "rdr_detalle"}
             for k in ("estudiantes", "docentes", "pubs"):
                 serie = c.get(k) or {}
                 a[k] = serie.get(y)
@@ -224,6 +228,15 @@ def main():
         obs["expectativa_2027"] = {k: l27.get(k) for k in
                                    ("version", "norma", "fecha", "url", "documentos", "notas",
                                     "total_universidades", "disposiciones")}
+    def rnd(x):  # soles enteros: los céntimos no aportan y engordan el JSON
+        if isinstance(x, float):
+            return round(x) if abs(x) >= 100 else round(x, 4)
+        if isinstance(x, dict):
+            return {k: rnd(v) for k, v in x.items()}
+        if isinstance(x, list):
+            return [rnd(v) for v in x]
+        return x
+    obs = rnd(obs)
     with open(D("observatorio.json"), "w", encoding="utf-8") as f:
         json.dump(obs, f, ensure_ascii=False, separators=(",", ":"))
     print(f"OK data/observatorio.json: {len(unis)} universidades, años {anios[0]}–{anios[-1]}, "

@@ -1,0 +1,6 @@
+# Nota: en GitHub Pages de proyecto Google solo lee /robots.txt del dominio raíz;
+# registrar el sitemap en Search Console.
+User-agent: *
+Allow: /
+
+Sitemap: https://unimauro.github.io/presupuesto-universidades/sitemap.xml
