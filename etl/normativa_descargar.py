@@ -48,7 +48,7 @@ def main():
     for c in uniq:
         d = PDF / c["id"]
         d.mkdir(parents=True, exist_ok=True)
-        for u in c["pdfs"]:
+        for u in [x for x in c["pdfs"] if "/preview_" not in x]:
             name = re.sub(r"[^A-Za-z0-9._-]", "_", u.split("/")[-1].split("?")[0])[-120:]
             f = d / name
             if f.exists() and f.stat().st_size > 1000:

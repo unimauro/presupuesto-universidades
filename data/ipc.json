@@ -1,0 +1,23 @@
+{
+ "fuente": "BCRP serie PN01271PM (IPC Lima, var% mensual), encadenada; promedio anual; base 2025=100",
+ "url": "https://estadisticas.bcrp.gob.pe/estadisticas/series/mensuales/resultados/PN01271PM/html",
+ "indice_promedio_anual": {
+  "2012": 65.476,
+  "2013": 67.313,
+  "2014": 69.498,
+  "2015": 71.963,
+  "2016": 74.549,
+  "2017": 76.639,
+  "2018": 77.648,
+  "2019": 79.307,
+  "2020": 80.756,
+  "2021": 83.969,
+  "2022": 90.584,
+  "2023": 96.258,
+  "2024": 98.521,
+  "2025": 100.0,
+  "2026": 103.73
+ },
+ "nota_2026": "2026 = promedio ene-oct",
+ "meses_2026": 10
+}

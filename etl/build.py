@@ -216,6 +216,10 @@ def main():
         "leyes": [{k: l.get(k) for k in ("anio", "norma", "url")} for l in nor.get("leyes", [])],
         "universidades": unis,
     }
+    ipc = load("ipc.json")
+    if ipc:
+        obs["ipc"] = {"base": 2025, "indice": ipc["indice_promedio_anual"], "fuente": ipc["fuente"], "url": ipc["url"],
+                      "nota": "Soles reales de 2025 = nominal × 100 / índice del año. " + ipc.get("nota_2026", "")}
     if l27:
         obs["expectativa_2027"] = {k: l27.get(k) for k in
                                    ("version", "norma", "fecha", "url", "documentos", "notas",

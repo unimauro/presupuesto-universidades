@@ -35,10 +35,10 @@ def table_rows(html, code_re):
         if idx is None:
             continue
         m = pat.match(cells[idx])
-        nums = [num(c) for c in cells[idx + 1:]]
-        nums = [n for n in nums if n is not None]
-        if len(nums) < 7:
+        rest = cells[idx + 1:]
+        if len(rest) < 7:
             continue
+        nums = [num(c) or 0.0 for c in rest]  # posicional: celda vacía = 0
         out.append((m.group(1), m.group(2).strip(), nums[0], nums[1], nums[5]))
     return out
 
